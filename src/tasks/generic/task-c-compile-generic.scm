@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile-generic.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-c-compile-generic.scm,v 1.3 2003/04/22 23:45:01 eyestep Exp $
 
 
 (arc:provide 'task-c-compile-generic)
@@ -121,12 +121,11 @@
      
      
      (makedeps 
-      ,(lambda (self sfile cflags cincs outdir objext)
+      ,(lambda (self sfile ofile cflags cincs)
          (let* ((bn (arc:path-last-comp (arc:string->path sfile)))
                 (tdf (arc:path->string
                       (arc:path-append (arc:deps-directory)
                                        (arc:path-replace-last-ext bn "d"))))
-                (objf (self 'make-objfile-name sfile outdir objext))
                 (dcmd (string-append (self 'makedeps-cmd) " "
                                      (self 'deps-flag) " "
                                      cflags " "
@@ -137,7 +136,7 @@
            (if (equal? (arc:sys 'system dcmd) 0)
                (let* ((deps (arc:parse-make-deps-file tdf)))
                  ;; set the correct object target
-                 (set-car! deps objf)
+                 (arc:deps-set-target! deps ofile)
                  (arc:sys 'remove-file tdf)
                  deps)
                #f))))
