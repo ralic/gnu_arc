@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: misc.scm,v 1.3 2003/04/15 00:04:20 eyestep Exp $
+;; $Id: misc.scm,v 1.4 2003/04/22 23:37:55 eyestep Exp $
 
 (define (arc:reduce fn base-value lst)
   (if (null? lst)
@@ -66,7 +66,8 @@
     (if (null? lx)
         res
         (loop (string-append res (if (string? (car lx))
-                                     (string-append " " (car lx)) ""))
+                                     (car lx) 
+                                     ""))
               (cdr lx)))))
 
 (define (arc:string-list->string* l tmpl)
@@ -75,7 +76,7 @@
     (if (null? lx)
         res
         (loop (string-append res (if (string? (car lx))
-                                     (string-append " " tmpl (car lx)) ""))
+                                     (string-append tmpl (car lx)) ""))
               (cdr lx)))))
 
 ;; indicates wether a list is an alist or not.
@@ -118,18 +119,20 @@
     ((verbose) (if %arc:verbose% (apply arc:msg values)))
     ((debug) (if %arc:debug% (apply arc:msg values)))
     ((info) (apply arc:msg values))
-    ((error) (apply arc:msg values))
+    ((error) (apply arc:msg (cons "ERROR: " values)))
     ((fatal) (begin
-               (apply arc:msg values)
+               (apply arc:msg (cons "ERROR: " values))
                (quit)))))
 
 ;; looks up a entry from an alist, and returns it's value.  if no such
 ;; entry is found, returns default
 (define (arc:aval key alist default)
-  (let ((va (assoc key alist)))
-    (if va 
-        (cadr va)
-        default)))
+  (if (list? alist)
+      (let ((va (assoc key alist)))
+        (if va 
+            (cadr va)
+            default))
+      #f))
 
 (define (arc:aval->mlist alist)
   (let loop ((res ())
