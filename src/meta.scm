@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: meta.scm,v 1.4 2003/04/19 01:08:37 eyestep Exp $
+;; $Id: meta.scm,v 1.5 2003/04/22 23:37:30 eyestep Exp $
 
 
 (define (arc:eval-arc-defines expr)
@@ -23,8 +23,9 @@
    ((list? expr) (case (car expr)
                    ((project) (arc:--apply-defproject expr))
                    ((stmt) (arc:--apply-defstmt expr))
-                   (else (arc:msg "unknown toplevel expr: " expr))))
-   (else (arc:msg "unknown toplevel expr: " expr))))
+                   (else (arc:log 'error "unknown toplevel expr: " expr))))
+   (else
+    (arc:log 'error "unknown toplevel expr: " expr))))
 
 (define (arc:load-arcfile nm)
   (let* ((*in* (open-input-file nm)))
@@ -69,24 +70,47 @@
                                          (default symbol optional))
                                        keys
                                        "project"))
-         (ctx (arc:make-context id)))
-    ;; the --script-in-loading-- variable is set by the eval-script!
-    (arc:context-script-home! ctx 
-                              (arc:path->string 
-                               (arc:path-without-last-comp 
-                                (arc:string->path 
-                                 %arc:--script-in-loading--%))))
-    (for-each (lambda (prop)
-                (case (car prop)
-                  ((info) (arc:context-info! ctx (cadr prop)))
-                  ((project) (arc:context-project! ctx (cadr prop)))
-                  ((version) (arc:context-version! ctx (cadr prop)))
-                  ((basedir) (arc:context-basedir! ctx (cadr prop)))
-                  ((default) (arc:context-default-stmt! ctx 
-                                                        (cadr prop)))) )
-              props*)
-    (arc:context-push ctx)
-    ctx))
+         (ctx (arc:make-context id))
+         (bd #f))
+
+    (if (not props*)
+        (begin
+          (arc:log 'fatal "bad project declaration")
+          #f)
+        (begin
+          ;; the --script-in-loading-- variable is set by the eval-script!
+          (arc:context-script-home! ctx 
+                                    (arc:path->string 
+                                     (arc:path-without-last-comp 
+                                      (arc:string->path 
+                                       %arc:--script-in-loading--%))))
+          (for-each (lambda (prop)
+                      (case (car prop)
+                        ((info) (arc:context-info! ctx (cadr prop)))
+                        ((project) (arc:context-project! ctx (cadr prop)))
+                        ((version) (arc:context-version! ctx (cadr prop)))
+                        ((basedir) (set! bd (cadr prop)))
+                        ((default) (arc:context-default-stmt! ctx 
+                                                              (cadr prop)))) )
+                    props*)
+          
+          (arc:context-push ctx)
+          
+          (let* ((bd1 (or bd
+                          "."))
+                 (bdp (arc:string->path bd1))
+                 (bd2 (if (arc:path-absolute? bdp)
+                          (arc:path->string bd2)
+                          (arc:path->string
+                           (arc:path-append
+                            (arc:path-without-last-comp
+                             (arc:string->path
+                              %arc:--script-in-loading--%))
+                            bdp)))))
+            (arc:log 'debug "set basedir to " bd2)
+            (arc:context-basedir! ctx bd2))       
+          ctx))
+    ))
 
 
 ;; ----------------------------------------------------------------------
@@ -156,32 +180,42 @@
                                        (symbol->string id)))
          (deps ())
          (bad #f)
-         (scope (case (arc:aval 'scope props* 'public)
-                  ((local) 'local)
-                  ((script) 'script)
-                  ((public) 'public)
-                  (else (begin
-                          (arc:log 'error 
-                                   "bad symbol used for scope in "
-                                   "statement '" id "'")
-                          'public))))
+         (scope (if props*
+                    (case (arc:aval 'scope props* 'public)
+                      ((local) 'local)
+                      ((script) 'script)
+                      ((public) 'public)
+                      (else (begin
+                              (arc:log 'error 
+                                       "bad symbol used for scope in "
+                                       "statement '" id "'")
+                              'public)))
+                    'local))
          (props ()))
-    (for-each (lambda (prop)
-                (case (car prop)
-                  ((info) (set! props (append props (list 'info
-                                                          (cadr prop)))))
-                  ((os) (set! props (append props (list 'os
-                                                        (cadr prop)))))
-                  ((once?) (set! props (append props (list 'once?
-                                                           (cadr prop)))))
-                  ((scope) (set! props (append props (list 'scope
-                                                           scope))))
-                  ((depends) (set! deps (cadr prop)))))
-              props*)
-    
-    (arc:context-stmt! (arc:context-current) id deps props (cdr keys-body))
-    ))
 
+    (if props*
+        (begin
+          (for-each (lambda (prop)
+                      (case (car prop)
+                        ((info) (set! props (append props (list 'info
+                                                                (cadr prop)))))
+                        ((os) (set! props (append props (list 'os
+                                                              (cadr prop)))))
+                        ((once?) (set! props (append props (list 'once?
+                                                                 (cadr prop)))))
+                        ((scope) (set! props (append props (list 'scope
+                                                                 scope))))
+                        ((depends) (set! deps (cadr prop)))))
+                    props*)
+
+          (if (arc:context-current)
+              (arc:context-stmt! (arc:context-current) id deps props
+                                 (cdr keys-body))
+              (arc:log 'fatal "no context found (bad or missing project "
+                       "declaration?)")) )
+        (arc:log 'error "bad statement declaration: " id))
+    ))
+  
 
 
 
@@ -286,7 +320,7 @@
       ((boolean?) (apply boolean? (arc:eval-list (cdr expr))))
       ((string-list?) (apply arc:string-list? (arc:eval-list (cdr expr))))
       ((alist?) (apply arc:alist? (arc:eval-list (cdr expr))))
-
+      
       ;; string functions
       ((string-append) (apply arc:to-str (arc:eval-list (cdr expr))))
       ((string-split) (apply arc:split-string (arc:eval-list (cdr expr))))
@@ -353,10 +387,12 @@
       ((list) (arc:eval-list (cdr expr)))
       ((cdr) (apply cdr (arc:eval-list (cdr expr))))
       ((car) (apply car (arc:eval-list (cdr expr))))
-      ((string-list->string) (apply arc:string-list->string
-                                    (arc:eval-list (cdr expr))))
+      ((string-list->string) (apply arc:string-list->string*
+                                    (arc:eval-list (cdr expr)) " "))
       ((length) (apply length (arc:eval-list (cdr expr))))
       ((make-alist) (apply arc:list->alist (arc:eval-list (cdr expr))))
+      ((cons) (apply cons (arc:eval-list (cdr expr))))
+      ((append) (apply append (arc:eval-list (cdr expr))))
 
       ((map) (apply map (arc:eval-list (cdr expr))))
       ((for-each) (apply for-each (arc:eval-list (cdr expr))))
@@ -393,6 +429,8 @@
       ((->) (arc:eval-stmt (cadr expr) 'local))
       ((prop) (or (arc:current-context-property (cadr expr))
                   (arc:env-get (cadr expr))))
+      ((prop!) (arc:env-set! (cadr expr) (arc:eval-arc (caddr expr))))
+      ((prop-unset!) (arc:env-unset! (cadr expr)))
 
       ;; else: (i) see if the called function is a declared function (from
       ;; named let for instance), than (ii) look if it is a generic tasks
