@@ -422,7 +422,8 @@ _ACEOF
   asc)
     cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
-export ASC_HOME="$arcdir"
+ASC_HOME="$arcdir"
+export ASC_HOME
 _ACEOF
 
 case "$build" in
@@ -468,7 +469,8 @@ fi
 cp asc/asc-init.scm ./app/asc-init.scm
 cp asc/$asccmd ./app/$arccmd
 
-export ASC_INIT_FILE="`pwd`/asc/init.scm"
+ASC_INIT_FILE="`pwd`/asc/init.scm"
+export ASC_INIT_FILE
 (cd boot; ../app/arc -s bootstrap-asc.scm -- -P "$prefix" -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
 unset ASC_INIT_FILE
 

@@ -30,7 +30,8 @@
                   "#!/bin/sh" #\nl
                   #\nl
                   "if [ -z \"$ARC_HOME\" ]; then" #\nl
-                  "  export ARC_HOME=" %arc:path% #\nl
+                  "  ARC_HOME=" %arc:path% #\nl
+                  "  export ARC_HOME" #\nl
                   "fi" #\nl
                   #\nl
                   (case scheme-cmd
@@ -53,7 +54,8 @@
     (arc:pdisplay port 
                   "#!/bin/sh" #\nl
                   #\nl
-                  "export ARC_HOME=" %arc:src-dir% #\nl
+                  "ARC_HOME=" %arc:src-dir% #\nl
+                  "export ARC_HOME" #\nl
                   "exec app/arc $*" #\nl)
     (close-output-port port)
     (arc:sys 'chmod "../arc" #o755)) )
