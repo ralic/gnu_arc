@@ -548,7 +548,7 @@ All linux systems, regardly for platform or architecture
 @item win32
 Wind32 systems (NT, 2000, XP)
 @item beos
-The various Beos versions, tested is BeOS 5.0.
+The various Beos versions, tested only on BeOS 5.0.
 @item cygwin
 @item bsd
 @item sunos
@@ -1166,10 +1166,12 @@ build in the current working directory.
 
 @item version-info: @var{list}
 This information is used for shared libraries on ELF systems.  It has
-to contain 3 integer or string values indicating the "version current"
-(first), "version revision" (second) and "version age" (third)
+to contain 3 integer or string values indicating the "major version"
+(first), "minor version" (second) and "release version" (third)
 information.  Ignored for static libraries, and for ELF systems
-defaults to @code{(0 0 0)}.
+defaults to @code{(0 0 0)}.  This information is ignored completely
+for system, which does not support versioned shared library
+(e.g. BeOS).
 
 @item libdirs: @var{string-list}
 For shared libraries on ELF systems only: A list of directories where
@@ -1183,15 +1185,23 @@ libraries the build library depends on.  The entries has to give the
 "base library name" only, so for e.g. libAbcX.so give "AbcX".
 @end table
  
-This task returns an attrval containing all created libraries and their
-applied (short-)names.  The attrval slot ids are: 
+This task returns an attrval containing all created libraries and
+their various nameforms, as needed for the specific platforms builded
+on.  The attrval slot ids are:
 
 @table @code
 @item shared
-the shared library's main file
+the shared library's main file.  On ELF system, which supports
+versioned libraries this is the "real name" (e.g. libABC.so.1.17.4).
 
-@item shared-add-names 
-additional names [symlinks] for the shared library, a list of strings
+@item shared-soname
+the shared library's "soname".  On ELF systems, which supports
+versioned libraries this is normally the "base name" of the library,
+which includes the major version (on linux this is: libABC.so.1).
+
+@item shared-linker-name
+the library's "linker name", i.e. the name which is found by the
+linker, when given the @option{-l} option (e.g. libABC.so).
 
 @item static
 the static library's file
@@ -1202,6 +1212,15 @@ If the host system supports shared libraries the attrval's default is
 @code{shared}.  Additionally the slot @code{shared-name}
 resp. @code{static-name} is set, which contains the library's base
 name (libABC.so's name is ABC).
+
+On ELF systems, which support versioned libraries, appropriate
+symlinks for the soname and linker name version are created in the
+build directory.  Note however that, to test a shared library without
+installation, it is probably necessary to add the build library
+temporarily to the system linker search path (on linux this is done by
+@command{ldconfig _build-dir}, or by modifying the
+@env{LD_LIBRARY_PATH} environment variable; on BeOS one can modify the
+@env{LIBRARY_PATH} environment variable).
 @end deffn
 
 
@@ -2277,6 +2296,8 @@ Returns the number of elements in list @var{l}.
 @end defun
 
 @defun map @var{proc} @var{l}
+Apply @var{proc} to every element of list @var{l}, accumulating the
+results in a list.
 @end defun
 
 @defun for-each @var{proc} @var{l}
@@ -2450,6 +2471,7 @@ therefore be simple, if however something awkward.
 @menu
 * Scheme interpreter::          Scheme interpreter
 * Install Unix::                Installing Arc on Unix platforms
+* Install BeOS::                Installing Arc on the BeOS
 * Install Win32::               Installing Arc on Windows platforms
 @end menu
 
@@ -2501,7 +2523,7 @@ interpreter to be used with Arc.
 
 
 @c --------------------------------------------------------------------
-@node Install Unix, Install Win32, Scheme interpreter, Install
+@node Install Unix, Install BeOS, Scheme interpreter, Install
 @section Installing Arc on Unix platforms
 @cindex Installation, Unix
 
@@ -2626,7 +2648,73 @@ $ ./arc doc-dvi
 
 
 @c --------------------------------------------------------------------
-@node Install Win32,  , Install Unix, Install
+@node Install BeOS, Install Win32, Install Unix, Install
+@section Installing Arc on the BeOS
+@cindex Installation, BeOS
+
+To install Arc on a BeOS box, the steps are more or less identical to
+those on a generic Unix box.  A number of extra packages are required
+however, before to start:
+
+@enumerate
+@item
+You need the gcc compiler and linker to work.
+
+@item
+To have the various tasks to work, you need the apropriate external
+tools, like @command{tar}, @command{gzip}, etc.
+@end enumerate
+
+Since the BeOS is much more restrictive about paths and locations of
+libraries or binaries, there's is normally no need to change the
+default installation directories.  The bootstrap mechanism of Arc
+knows about the default places.  Here's where Arc is installed:
+
+@table @samp
+@item /boot/home/config/bin/
+Here's the binary @command{arc} installed.
+
+@item /boot/home/config/arc/
+This is the "arc home", where all the scheme files, tasks and backend
+declarations are installed.
+
+@item /boot/home/config/info
+Here are the info files installed, if you have an @command{maketexi}
+installed and generated the info documentation.
+@end table
+
+Otherwise the installation is as follows:
+
+@itemize
+@item
+@example
+$ tar xzvf arc-x.x.x.tar.gz
+$ cd arc-x.x.x
+@end example
+
+@item
+@example
+$ ./configure
+@end example
+
+Only the Asc scheme interpreter is tested until now.  If you've have a
+guile installed, try @option{--scheme=asc} first.
+
+@item
+@example
+$ ./bootstrap.sh
+@end example
+
+@item
+@example
+$ ./arc install
+@end example
+@end itemize
+
+
+
+@c --------------------------------------------------------------------
+@node Install Win32,  , Install BeOS, Install
 @section Installing Arc on Windows platforms
 @cindex Installation, Windows
 

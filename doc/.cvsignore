@@ -1,8 +1,7 @@
 *.info
 *~
 arc.txt
-arc.info-2
-arc.info-1
+arc.info-*
 arc.texinfo
 arc.dvi
 arc.1
