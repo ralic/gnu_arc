@@ -1,6 +1,6 @@
 ;; this is a test file, to be used by the arc system
 
-;; $Id: Arcfile,v 1.4 2003/04/15 00:01:12 eyestep Exp $
+;; $Id: Arcfile,v 1.5 2003/04/22 23:46:35 eyestep Exp $
 
 (project grovekit
          info: "The GroveKit library"
@@ -101,7 +101,8 @@
             libdirs: (list (-> build-dir))
             shared?: #t
             appext: "app"
-            appnm: "hw"))
+            rpath: (-> build-dir)
+            appnm: "hw" ))
 
 (stmt mapp
       info: "Builds the application"
