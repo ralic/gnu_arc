@@ -1,3 +1,8 @@
+2003-05-04    <gck@eyestep.org>
+
+	* src/tasks/task-bison.scm (arc:bison-keywords): added verbose?
+	parameter
+
 2003-04-24    <gck@eyestep.org>
 
 	* bumbed version to 0.4.0; release
