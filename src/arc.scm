@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: arc.scm,v 1.2 2003/04/12 23:50:49 eyestep Exp $
+;; $Id: arc.scm,v 1.3 2003/04/19 01:07:07 eyestep Exp $
 
 ;; setup the require/provide system
 (define %arc:debug% (let ((ff (getenv "ARC_DEBUG")))
@@ -41,18 +41,26 @@
                                    "config.arc" "Arc.rc" "arc.rc"))
 
 (load (string-append %arc:home% "/config.scm"))
-
-(if (arc:sys.file-exists? (string-append %arc:home% "/version.scm"))
-    (load (string-append %arc:home% "/version.scm"))
-    (define %arc:version% "?"))
-
 (load (string-append %arc:home% "/misc.scm"))
 (load (string-append %arc:home% "/sysnm.scm"))
+(load (string-append %arc:home% "/strings.scm"))
+(load (string-append %arc:home% "/logical.scm"))
+(load (string-append %arc:home% "/excp.scm"))
 
 (define %arc:sysnm% (arc:canonical-sysnm (arc:host-os)
                                          (arc:host-maker)
                                          (arc:host-cpu)
                                          (arc:host-version)))
+
+(load (string-append %arc:home% "/oop.scm"))
+(load (string-append %arc:home% "/sys.scm"))
+
+
+
+(if (arc:sys 'file-exists? (string-append %arc:home% "/version.scm"))
+    (load (string-append %arc:home% "/version.scm"))
+    (define %arc:version% "?"))
+
 
 ;; this variable defines the os as used for the evaluation machine.  This
 ;; does not need to be identical to the real system name
@@ -97,7 +105,6 @@
     "filter.scm"
     "pregexp.scm"
     "fnmatch.scm"
-    "oop.scm"
     "handler-factory.scm"
     "bt-tasks.scm"))
   
@@ -107,7 +114,6 @@
       (begin
         (load (string-append %arc:home% "/" (car fn)))
         (loop (cdr fn)))))
-
 
 
 ;; display a help text
@@ -175,7 +181,7 @@
                       ;; store the current directory
                       (set! %arc:start-dir% (arc:path-cwd))
                       ;; change to new working directory
-                      (arc:sys.chdir *arc:optarg*)))
+                      (arc:sys 'chdir *arc:optarg*)))
           ((help) (begin
                     (arc:display-help)
                     (quit)))
@@ -199,7 +205,6 @@
       (arc:display "assume os: " %arc:eval-os% #\nl)))
 
 
-
 ;; start the scripting logic
 ;; [1] look for a arcconfig file to load
 (let ((script (if arc:config-name 
@@ -213,6 +218,7 @@
       (arc:msg "use config file: " script))
   (if script
       (arc:load-arcconfig script)))
+
 
 ;; [2] look for the Arcfile and go ...
 (let ((script (if arc:script-name 

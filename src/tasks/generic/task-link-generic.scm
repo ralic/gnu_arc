@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-link-generic.scm,v 1.1 2003/04/13 23:47:34 eyestep Exp $
+;; $Id: task-link-generic.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 
 (arc:provide 'task-link-linux)
@@ -101,7 +101,7 @@
 
            (arc:display linkcmd #\nl)
 
-           (if (not (= (arc:sys.system linkcmd) 0))
+           (if (not (= (arc:sys 'system linkcmd) 0))
                (arc:log 'info "linking '" fullnm "' failed"))
       
            fullnm)) )

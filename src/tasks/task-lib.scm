@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib.scm,v 1.3 2003/04/13 23:46:16 eyestep Exp $
+;; $Id: task-lib.scm,v 1.4 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-lib)
 
@@ -149,13 +149,13 @@
                   ;; unless the library is registered with the system
                   ;; e.g. calling ldconfig
                   (if (not (equal? linknm soname))
-                      (arc:sys.symlink 
+                      (arc:sys 'symlink 
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path realnm)))
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path soname)))))
                   (if (not (equal? linknm realnm))
-                      (arc:sys.symlink 
+                      (arc:sys 'symlink 
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path realnm)))
                        (arc:path->string (arc:path-absolutize 
@@ -170,13 +170,13 @@
 
 
 (define (arc:deps-lib-needs-rebuild? libnm objs)
-  (if (not (arc:sys.file-exists? libnm))
+  (if (not (arc:sys 'file-exists? libnm))
       #t
-      (let ((libmt (arc:sys.get-mtime libnm)))
+      (let ((libmt (arc:sys 'mtime libnm)))
         (let loop ((obj objs))
           (if (null? obj)
               #f
-              (or (< libmt (arc:sys.get-mtime (car obj)))
+              (or (< libmt (arc:sys 'mtime (car obj)))
                   (loop (cdr obj))))))))
 
 

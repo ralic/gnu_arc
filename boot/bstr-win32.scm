@@ -18,7 +18,7 @@
 ;; bootstrapping code for win32 platforms
 
 (define (prepare-script)
-  (arc:sys.mkdirs "../app/arc")
+  (arc:sys 'mkdirs "../app/arc")
   (let ((port (open-output-file "../app/arc.bat"))
         (scheme-cmd (cond 
                      ((string-ci=? %arc:impl% "scm") 'scm)

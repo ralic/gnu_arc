@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-(define %arc:version% "0.2.1")
+(define %arc:version% "0.3.0")
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:

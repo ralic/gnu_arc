@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: meta.scm,v 1.3 2003/04/17 00:05:07 eyestep Exp $
+;; $Id: meta.scm,v 1.4 2003/04/19 01:08:37 eyestep Exp $
 
 
 (define (arc:eval-arc-defines expr)
@@ -330,8 +330,8 @@
       ((path-ext)
        (arc:path-ext (arc:string->path (arc:eval-arc (cadr expr)))))
 
-      ((path-cwd) (arc:sys.getcwd))
-      ((path-homedir) (arc:sys.homedir))
+      ((path-cwd) (arc 'sys.getcwd))
+      ((path-homedir) (arc:sys 'homedir))
       ((path-absolute?) 
        (arc:path-absolute? (arc:string->path (arc:eval-arc (cadr expr)))))
       ((path-begins-with?)
@@ -510,7 +510,11 @@
                           (quit)))
                     #f)))
     (if task
-        (apply (cadr task) (list props (cdr rtv)))
+        (arc:try (lambda (type arg)
+                   (arc:log 'error (arc:to-str "(" type ") "
+                                               task-name ": " arg)))
+                 (lambda ()
+                   (apply (cadr task) (list props (cdr rtv)))))
         (arc:msg "unknown task: " task-name))))
 
 (define (arc:call-task task-name param-alist body)
@@ -520,7 +524,11 @@
                       (arc:msg "missing properties")
                       (quit)))) )
     (if task
-        (apply (cadr task) (list props body))
+        (arc:try (lambda (type arg)
+                   (arc:log 'error (arc:to-str "(" type ") "
+                                               task-name ": " arg)))
+                 (lambda ()
+                   (apply (cadr task) (list props body))))
         (arc:msg "unknown task: " task-name))))
 
 ;; functions

@@ -16,7 +16,7 @@
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 (define (arc:scan-dir-with-pattern root-path pattern)
-  (let* ((cwd (arc:sys.getcwd))
+  (let* ((cwd (arc:sys 'getcwd))
          (p1 (arc:string->path pattern))
          (retv ()))
     (arc:traverse-dir (arc:path->string root-path)

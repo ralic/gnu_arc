@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-gzip.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-gzip.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-gzip)
 
@@ -67,10 +67,10 @@
 	    (= (string-length zfn) 0))
 	(arc:log 'fatal "invalid file names in gzip"))
 
-    (if (arc:sys.file-exists? fn)
+    (if (arc:sys 'file-exists? fn)
 	(begin
-	  (if (arc:sys.file-exists? zfn)
-	      (arc:sys.remove-file zfn))
+	  (if (arc:sys 'file-exists? zfn)
+	      (arc:sys 'remove-file zfn))
 	  
 	  (let ((gzipcmd (string-append "gzip -c " cl fn " > " zfn)))
 	    (arc:display gzipcmd #\nl)

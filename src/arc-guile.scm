@@ -23,11 +23,13 @@
 ;; setup the program arguments
 (define %arc:argv% (list-tail (program-arguments) 1))
 
-(load (string-append %arc:home% "/strings.scm"))
-(load (string-append %arc:home% "/logical.scm"))
+;;(load (string-append %arc:home% "/strings.scm"))
+;;(load (string-append %arc:home% "/logical.scm"))
 
 ;; load system specific code
-(load (string-append %arc:home% "/sys-guile.scm"))
+;;(load (string-append %arc:home% "/oop.scm"))
+;;(load (string-append %arc:home% "/sys.scm"))
+;;(load (string-append %arc:home% "/sys-guile.scm"))
 
 ;; eval the loader
 (load (string-append %arc:home% "/arc.scm"))

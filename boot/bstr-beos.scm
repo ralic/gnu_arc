@@ -18,7 +18,7 @@
 ;; bootstraping code for the beos system
 
 (define (prepare-script)
-  (arc:sys.mkdirs "../app")
+  (arc:sys 'mkdirs "../app")
   (let ((port (open-output-file "../app/arc"))
         (scheme-cmd (cond 
                      ((string-ci=? %arc:impl% "scm") 'scm)
@@ -40,7 +40,7 @@
                     ((ksi) "ksi -s $ARC_HOME/arc-ksi.scm -- $*"))
                   #\nl)
     (close-output-port port)
-    (arc:sys.chmod "../app/arc" #o755)) )
+    (arc:sys 'chmod "../app/arc" #o755)) )
 
 (define (bootstrap-script)
   (let ((port (open-output-file "../arc"))
@@ -56,7 +56,7 @@
                   "export ARC_HOME=" %arc:src-dir% #\nl
                   "exec app/arc $*" #\nl)
     (close-output-port port)
-    (arc:sys.chmod "../arc" #o755)) )
+    (arc:sys 'chmod "../arc" #o755)) )
 
 (define (include-path)
   (string-append %arc:path% ":"

@@ -20,7 +20,7 @@
 ;; change, e.g. machine type, host type and name, installed os version and
 ;; type, etc.
 
-;; $Id: config.scm,v 1.2 2003/04/13 23:41:11 eyestep Exp $
+;; $Id: config.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
 
 
 (define (arc:include-path) "/usr/local/share/arc:/usr/local/share/arc:/usr/share/arc:/usr/local/share/arc/site:/usr/share/arc/site:/usr/local/lib/arc:/usr/lib/arc")

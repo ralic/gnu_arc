@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-clean.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-clean.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 
 (arc:provide 'task-clean)
@@ -57,8 +57,8 @@
           'done
           (begin
             (cond
-             ((arc:sys.file-directory? (car r)) (arc:sys.remove-dir (car r)))
-             ((arc:sys.file-exists? (car r)) (arc:sys.remove-file (car r)))
+             ((arc:sys 'file-directory? (car r)) (arc:sys 'remove-dir (car r)))
+             ((arc:sys 'file-exists? (car r)) (arc:sys 'remove-file (car r)))
              (else 'ignore))
             (loop (cdr r)))))
     ;; do something more?

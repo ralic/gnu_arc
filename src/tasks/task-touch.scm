@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-touch.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-touch.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-touch)
 
@@ -42,9 +42,9 @@
     
     (arc:log 'debug "touch ... " fn)
     
-    (if (arc:sys.file-exists? fn)
-        (let ((ct (arc:sys.current-time)))
-          (arc:sys.utime fn ct ct))
+    (if (arc:sys 'file-exists? fn)
+        (let ((ct (arc:sys 'current-time)))
+          (arc:sys 'utime fn ct ct))
         (let ((port (open-output-file fn)))
           (close-output-port port)) )
     

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: ctx.scm,v 1.2 2003/04/13 23:42:10 eyestep Exp $
+;; $Id: ctx.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
 
 
 ;; each build script is evaluated in a given context.  the contexts
@@ -70,7 +70,7 @@
   (if (not (null? %arc:contexts%))
       (let ((old-dir (arc:-ctx-meta-info (car %arc:contexts%) 'old-cwd)))
         (if old-dir
-            (arc:sys.chdir old-dir))
+            (arc:sys 'chdir old-dir))
         (set! %arc:contexts% (cdr  %arc:contexts%)))
       (begin 
         (arc:log 'error "no context to drop. bad stacking")
@@ -107,14 +107,14 @@
   (if (arc:context? ctx)
       (begin
         (if (not (arc:-ctx-meta-info ctx 'old-cwd))
-            (arc:-ctx-meta-info! ctx 'old-cwd (arc:sys.getcwd)))
+            (arc:-ctx-meta-info! ctx 'old-cwd (arc:sys 'getcwd)))
         (let* ((bdp (arc:string->path bd))
                (tp (if (arc:path-absolute? bdp)
                        bdp
                        (arc:path-append (arc:path-cwd) bdp))) 
                (tps (arc:path->string (arc:path-normalize tp))))
           (arc:-ctx-meta-info! ctx 'basedir tps)
-          (if (not (arc:sys.chdir tps))
+          (if (not (arc:sys 'chdir tps))
               (begin
                 (arc:msg "failed to change to directory '" tps "'.  Aborted")
                 (quit)))))))

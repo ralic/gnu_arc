@@ -15,9 +15,9 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: oop.scm,v 1.3 2003/04/13 23:43:20 eyestep Exp $
+;; $Id: oop.scm,v 1.4 2003/04/19 01:08:37 eyestep Exp $
 
-(arc:provide 'oop)
+;;(arc:provide 'oop)
 
 ;; this file provides a simple object and class system for arc.
 

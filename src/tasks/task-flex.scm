@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-flex.scm,v 1.1 2003/04/17 00:02:45 eyestep Exp $
+;; $Id: task-flex.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-flex)
 (arc:require 'task-c-deps)
@@ -23,10 +23,6 @@
 (arc:log 'debug "loading 'flex' task")
 
 ;; compiles a flex description file into a c source file.
-;;
-;; the majority of settings, e.g. which c compiler to use, which default
-;; flags to specify, etc. should be set by a system configuration and read
-;; in by the master arc-script (if available)
 ;;
 ;; keywords:
 ;;

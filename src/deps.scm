@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: deps.scm,v 1.2 2003/04/17 00:04:24 eyestep Exp $
+;; $Id: deps.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
 
 
 ;; ----------------------------------------------------------------------
@@ -50,10 +50,10 @@
                  (arc:context-script-home (arc:context-current))
                  ()))
             ".arc")))
-    (if (arc:sys.file-exists? (arc:path->string p))
+    (if (arc:sys 'file-exists? (arc:path->string p))
         p
         (begin
-          (arc:sys.mkdirs (arc:path->string p))
+          (arc:sys 'mkdirs (arc:path->string p))
           p))))
 
 ;; returns the dependency directory as a path object
@@ -64,10 +64,10 @@
                  (arc:context-script-home (arc:context-current))
                  ()))
             %arc:deps-directory%)))
-    (if (arc:sys.file-exists? (arc:path->string p))
+    (if (arc:sys 'file-exists? (arc:path->string p))
         p
         (begin
-          (arc:sys.mkdirs (arc:path->string p))
+          (arc:sys 'mkdirs (arc:path->string p))
           p))))
 
 ;; creates a unified file name for a source name
@@ -79,7 +79,7 @@
                        (arc:path-last-comp fnbn)))))
 
 (define (arc:load-deps-file fn)
-  (if (arc:sys.file-exists? fn)
+  (if (arc:sys 'file-exists? fn)
       (let* ((port (open-input-file fn))
              (deps (read port)))
         (close-input-port port)
@@ -87,7 +87,7 @@
       #f))
 
 (define (arc:save-deps-file fn deps)
-  (if (arc:sys.file-exists? fn)
+  (if (arc:sys 'file-exists? fn)
       (delete-file fn))
   (let ((port (open-output-file fn)))
     ;; produce some informational stuff
@@ -102,12 +102,12 @@
 ;; in the modification times in the deps cons'
 (define (arc:deps-determine-mtime deps)
   (for-each (lambda (fc)
-              (set-cdr! fc (arc:sys.get-mtime (car fc))) )
+              (set-cdr! fc (arc:sys 'mtime (car fc))) )
             (cadr deps))
   deps)
 
 (define (arc:mtime-file-changed? deps ofile)
-  (let ((mtime (arc:sys.get-mtime ofile))
+  (let ((mtime (arc:sys 'mtime ofile))
         (dps (arc:deps-determine-mtime deps)))
     (let loop ((fc (cadr dps)))
       (if (null? fc)

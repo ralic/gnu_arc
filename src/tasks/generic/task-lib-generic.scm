@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-generic.scm,v 1.1 2003/04/13 23:47:34 eyestep Exp $
+;; $Id: task-lib-generic.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-lib-generic)
 
@@ -32,8 +32,8 @@
 
 ;; compile a static library
 (define (arc:<lib-generic>-make-static-lib self libnm objs)
-  (if (arc:sys.file-exists? libnm)
-      (arc:sys.remove-file libnm))
+  (if (arc:sys 'file-exists? libnm)
+      (arc:sys 'remove-file libnm))
   
   (let ((arcmd (string-append (self 'ar-cmd) " "
                               (self 'replace-create-flag) " "
@@ -43,13 +43,13 @@
     
     (arc:display arcmd #\nl)
     
-    (if (not (equal? (arc:sys.system arcmd) 0))
+    (if (not (equal? (arc:sys 'system arcmd) 0))
         (arc:msg "failed to create library " libnm #\nl)
 
         (if (self 'ranlib-needed?)
             (begin
               (arc:display ranlibcmd #\nl)
-              (if (not (equal? (arc:sys.system arcmd) 0))
+              (if (not (equal? (arc:sys 'system arcmd) 0))
                   (arc:msg "failed to run ranlib on " libnm #\nl)))))
     libnm))
 
@@ -58,8 +58,8 @@
 ;; properly
 (define (arc:<lib-generic>-make-share-lib self libnm soname 
                                           objs libdirs deplibs)
-  (if (arc:sys.file-exists? libnm)
-      (arc:sys.remove-file libnm))
+  (if (arc:sys 'file-exists? libnm)
+      (arc:sys 'remove-file libnm))
   
   (let ((ldmd (string-append
                (self 'ld-cmd) " "
@@ -81,7 +81,7 @@
 
     (arc:display ldmd #\nl)
     
-    (if (not (equal? (arc:sys.system ldmd) 0))
+    (if (not (equal? (arc:sys 'system ldmd) 0))
         (begin
           (arc:msg "failed to create library " libnm #\nl)
           #f)

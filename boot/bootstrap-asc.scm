@@ -16,10 +16,12 @@
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 (define %arc:argv% (program-arguments))
+(define %arc:scheme-impl% 'asc)
 
-(load "../src/path.scm")
-(load "../src/logical.scm")
-(load "../src/sys-scm.scm")
+
+;;(load "../src/path.scm")
+;;(load "../src/logical.scm")
+;;(load "../src/sys-scm.scm")
 
 (load "bootstrap.scm")
 

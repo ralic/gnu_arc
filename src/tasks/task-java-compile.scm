@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-java-compile.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-java-compile.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-java-compile)
 
@@ -119,7 +119,7 @@
                                 sfile                     ; the source file
                                 )))
     (arc:display cmd-str #\nl)
-    (if (not (equal? (arc:sys.system cmd-str) 0))
+    (if (not (equal? (arc:sys 'system cmd-str) 0))
         (if (not %arc:keep-going-on-errors%)
             (quit)))))
 

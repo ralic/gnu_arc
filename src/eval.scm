@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: eval.scm,v 1.2 2003/04/13 23:42:10 eyestep Exp $
+;; $Id: eval.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
 
 
 ;; find a build script.  If %arc:find-script-rec% is #t, then search the
@@ -27,7 +27,7 @@
       (if (<= (arc:path-length cp) 0)
           #f
           (let ((nm (arc:path->string (arc:path-append cp nm))))
-            (if (arc:sys.file-exists? nm)
+            (if (arc:sys 'file-exists? nm)
                 nm
                 (if (not %arc:find-script-rec%)
                     #f

@@ -20,11 +20,14 @@
 ;; input installation-path of scripts, %arc:exec%
 ;; input scheme-implementation, %arc:impl%
 
+(load "../src/path.scm")
 (load "../src/strings.scm")
 (load "../src/misc.scm")
 (load "../src/getopt.scm")
 (load "../src/sysnm.scm")
 (load "../src/filter.scm")
+(load "../src/excp.scm")
+(load "../src/logical.scm")
 
 (define %arc:system% "")
 (define %arc:path% "")
@@ -58,6 +61,12 @@
                   (arc:msg "unknown option: " opt))))
         (loop (arc:getopt %arc:argv% arc:opts)))))
 
+(define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f #f #f ))
+
+(define %arc:home% "../src")
+(load "../src/oop.scm")
+(load "../src/sys.scm")
+
 (define %arc:src-dir% (arc:path->string
                        (arc:path-append
                         (arc:path-without-last-comp (arc:path-cwd))
@@ -73,8 +82,6 @@
             (else (display (car v) port)))
           (loop (cdr v))))))
 
-
-(define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f #f #f ))
 
 (case (car %arc:sysnm%)
   ((linux bsd sunos cygwin) (load "./bstr-unix.scm"))

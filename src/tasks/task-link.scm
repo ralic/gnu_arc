@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-link.scm,v 1.2 2003/04/12 23:48:45 eyestep Exp $
+;; $Id: task-link.scm,v 1.3 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-link)
 
@@ -65,7 +65,7 @@
 (define arc:link-keywords '((files (strlist attrval) required)
                             (libs strlist optional)
                             (shared? boolean optional)
-                            (appnm string required)
+                            (appnm string optional) ;;required)
                             (appext string optional)
                             (outdir string optional)
                             (nostdlib? boolean optional)
@@ -93,17 +93,18 @@
          (libdirs (arc:aval 'libdirs props ())) 
          )
     (if (= (string-length appnm) 0)
-        (arc:log 'fatal "bad or empty application name"))
+        ;; (arc:log 'fatal "bad or empty application name"))
+        (arc:throw 'bad-parameters "bad or empty application name"))
     
     (if (and (= (length files) 0)
              (= (length libs) 0))
-        (arc:log 'info "no object files/libs for executable!"))
-    
-    
-    (let* ((fullnm (<backend> 'link-app outdir appnm appext
-                              libdirs autolibdirs shared nostdlib
-                              files autolibs libs)))
-      fullnm) ))
+        (begin
+          (arc:log 'info "no object files/libs for executable!")
+          #f)
+        (let* ((fullnm (<backend> 'link-app outdir appnm appext
+                                  libdirs autolibdirs shared nostdlib
+                                  files autolibs libs)))
+          fullnm) )))
 
 
 (arc:register-task 'link arc:link arc:link-keywords)

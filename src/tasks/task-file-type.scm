@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-file-type.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-file-type.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-file-type)
 
@@ -42,10 +42,10 @@
     
     (arc:log 'debug "file-type ... " fn)
     
-    (if (arc:sys.file-directory? fn)
+    (if (arc:sys 'file-directory? fn)
         (set! retv 'dir)
-        (if (arc:sys.file-exists? fn)
-            (if (arc:sys.file-executable? fn)
+        (if (arc:sys 'file-exists? fn)
+            (if (arc:sys 'file-executable? fn)
                 (set! retv 'executable)
                 (set! retv 'file) )
             (set! retv 'unknown)))

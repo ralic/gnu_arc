@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-gunzip.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-gunzip.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-gunzip)
 
@@ -55,15 +55,15 @@
 	    (= (string-length dest) 0))
 	(arc:log 'fatal "invalid file names in gunzip"))
 
-    (if (arc:sys.file-exists? fn)
+    (if (arc:sys 'file-exists? fn)
 	(begin
-	  (if (arc:sys.file-exists? dest)
+	  (if (arc:sys 'file-exists? dest)
 	      (if force?
 		  (begin
-		    (arc:sys.remove-file dest)
+		    (arc:sys 'remove-file dest)
 		    (set! really-do #t))
-		  (let ((mt-fn (arc:sys.get-mtime fn))
-			(mt-dest (arc:sys.get-mtime dest)))
+		  (let ((mt-fn (arc:sys 'get-mtime fn))
+			(mt-dest (arc:sys 'get-mtime dest)))
 		    (set! really-do (> mt-fn mt-dest))) ))
 	  
 	  (if really-do

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-delete.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-delete.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 
 (arc:provide 'task-delete)
@@ -49,11 +49,11 @@
                        (arc:log 'fatal "empty path")))))
     (arc:log 'debug "delete ... " pathnm)
     
-    (if (arc:sys.file-exists? pathnm)
+    (if (arc:sys 'file-exists? pathnm)
         (if (arc:aval 'recursive? props #f)
-            (if (arc:sys.remove-dir pathnm)
+            (if (arc:sys 'remove-dir pathnm)
                 (arc:log 'verbose "directory '" pathnm "' deleted"))
-            (if (arc:sys.remove-file pathnm)
+            (if (arc:sys 'remove-file pathnm)
                 (arc:log 'verbose "file '" pathnm "' deleted")))
         (if (arc:aval 'ignore-missing? props #f)
             #f

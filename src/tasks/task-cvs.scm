@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-cvs.scm,v 1.1 2003/04/15 00:03:50 eyestep Exp $
+;; $Id: task-cvs.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-cvs)
 
@@ -188,12 +188,12 @@
 (define (arc:cvs-handle-update compress-opt rev date dir files 
                                local? prune-dir? create-dir?)
   (let* ((cwd (if dir
-                  (arc:sys.getcwd)
+                  (arc:sys 'getcwd)
                   #f)))
     (if cwd
         (begin
           (arc:log 'verbose "cvs/update: change to dir '" dir "'")
-          (arc:sys.chdir dir)))
+          (arc:sys 'chdir dir)))
     
     (let* ((tfn (arc:path->string (arc:path-append (arc:arc-tmp-directory)
                                                    "cvs-out")))
@@ -228,7 +228,7 @@
             (set! retv #f)))
       
       (if cwd 
-          (arc:sys.chdir cwd))
+          (arc:sys 'chdir cwd))
       
       ;; @todo write the output for the update command into a temporary file
       ;; and parse the output lines for the "U A R M C ?" characters.  This

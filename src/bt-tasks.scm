@@ -15,34 +15,36 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: bt-tasks.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: bt-tasks.scm,v 1.2 2003/04/19 01:08:37 eyestep Exp $
 
 ;; read the handler declarations
 (for-each 
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "meta-inf"))
-          (dir (if (arc:sys.file-exists? (arc:path->string pth))
-                   (arc:sys.opendir (arc:path->string pth))
+          (dir (if (arc:sys 'file-exists? (arc:path->string pth))
+                   (arc:sys 'opendir (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (arc:sys.readdir dir) (arc:sys.readdir dir)))
+           (do ((fn (arc:sys 'readdir dir) (arc:sys 'readdir dir)))
                ((not fn) #t)
              (if (arc:string-suffix? fn ".decl")
-                 (arc:load (arc:path->string (arc:path-append pth fn)))))
-           (arc:sys.closedir dir)))))
+                 (begin
+                   (arc:log 'verbose "load '" (arc:path-append pth fn) "'")
+                   (arc:load (arc:path->string (arc:path-append pth fn))))))
+           (arc:sys 'closedir dir)))))
  %arc:arc-incl-path%)
 
 ;; load all tasks in the subdirectory "tasks"
 (for-each 
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "tasks"))
-          (dir (if (arc:sys.file-exists? (arc:path->string pth))
-                   (arc:sys.opendir (arc:path->string pth))
+          (dir (if (arc:sys 'file-exists? (arc:path->string pth))
+                   (arc:sys 'opendir (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (arc:sys.readdir dir) (arc:sys.readdir dir)))
+           (do ((fn (arc:sys 'readdir dir) (arc:sys 'readdir dir)))
                ((not fn) #t)
              (if (and (arc:string-prefix? fn "task-")
                       (arc:string-suffix? fn ".scm"))
@@ -51,7 +53,7 @@
                                 (arc:path-without-last-ext 
                                  (arc:string->path fn))))
                               (arc:path->string (arc:path-append pth fn)))))
-           (arc:sys.closedir dir)))))
+           (arc:sys 'closedir dir)))))
  %arc:arc-incl-path%)
 
 

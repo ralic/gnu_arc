@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-copy.scm,v 1.2 2003/04/13 23:45:36 eyestep Exp $
+;; $Id: task-copy.scm,v 1.3 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-copy)
 
@@ -104,20 +104,20 @@
 
 (define (arc:-copy-dir-to-dir dir todir force)
   (let ((copy #f))
-    (if (not (arc:sys.file-exists? dir))
+    (if (not (arc:sys 'file-exists? dir))
         (arc:log 'info "copy: source dir '" dir "' not found")
-        (if (arc:sys.file-exists? todir)
+        (if (arc:sys 'file-exists? todir)
             (if (not force)
                 (arc:log 'info
                          "copy: destination directory exists. don't touch")
                 (set! copy #t))
             (set! copy #t)))
     (if copy
-        (arc:sys.copy-dir dir todir)) ))
+        (arc:sys 'copy-dir dir todir)) ))
 
 (define (arc:-copy-files-to-dir files todir force flatten)
   (let ((todirp (arc:string->path todir)))
-    (if (not (arc:sys.file-directory? todir))
+    (if (not (arc:sys 'file-directory? todir))
         (arc:log 'info "copy: dest directory doesn't exists / or no directory")
         (let loop ((f files))
           (if (null? f)
@@ -127,7 +127,7 @@
                                (arc:path-last-comp (arc:string->path (car f)))
                                (arc:path-abbreviate (arc:string->path (car f)))))
                        (tp (arc:path-append todirp fp)) )
-                  (if (and (arc:sys.file-exists? (arc:path->string tp))
+                  (if (and (arc:sys 'file-exists? (arc:path->string tp))
                            (not force))
                       (arc:log 'info 
                                "copy: file '" (arc:path->string tp) 
@@ -137,28 +137,29 @@
 
 (define (arc:-copy-file-to-dir file todir force flatten)
   (let ((todirp (arc:string->path todir)))
-    (if (not (arc:sys.file-directory? todir))
+    (if (not (arc:sys 'file-directory? todir))
         (arc:log 'info 
                  "copy: destination directory is not an "
                  "directory/doesn't exist")
-        (if (not (arc:sys.file-exists? file))
+        (if (not (arc:sys 'file-exists? file))
             (arc:log 'info "copy: source file not found: " file)
             (let* ((fp (if flatten
                            (arc:path-last-comp (arc:string->path file))
                            (arc:path-abbreviate (arc:string->path file))) )
                    (tp (arc:path-append (arc:string->path todir) fp)) )
-              (if (and (arc:sys.file-exists? (arc:path->string tp)) (not force))
+              (if (and (arc:sys 'file-exists? (arc:path->string tp)) 
+                       (not force))
                   (arc:log 'info
                            "copy: file '" (arc:path->string tp) 
                            "' exists. don't touch")
                   (arc:-copy-file file (arc:path->string tp)))) ))))
 
 (define (arc:-copy-file-to-file file tofile force)
-  (if (arc:sys.file-directory? tofile)
+  (if (arc:sys 'file-directory? tofile)
       (arc:log 'info "copy: destination is a directory, not a file")
-      (if (not (arc:sys.file-exists? file))
+      (if (not (arc:sys 'file-exists? file))
           (arc:log 'info "copy: source file not found (" file")")
-          (if (arc:sys.file-exists? tofile)
+          (if (arc:sys 'file-exists? tofile)
               (if (not force)
                   (arc:log 'info "copy: destination file found. don't touch")
                   (arc:-copy-file file tofile))
@@ -168,8 +169,8 @@
   (let* ((destp (arc:string->path dest))
          (dirs (arc:path-without-last-comp destp)))
     (if (> (arc:path-length dirs) 0)
-        (arc:sys.mkdirs (arc:path->string dirs)))
-    (arc:sys.copy-file src dest)))
+        (arc:sys 'mkdirs (arc:path->string dirs)))
+    (arc:sys 'copy-file src dest)))
 
 
 ;;Keep this comment at the end of the file 

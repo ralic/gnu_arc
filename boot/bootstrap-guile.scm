@@ -17,10 +17,11 @@
 
 
 (define %arc:argv% (list-tail (program-arguments) 1))
+(define %arc:scheme-impl% 'guile)
 
-(load "../src/path.scm")
-(load "../src/logical.scm")
-(load "../src/sys-guile.scm")
+;;(load "../src/path.scm")
+;;(load "../src/logical.scm")
+;;(load "../src/sys-guile.scm")
 
 (load "bootstrap.scm")
 

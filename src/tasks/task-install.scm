@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-install.scm,v 1.2 2003/04/13 23:45:36 eyestep Exp $
+;; $Id: task-install.scm,v 1.3 2003/04/19 01:08:38 eyestep Exp $
 
 
 (arc:provide 'task-install)
@@ -47,7 +47,7 @@
 ;; RETURNS
 ;; <unspecified>
 
-(define arc:install-keywords '((src    (string strlist)  required)
+(define arc:install-keywords '((src    (string list)     required)
                                (dest   string            required)
                                (strip? boolean           optional)
                                (group  integer           optional)
@@ -62,35 +62,88 @@
          (mode (arc:aval 'mode props #f)))
     
     (arc:log 'debug "install ... " src)
-    
-    (if (string? src)
-        (arc:install-file src dest strip group owner mode))
-    (if (list? src)
-        (let loop ((fn src))
-          (if (null? fn)
-              'done
-              (begin
-                (arc:install-file (car fn) dest strip group owner mode)
-                (loop (cdr fn)))))) )
+
+    (cond
+     ((string? src) (arc:install-file src dest strip group owner mode))
+     ((list? src)
+      (let loop ((fn src))
+        (if (null? fn)
+            'done
+            (begin
+              (arc:install-elt (car fn) dest strip group owner mode)
+              (loop (cdr fn))))))
+     ((arc:attrval? src)
+      (arc:install-elt src dest strip group owner mode))
+     ))
   '<unspecified>)
 
 (arc:register-task 'install arc:install arc:install-keywords)
 
-
 (define (arc:install-file src dest strip group owner mode)
-  (if (arc:sys.file-exists? src)
+  (if (arc:sys 'file-exists? src)
       (let* ((srcp (arc:string->path src))
              (destp (arc:string->path dest))
              (ndest (arc:path->string (arc:path-append 
                                        destp (arc:path-last-comp srcp)))))
-        (arc:sys.mkdirs dest)
-        (arc:sys.copy-file src ndest)
+        (arc:display "install " src " to " ndest "(" (or mode 'exec) ")" #\nl)
+        (arc:sys 'mkdirs dest)
+        (arc:sys 'copy-file src ndest)
         
         ;; TODO: change owner, group flags, strip binary date
         
         (if mode
-            (arc:sys.chmod ndest mode)))
-      (arc:log 'info "source file not found: " src)))
+            (arc:sys 'chmod ndest mode))
+        ndest)
+      (begin
+        (arc:log 'info "source file not found: " src)
+        #f)))
+
+
+
+(define (arc:install-elt src dest strip group owner mode)
+  (cond
+   ((string? src) (arc:install-file src dest strip group owner mode))
+   ((arc:attrval? src) (arc:install-attrval src dest strip group owner mode))
+
+   (else
+    (arc:log 'error "install: bad element type in source list: " src))))
+
+(define (arc:install-attrval src dest strip group owner mode)
+  ;; check installable information: libraries
+  (let ((static-lib (arc:attrval-ref src 'static))
+        (shared-lib (arc:attrval-ref src 'shared))
+        (shared-lib-soname (arc:attrval-ref src 'shared-soname))
+        (shared-lib-linkname (arc:attrval-ref src 'shared-linker-name)))
+
+    (if static-lib
+        (arc:install-file static-lib dest strip group owner mode))
+    (if shared-lib
+        (let* ((real-lib (arc:install-file shared-lib dest strip group 
+                                           owner mode)))
+          (if (not (equal? shared-lib shared-lib-soname))
+              (let ((target (arc:path->string
+                             (arc:path-append 
+                              (arc:string->path dest)
+                              (arc:path-last-comp 
+                               (arc:string->path shared-lib-soname))))))
+                (arc:sys 'symlink real-lib target)
+                (if mode
+                    (arc:sys 'chmod target mode))))
+
+          (if (and (not (equal? shared-lib shared-lib-linkname))
+                   (not (equal? shared-lib-soname shared-lib-linkname)))
+              (let ((target (arc:path->string
+                             (arc:path-append 
+                              (arc:string->path dest)
+                              (arc:path-last-comp 
+                               (arc:string->path shared-lib-linkname))))))
+                (arc:sys 'symlink real-lib target)
+                (if mode
+                    (arc:sys 'chmod target mode))))
+          ))
+    ))
+        
+
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:

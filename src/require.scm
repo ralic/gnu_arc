@@ -57,7 +57,7 @@
     (if (null? pp)
         #f
         (let ((t (string-append (car pp) "/" fn ".scm")))
-          (if (arc:sys.file-exists? t)
+          (if (arc:sys 'file-exists? t)
               t 
               (loop (cdr pp)))))))
 

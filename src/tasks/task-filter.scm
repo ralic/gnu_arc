@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-filter.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-filter.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-filter)
 
@@ -81,10 +81,10 @@
     
     (if destnm
         (begin
-          (if (arc:sys.file-exists? destnm)
+          (if (arc:sys 'file-exists? destnm)
               (if force
                   (begin
-                    (arc:sys.remove-file destnm)
+                    (arc:sys 'remove-file destnm)
                     (set! really-do #t)))
               (set! really-do #t))
           

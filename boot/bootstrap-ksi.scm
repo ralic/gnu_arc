@@ -16,12 +16,19 @@
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 (define %arc:argv% (list-tail (program-arguments) 4))
+(define %arc:scheme-impl% 'ksi)
 
 (define (quit) (exit))
 
 
-(load "../src/path.scm")
-(load "../src/logical.scm")
-(load "../src/sys-ksi.scm")
+;;(load "../src/path.scm")
+;;(load "../src/logical.scm")
+;;(load "../src/sys-ksi.scm")
 
 (load "./bootstrap.scm")
+
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:

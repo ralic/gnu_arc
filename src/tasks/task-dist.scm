@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-dist.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-dist.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
 
 (arc:provide 'task-dist)
 (arc:require 'task-tar)
@@ -55,11 +55,11 @@
 
     (arc:log 'debug "dist ... " dist-file)
     
-    (if (arc:sys.file-exists? dist-file)
-        (arc:sys.remove-file dist-file))
+    (if (arc:sys 'file-exists? dist-file)
+        (arc:sys 'remove-file dist-file))
     
-    (if (arc:sys.file-exists? dist-dir)
-        (arc:sys.remove-dir dist-dir))
+    (if (arc:sys 'file-exists? dist-dir)
+        (arc:sys 'remove-dir dist-dir))
 
     (arc:call-task 'mkdir 
                    (list 'dir dist-dir)

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: path.scm,v 1.2 2003/04/12 23:53:53 eyestep Exp $
+;; $Id: path.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
 
 
 (define %arc:path-sep% #\/)
@@ -118,10 +118,10 @@
         "")))
 
 (define (arc:path-cwd)
-  (arc:string->path (arc:sys.getcwd)))
+  (arc:string->path (arc:sys 'getcwd)))
 
 (define (arc:home-dir)
-  (arc:string->path (arc:sys.homedir)))
+  (arc:string->path (arc:sys 'homedir)))
 
 (define (arc:path-absolute? path)
   (and (list? path)
