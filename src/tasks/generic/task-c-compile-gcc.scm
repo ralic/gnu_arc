@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile-gcc.scm,v 1.1 2003/04/13 23:47:34 eyestep Exp $
+;; $Id: task-c-compile-gcc.scm,v 1.2 2003/04/22 23:43:54 eyestep Exp $
 
 
 (arc:provide 'task-c-compile-gcc)
@@ -49,8 +49,9 @@
      ;; default flags
      (default-flags ,(lambda (self) ""))
      
-     ;; flag for compiling dependencies
-     (deps-flag ,(lambda (self) "-M"))
+     ;; flag for compiling dependencies; only produce dependencies for non
+     ;; system files
+     (deps-flag ,(lambda (self) "-MM"))
      
      ;; returns the compiler flag for optimization
      (opt-level-flag ,(lambda (self level)
