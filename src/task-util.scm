@@ -115,7 +115,7 @@
 ;;'((:set string (opt-xor :pattern))
 ;;  (:pattern string (opt-xor :set)))
 
-(define (arc:compile-key-list table keys)
+(define (arc:compile-key-list table keys task-name)
   (let ((rx (let loop ((res ())
                        (key keys))
               (if (null? key)
@@ -129,7 +129,8 @@
                             ((:ok) (append res (list (list (car key) 
                                                            nextval))))
                             (else (begin
-                                    (arc:msg keycheck " (was: " nextval ")")
+                                    (arc:msg task-name ": " 
+                                             keycheck " (was: " nextval ")")
                                     res))))
                         (if (not (null? (cdr key) ))
                             (cddr key) 
@@ -145,7 +146,7 @@
                        retv
                        ;; the required value has not been defined!
                        (begin
-                         (arc:msg "required keyword '"
+                         (arc:msg task-name ": required keyword '"
                                   (symbol->string (caar ta))
                                   "' not specified")
                          #f)))
@@ -156,7 +157,7 @@
                                (not (assoc (cadr (caddar ta)) rx)))
                           ;; the required value has not been defined!
                           (begin
-                            (arc:msg "neither keyword '"
+                            (arc:msg task-name ": neither keyword '"
                                      (symbol->string (caar ta))
                                      "' nor '"
                                      (symbol->string (cadr (caddar ta)))
@@ -167,7 +168,7 @@
                       (if (and (assoc (caar ta) rx)
                                (assoc (cadr (caddar ta)) rx))
                           (begin
-                            (arc:msg "optional exclusive keywords '"
+                            (arc:msg task-name ": optional exclusive keywords '"
                                      (symbol->string (caar ta))
                                      "' and '"
                                      (symbol->string (cadr (caddar ta)))
@@ -178,7 +179,7 @@
                       (if (and (assoc (caar ta) rx)
                                (assoc (cadr (caddar ta)) rx))
                           (begin
-                            (arc:msg "required exclusive keywords '"
+                            (arc:msg task-name ": required exclusive keywords '"
                                      (symbol->string (caar ta))
                                      "' and '"
                                      (symbol->string (cadr (caddar ta)))
@@ -187,7 +188,7 @@
                           (if (and (not (assoc (caar ta) rx))
                                    (not (assoc (cadr (caddar ta)) rx)))
                               (begin
-                                (arc:msg "neither keyword '"
+                                (arc:msg task-name ": neither keyword '"
                                          (symbol->string (caar ta))
                                          "' nor '"
                                          (symbol->string (cadr (caddar ta)))
@@ -195,11 +196,11 @@
                                 #f)
                               retv)))
                      (else (begin
-                             (arc:msg "unknown table entry: '"
+                             (arc:msg task-name ": unknown table entry: '"
                                       (car (caddar ta)) "'")
                              retv))))
                   (else (begin
-                          (arc:msg "unknown table entry: '"
+                          (arc:msg task-name ": unknown table entry: '"
                                    (car (caddar ta)) "'")
                           retv)))
                  (cdr ta))))
