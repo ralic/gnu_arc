@@ -25,10 +25,10 @@ echo X/"$0" |
 build=`uname -s 2>/dev/null` || build="unknown"
 
 case "$build" in
-  Linux | SunOS)
+  Linux | SunOS )
     arc_default_prefix=/usr/local
     ;;
-  Cygwin* )
+  Cygwin* | CYGWIN* )
     arc_default_prefix=/usr
     ;;
   BeOS)
@@ -39,10 +39,9 @@ case "$build" in
     ;;
   *)
     echo "unknown operating system $build"
-    exit -1
+    exit 255
 esac
 
-exec_prefix=$arc_default_prefix
 prefix=$arc_default_prefix
 
 arc_init_help=
@@ -222,6 +221,10 @@ Try '$0 --help' for more information." >&2
   esac
 done
 
+if test -z "$exec_prefix"; then
+  exec_prefix=$prefix
+fi
+
 if test -n "$arc_prev"; then
   arc_option=--`echo $arc_prev | sed 's/_/-/g'`
   { echo "$as_me: error: missing argument to $arc_option" >&2
@@ -394,7 +397,7 @@ case "$arc_scheme_impl" in
   scm)
     cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
-(cd boot; scm bootstrap-scm.scm -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+(cd boot; scm bootstrap-scm.scm -P "$prefix" -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
 ./arc configure
 _ACEOF
     chmod +x ./bootstrap.sh
@@ -405,7 +408,7 @@ _ACEOF
   ksi)
     cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
-(cd boot; ksi -s ./bootstrap-ksi.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+(cd boot; ksi -s ./bootstrap-ksi.scm -- -P "$prefix" -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
 ./arc configure
 _ACEOF
     chmod +x ./bootstrap.sh
@@ -416,7 +419,7 @@ _ACEOF
   guile)
     cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
-(cd boot; guile -l bootstrap-guile.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+(cd boot; guile -l bootstrap-guile.scm -- -P "$prefix" -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
 ./arc configure
 _ACEOF
     chmod +x ./bootstrap.sh
@@ -428,32 +431,53 @@ _ACEOF
     cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
 export ASC_HOME="$arcdir"
+_ACEOF
+
 case "$build" in
   Linux)
-    (cd asc; /bin/sh build-unix.sh)
+    asccmd=asc
+    arccmd=arc
+    cat >> ./bootstrap.sh <<_ACEOF
+(cd asc; /bin/sh build-unix.sh)
+_ACEOF
     ;;
-  Cygwin* )
-    (cd asc; /bin/sh build-cygwin.sh)
+  Cygwin* | CYGWIN* )
+    asccmd=asc.exe
+    arccmd=arc.exe
+    cat >> ./bootstrap.sh <<_ACEOF
+(cd asc; /bin/sh build-cygwin.sh)
+_ACEOF
     ;;
   BeOS)
-    (cd asc; /bin/sh build-beos.sh)
+    asccmd=asc
+    arccmd=arc
+    cat >> ./bootstrap.sh <<_ACEOF
+(cd asc; /bin/sh build-beos.sh)
+_ACEOF
     ;;
   SunOS )
-    (cd asc; /bin/sh build-sun.sh)
+    asccmd=asc
+    arccmd=arc
+    cat >> ./bootstrap.sh <<_ACEOF
+(cd asc; /bin/sh build-sun.sh)
+_ACEOF
     ;;
   *)
     echo "unknown build procedure for system $build"
+    rm ./bootstrap.sh
     exit 1
 esac
+
+cat >> ./bootstrap.sh <<_ACEOF
 # copy the asc initializing file for arc
 if [ ! -d "./app" ]; then
   mkdir ./app
 fi
 cp asc/asc-init.scm ./app/asc-init.scm
-cp asc/asc ./app/arc
+cp asc/$asccmd ./app/$arccmd
 
 export ASC_INIT_FILE="`pwd`/asc/init.scm"
-(cd boot; ../app/arc -s bootstrap-asc.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+(cd boot; ../app/arc -s bootstrap-asc.scm -- -P "$prefix" -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
 unset ASC_INIT_FILE
 
 ./arc configure
