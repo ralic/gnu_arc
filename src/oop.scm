@@ -15,70 +15,105 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: oop.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: oop.scm,v 1.2 2003/04/12 23:52:44 eyestep Exp $
 
 (arc:provide 'oop)
 
-;; a class definition:
-;(define <arc:my-class>
-;  (list '<my-class>
-;        '((name "my-class"))
-;        super-class
-;        `((say ,(lambda (self a b) (display (+ a b)) (newline)))
-;          (time ,(lambda (self) (display "today") (newline))) )
-;        ))
+;; this file provides a simple object and class system for arc.
 
-(define (arc:make-instance cls)
-  (letrec ((class cls)
-           ;; make a copy of the slots
-           (slots (map (lambda (p) 
-                         (cons (car p) (cdr p)) )
-                       (cadr cls)))
-           ;; make ptr to self and implement the method eval
+(define (arc:make-class cls-name
+                        super-class
+                        vars
+                        the-methods)
+  (letrec ((isa super-class)
+           (name cls-name)
+           (slot-templ (append (map (lambda (p) 
+                                      (cons (car p) (cdr p)) )
+                                    vars)
+                               (if (not (null? super-class))
+                                   (super-class 'slots)
+                                   ())))
+           (methods the-methods)
            (self (lambda (msg . prms)
                    (case msg
-                     ((class) class)
+                     ((super) isa)
+                     ((self) self)
+                     ((methods) methods)
+                     ((slots) slot-templ)
+                     ((alloc) (arc:alloc-instance self
+                                                  slot-templ))
+                     ((name) name)
+                     ((instance?) #f)
+                     (else (begin
+                             (display "unknown class method ")
+                             (display msg) (newline)
+                             #f))))))
+    self))
+
+(define (arc:alloc-instance class slot-templ)
+  (letrec ((isa class)
+           (slots (map (lambda (p)
+                         (cons (car p) (cdr p)) )
+                       slot-templ))
+           (self (lambda (msg . prms)
+                   (case msg
+                     ((class) isa)
                      ((self) self)
                      ((set!) (let* ((attr (car prms))
                                     (val (cadr prms))
-
+                                    
                                     (aslot (assoc attr slots)))
                                (if aslot
                                    (set-cdr! aslot (list val))
                                    (begin
-                                     (arc:msg "unknown slot " attr)
+                                     (display "unknown slot ")
+                                     (display attr) (newline)
                                      #f))))
                      ((get) (let* ((attr (car prms))
                                    (aslot (assoc attr slots)))
                               (if aslot
                                   (cadr aslot)
                                   (begin
-                                    (arc:msg "unknown slot " attr)
+                                    (display "unknown slot ")
+                                    (display attr) (newline)
                                     #f))))
-                     (else 
-                      (let loop ((cl class))
-                        (if (null? cl)
-                            (begin
-                              (arc:msg "unknown method " msg)
-                              #f)
-                            (let ((m (assoc msg (cadddr cl))))
-                              (if (and m
-                                       (procedure? (cadr m)))
-                                  (apply (cadr m) (cons self prms))
-                                  (loop (caddr class)))) ))
-                      )))))
-    self))
-
-
+                     ((instance?) #t)
+                     (else (let loop ((cls isa))
+                             (if (null? cls)
+                                 (begin
+                                   (display "unknown method ")
+                                   (display msg) (newline)
+                                   #f)
+                                 (let* ((methl (cls 'methods))
+                                        (m (assoc msg (or methl ()))))
+                                   (if (and m
+                                            (procedure? (cadr m)))
+                                       (apply (cadr m) (cons self prms))
+                                       (loop (cls 'super)))))))))))
+          self))
+                   
 (define <arc:object>
-  (list '<arc:object>                   ; name of the class
-        '()                             ; slots
-        
-        '()                              ; superclass
-        
-        ;; methods
-        '()
-        ))
+  (arc:make-class '<arc:object>
+                  ()          ; super class
+                  '()         ; slots
+                  `((isa? ,(lambda (self a-class)
+                             (and (arc:class? a-class)
+                                  (eq? (self 'class) a-class))))
+                    (kind-of? ,(lambda (self a-class)
+                                 (and (arc:class? a-class)
+                                      (let loop ((cls (self 'class)))
+                                        (if (null? cls)
+                                            #f
+                                            (or (eq? cls a-class)
+                                                (loop (cls 'super))))))))
+                    )))
 
-; to get a copy of an class
-;(define m (arc:make-instance <arc:my-class>))
+(define (arc:class? obj)
+  (and (procedure? obj)
+       (not (obj 'instance?))))
+
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:
