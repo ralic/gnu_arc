@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-version.scm,v 1.1 2003/04/15 00:03:27 eyestep Exp $
+;; $Id: task-version.scm,v 1.2 2003/04/17 00:06:27 eyestep Exp $
 
 (arc:provide 'task-version)
 
@@ -30,8 +30,8 @@
 ;; src: STRING require
 ;; the version file
 ;;
-;; seperator: CHAR
-;; the seperator to use instead of @
+;; separator: CHAR
+;; the separator to use instead of @
 ;;
 ;; step: INTEGER
 ;; the step to count for, defaults to 1
@@ -41,7 +41,7 @@
 ;;
 ;; clean-copy-tofile: STRING
 ;; if set write a copy of the counted data to STRING, but removes the
-;; seperator chars
+;; separator chars
 ;;
 ;; fill-to-length: INTEGER
 ;; left fill the generated build number at least to this length, use
@@ -58,7 +58,7 @@
 (define arc:version-keywords '((src            string required)
                                (tofile         string optional)
                                (clean-copy-tofile string optional)
-                               (seperator      char optional)
+                               (separator      char optional)
                                (fill-to-length integer optional)
                                (fill-char      char optional)
                                (step           integer optional)))
@@ -66,18 +66,18 @@
   (let* ((src (arc:aval 'src props #f))
          (tofile (arc:aval 'tofile props src))
          (clean-copy-tofile (arc:aval 'clean-copy-tofile props #f))
-         (seperator (arc:aval 'seperator props #\@))
+         (separator (arc:aval 'separator props #\@))
          (step (arc:aval 'step props 1))
          (fill-to-length (arc:aval 'fill-to-length props 4))
          (fill-char (arc:aval 'fill-char props #\0))
          (s-apt #f))
     
     (arc:log 'verbose "version: use version file '" src "' ...")
-    (set! s-apt (arc:-version-file-scan src seperator))
+    (set! s-apt (arc:-version-file-scan src separator))
     (set! s-apt (arc:-version-file-increase-counts s-apt step 
                                                    fill-to-length
                                                    fill-char))
-    (arc:-version-file-write s-apt tofile seperator)
+    (arc:-version-file-write s-apt tofile separator)
 
     (if clean-copy-tofile
         (arc:-version-file-write s-apt clean-copy-tofile #f))
