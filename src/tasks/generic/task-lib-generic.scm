@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-generic.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-lib-generic.scm,v 1.3 2003/04/22 23:44:37 eyestep Exp $
 
 (arc:provide 'task-lib-generic)
 
@@ -57,7 +57,8 @@
 ;; build a shared library.  This requires the object files to be combiled
 ;; properly
 (define (arc:<lib-generic>-make-share-lib self libnm soname 
-                                          objs libdirs deplibs)
+                                          objs libdirs deplibs
+                                          rpath)
   (if (arc:sys 'file-exists? libnm)
       (arc:sys 'remove-file libnm))
   
@@ -66,16 +67,19 @@
                (self 'ld-shared-flag) " "
                (self 'ld-extra-flags) " "
                (self 'ld-soname-flag soname) " "
+               (if rpath
+                   (string-append (self 'ld-rpath-option rpath) " ")
+                   "")
                (if (and deplibs
                         (not (null? deplibs)))
-                   (string-append (arc:string-list->string* libdirs "-L") " ")
+                   (string-append (arc:string-list->string* libdirs " -L") " ")
                    "")
                ;; objects
                (arc:string-list->string* objs " ") " "
                ;; deplibs
                (if (and deplibs
                         (not (null? deplibs)))
-                   (string-append (arc:string-list->string* deplibs "-l") " ")
+                   (string-append (arc:string-list->string* deplibs " -l") " ")
                    "")
                (self 'ld-outfile-flag) " " libnm)) )
 
@@ -109,6 +113,11 @@
      (ld-extra-flags ,(lambda (self) "-Wl,--export-dynamic"))
      (ld-outfile-flag ,(lambda (self) "-o"))
      (ld-soname-flag ,(lambda (self soname) ""))
+     (ld-rpath-option ,(lambda (self rpath)
+                         (string-append "-Wl,-rpath=" 
+                                        (arc:path->string
+                                         (arc:path-absolutize
+                                          (arc:string->path rpath))))))
      
      ;; make a name for a static library 
      ;; #1: the outdir
@@ -140,6 +149,7 @@
      ;;     dependency libs
      ;; #5: a list of libraries the shared library depends 
      ;;     on (or () if not needed)
+     ;; #6: rpath
      (make-shared-lib ,arc:<lib-generic>-make-share-lib)
      )))
 

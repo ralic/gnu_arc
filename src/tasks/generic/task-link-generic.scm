@@ -15,35 +15,51 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-link-generic.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-link-generic.scm,v 1.3 2003/04/22 23:45:23 eyestep Exp $
 
 
-(arc:provide 'task-link-linux)
+(arc:provide 'task-link-generic)
 
-(arc:log 'debug "loading 'link' task")
+(arc:log 'debug "loading 'link' task [generic]")
 
 
 ;; backend functionality for linking object files on linux systems.
-(define <arc:linux-link>
+(define <arc:link-generic>
   (arc:make-class 
-   '<arc:linux-link>                    ; name of the class
+   '<arc:link-generic>                  ; name of the class
    <arc:object>                         ; superclass
 
-   '((os linux))                        ; slots
+   '()                                  ; slots
    
    ;; methods
-   `((os ,(lambda (self) linux))
-
-     (link-cmd ,(lambda (self) "gcc"))
+   `((link-cmd ,(lambda (self) "gcc"))
      (outfile-flag ,(lambda (self) "-o"))
      (shared-flag ,(lambda (self) ""))
      (static-flag ,(lambda (self) "-static"))
      (nostdlib-flag ,(lambda (self) "-nostdlib"))
      
-
      ;; the default application extension (on windows: .exe)
      (app-ext ,(lambda (self) ""))
 
+     (rpath-option ,(lambda (self rpath)
+                      (cond
+                       ((string? rpath)
+                        (string-append "-Wl,-rpath," 
+                                       (arc:path->string
+                                        (arc:path-absolutize
+                                         (arc:string->path rpath)))))
+                       ((list? rpath)
+                        (arc:string-list->string*
+                         (arc:reduce (lambda (x lst)
+                                       (cons (arc:path->string
+                                              (arc:path-absolutize
+                                               (arc:string->path x)))
+                                             lst))
+                                     '()
+                                     rpath)
+                         " -Wl,-rpath,"))
+                       (else "")) ))
+     
      ;; make the name for an application
      (make-app-name 
       ,(lambda (self outdir appnm appext*)
@@ -62,39 +78,45 @@
      ;; link a set of object files
      (link-app
       ,(lambda (self outdir appnm appext 
-                     libdirs autolibdirs shared nostdlib files autolibs libs)
+                     libdirs autolibdirs shared nostdlib files autolibs libs
+                     rpath)
          (let* ((fullnm (self 'make-app-name outdir appnm appext))
                 (linkcmd (string-append 
                           (self 'link-cmd) " "
                           (if libdirs
                               (string-append (arc:string-list->string* libdirs
-                                                                       "-L")
+                                                                       " -L")
                                              " ")
                               "")
                           (if autolibdirs
                               (string-append (arc:string-list->string* 
-                                              autolibdirs "-L")
+                                              autolibdirs " -L")
                                              " ")
                               "")
                           (if shared
                               (string-append (self 'shared-flag) " ")
                               (string-append (self 'static-flag) " "))
+                          (if (and shared
+                                   rpath)
+                              (string-append (self 'rpath-option rpath) " ")
+                              "")
                           (if nostdlib
                               (string-append (self 'nostdlib-flag) " ")
                               "")
                           (self 'outfile-flag) " " fullnm " "
                           (if files
-                              (string-append (arc:string-list->string files)
+                              (string-append (arc:string-list->string* files
+                                                                       " ")
                                              " ")
                               "")
                           (if autolibs
                               (string-append (arc:string-list->string* autolibs
-                                                                       "-l")
+                                                                       " -l")
                                              " ")
                               "")
                           (if libs
                               (string-append (arc:string-list->string* 
-                                              libs "-l")
+                                              libs " -l")
                                              " ")
                               "") )))
            (arc:log 'debug "linking " fullnm " ...")

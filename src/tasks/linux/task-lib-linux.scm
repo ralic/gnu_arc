@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-linux.scm,v 1.3 2003/04/13 23:48:26 eyestep Exp $
+;; $Id: task-lib-linux.scm,v 1.4 2003/04/22 23:46:03 eyestep Exp $
 
 (arc:provide 'task-lib-linux)
 
@@ -71,6 +71,11 @@
      (ld-outfile-flag ,(lambda (self) "-o"))
      (ld-soname-flag ,(lambda (self soname)
                         (string-append "-Wl,-soname," soname)))
+     (ld-rpath-option ,(lambda (self rpath)
+                         (string-append "-Wl,-rpath," 
+                                        (arc:path->string
+                                         (arc:path-absolutize
+                                          (arc:string->path rpath))))))
      
      (make-shared-names ,arc:<lib-linux>-make-shared-names)
      
