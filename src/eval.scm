@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: eval.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
+;; $Id: eval.scm,v 1.4 2003/04/22 23:37:03 eyestep Exp $
 
 
 ;; find a build script.  If %arc:find-script-rec% is #t, then search the
@@ -46,13 +46,16 @@
     (arc:load-arcfile script)
     
     (if (not current-stmt)
-        (set! current-stmt 
-              (arc:context-default-stmt (arc:context-current))))
+        (if (arc:context-current)
+            (set! current-stmt 
+                  (arc:context-default-stmt (arc:context-current)))))
     
     (if (not current-stmt)
         (set! current-stmt 'all))
 
     (arc:eval-stmt current-stmt at-level)
+
+    (arc:deps-store-database)
 
     (arc:context-drop)
     ))
@@ -68,7 +71,7 @@
         (if (not stmt)
             (begin
               (arc:log 'error 
-                       "Statement '" stmt-id "' unknown "
+                       "statement '" stmt-id "' unknown "
                        "(at least on this platform). Aborted")
               ;;(arc:context-display)
               (quit))
