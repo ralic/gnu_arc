@@ -20,17 +20,17 @@
 ;; change, e.g. machine type, host type and name, installed os version and
 ;; type, etc.
 
-;; $Id: config.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: config.scm,v 1.2 2003/04/13 23:41:11 eyestep Exp $
 
 
-(define (arc:include_path) "/usr/local/share/arc:/usr/local/share/arc:/usr/share/arc:/usr/local/share/arc/site:/usr/share/arc/site:/usr/local/lib/arc:/usr/lib/arc")
+(define (arc:include-path) "/usr/local/share/arc:/usr/local/share/arc:/usr/share/arc:/usr/local/share/arc/site:/usr/share/arc/site:/usr/local/lib/arc:/usr/lib/arc")
 
 (define (arc:host-os) "linux")
 (define (arc:host-cpu) "unknown")
 (define (arc:host-maker) "unknown")
 (define (arc:host-version) "unknown")
-(define (arc:exec-path) "%arc:exec%")
-(define (arc:home) "%arc:path%")
+(define (arc:exec-path) "/usr/local/bin")
+(define (arc:home) "/usr/local/share/arc")
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
