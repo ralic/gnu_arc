@@ -231,7 +231,8 @@
 ;; --------------------------------------------------------------------
 (define %arc:scheme-impl% 'asc)
 
-(define %arc:home% (getenv "ARC_HOME"))
+(define %arc:home% (or (getenv "ARC_HOME")
+                       (arc-home)))
 (define (arc:home)
   (if (not %arc:home%)
       (begin 

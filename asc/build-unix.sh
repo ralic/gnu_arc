@@ -4,7 +4,8 @@
 # ASC_HOME   - gives the home directory where to install the asc init files 
 
 # build script for unix environments
-echo "#define IMPLINIT \"$ASC_HOME/asc-init.scm\"" > scmenv.h
+echo "#define ARC_HOME \"$ASC_HOME\"" > scmenv.h
+echo "#define IMPLINIT \"$ASC_HOME/asc-init.scm\"" >> scmenv.h
 echo "#define INIT_FILE_NAME \"asc-init.scm\"" >> scmenv.h
 
 # Compile C source files

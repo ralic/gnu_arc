@@ -6,7 +6,8 @@ rem expects the following environment parameters set
 rem ASC_HOME   - gives the home directory where to install the asc init files 
 
 rem build script for unix environments
-echo #define IMPLINIT "%ASC_HOME%/asc-init.scm" > scmenv.h
+echo #define ARC_HOME "%ASC_HOME%" > scmenv.h
+echo #define IMPLINIT "%ASC_HOME%/asc-init.scm" >> scmenv.h
 echo #define INIT_FILE_NAME "asc-init.scm" >> scmenv.h
 
 rem Compile C source files

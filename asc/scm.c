@@ -918,8 +918,14 @@ SCM vms_debug()
 }
 #endif
 
+SCM arc_home()
+{
+  return makfrom0str(ARC_HOME);
+}
+
 static iproc subr0s[] = {
 	{"software-type", softtype},
+	{"arc-home", arc_home},
 	{"scm_init_extensions", scm_init_extensions},
 #ifdef vms
 	{"vms-debug", vms_debug},
