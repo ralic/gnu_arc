@@ -364,11 +364,11 @@ fi
 
 
 if test -z "${arc_scheme_impl}"; then
-  if (`scm -b 2>/dev/null` || test $? = "0"); then
+  if (`(scm -b) 2>/dev/null` || test $? = "0"); then
     arc_scheme_impl="scm"
-  elif (`ksi -c '(define arc:x 0)' 2>/dev/null` || test $? = "0"); then
+  elif (`(ksi -c '(define arc:x 0)') 2>/dev/null` || test $? = "0"); then
     arc_scheme_impl="guile"
-  elif (`guile -c '(define arc:x 0)' 2>/dev/null` || test $? = "0"); then
+  elif (`(guile -c '(define arc:x 0)') 2>/dev/null` || test $? = "0"); then
     arc_scheme_impl="guile"
   else
     arc_scheme_impl="asc"
