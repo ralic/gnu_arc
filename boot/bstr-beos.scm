@@ -62,7 +62,7 @@
   (string-append %arc:path% ":"
 		 (string-append %arc:path% "/site" ":"
                  "/boot/home/config/arc" ":"
-                 "/boot/home/config/arc/site"))
+                 "/boot/home/config/arc/site")))
 
 
 ;;Keep this comment at the end of the file 
