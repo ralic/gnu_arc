@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: meta.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: meta.scm,v 1.2 2003/04/12 23:52:19 eyestep Exp $
 
 
 (define (arc:eval-arc-defines expr)
@@ -226,6 +226,9 @@
       ((-) (apply - (arc:eval-list (cdr expr))))
       ((*) (apply * (arc:eval-list (cdr expr))))
       ((/) (apply / (arc:eval-list (cdr expr))))
+      ((modulo) (apply modulo (arc:eval-list (cdr expr))))
+      ((exp*) (apply * (arc:make-list (arc:eval-arc (caddr expr))
+                                      (arc:eval-arc (cadr expr)))))
       ((>) (apply > (arc:eval-list (cdr expr))))
       ((<) (apply < (arc:eval-list (cdr expr))))
       ((<=) (apply <= (arc:eval-list (cdr expr))))
@@ -288,6 +291,8 @@
       ((string-suffix?) (apply arc:string-suffix? (arc:eval-list (cdr expr))))
       ((string-prefix?) (apply arc:string-prefix? (arc:eval-list (cdr expr))))
       ((string-length) (apply arc:string-length (arc:eval-list (cdr expr))))
+      ((string->symbol) (apply string->symbol (arc:eval-list (cdr expr))))
+      ((symbol->string) (apply symbol->string (arc:eval-list (cdr expr))))
 
       ;; path functions (different to the functions in path.scm, these meta
       ;; functions work directly on strings)
@@ -324,6 +329,7 @@
        (arc:path-ext (arc:string->path (arc:eval-arc (cadr expr)))))
 
       ((path-cwd) (arc:sys.getcwd))
+      ((path-homedir) (arc:sys.homedir))
       ((path-absolute?) 
        (arc:path-absolute? (arc:string->path (arc:eval-arc (cadr expr)))))
       ((path-begins-with?)
@@ -352,6 +358,7 @@
 
       ((map) (apply map (arc:eval-list (cdr expr))))
       ((for-each) (apply for-each (arc:eval-list (cdr expr))))
+
 
       ((lambda) 
        (begin
@@ -382,7 +389,8 @@
       
       ;; access to properties and statements
       ((->) (arc:eval-stmt (cadr expr) 'local))
-      ((prop) (arc:current-context-property (cadr expr)))
+      ((prop) (or (arc:current-context-property (cadr expr))
+                  (arc:env-get (cadr expr))))
 
       ;; else: (i) see if the called function is a declared function (from
       ;; named let for instance), than (ii) look if it is a generic tasks
