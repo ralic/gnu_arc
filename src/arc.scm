@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: arc.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: arc.scm,v 1.2 2003/04/12 23:50:49 eyestep Exp $
 
 ;; setup the require/provide system
 (define %arc:debug% (let ((ff (getenv "ARC_DEBUG")))
@@ -25,6 +25,7 @@
 (define %arc:verbose% #f)
 
 (define arc:script-name #f)
+(define arc:config-name #f)
 (define arc:current-stmt #f)
 (define %arc:find-script-rec% #f)
 (define %arc:start-dir% ())
@@ -34,6 +35,10 @@
 (define arc:default-script-names '("ARCFile" "Arcfile" "ArcFile" "arcfile"
 				   "ARCFILE" "build.arc" "Build.arc" 
 				   "build.ARC" "Build.ARC" "BUILD.ARC"))
+(define arc:default-config-names '("arc.config"
+                                   "ARCConfig" "Arcconfig" "ArcConfig" 
+                                   "arcconfig" "ARCCONFIG" "Config.arc" 
+                                   "config.arc" "Arc.rc" "arc.rc"))
 
 (load (string-append %arc:home% "/config.scm"))
 
@@ -57,7 +62,8 @@
 ;; set up the include path
 ;; ----------------------------------------------------------------------
 (define %arc:arc-incl-path% 
-  (let ((ip (getenv "ARC_INCL_PATH")))
+  (let ((ip (or (getenv "ARC_INCL_PATH")
+                (arc:include-path))))
     (if ip
         (append (append (arc:split-string ip (arc:pathlist-sep))
                         (list %arc:home%))
@@ -79,6 +85,7 @@
     "getopt.scm"
     "path.scm"
     "eval.scm"
+    "arcconf.scm"
     "show.scm"
     "implicit.scm"
     "ctx.scm"
@@ -145,6 +152,7 @@
 
 (define arc:opts '((verbose   "-v" "--verbose" #f)
                    (script    "-f" "--script" #t)
+                   (conf      "-c" "--conf" #t)
                    (recursive "-r" "--rec" #f)
                    (keep      "-k" "--keep-going" #f)
                    (change    "-C" "--dir" #t)
@@ -158,6 +166,7 @@
       (let ((done #f))
         (case opt
           ((verbose) (set! %arc:verbose% #t))
+          ((conf) (set! arc:config-name *arc:optarg*))
           ((script) (set! arc:script-name *arc:optarg*))
           ((recursive) (set! %arc:find-script-rec% #t))
           ((keep) (set! %arc:keep-going-on-errors% #t))
@@ -192,6 +201,20 @@
 
 
 ;; start the scripting logic
+;; [1] look for a arcconfig file to load
+(let ((script (if arc:config-name 
+		  arc:config-name
+		  (let loop ((nl arc:default-config-names))
+		    (if (null? nl)
+			#f
+			(or (arc:find-script (car nl))
+			    (loop (cdr nl))))))))
+  (if %arc:verbose%
+      (arc:msg "use config file: " script))
+  (if script
+      (arc:load-arcconfig script)))
+
+;; [2] look for the Arcfile and go ...
 (let ((script (if arc:script-name 
 		  arc:script-name
 		  (let loop ((nl arc:default-script-names))
