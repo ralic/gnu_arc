@@ -15,13 +15,13 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: misc.scm,v 1.2 2003/04/12 23:53:23 eyestep Exp $
+;; $Id: misc.scm,v 1.3 2003/04/15 00:04:20 eyestep Exp $
 
 (define (arc:reduce fn base-value lst)
   (if (null? lst)
       base-value
       (fn (car lst)
-          (reduce fn base-value (cdr lst)))))
+          (arc:reduce fn base-value (cdr lst)))))
 
 (define (arc:list-copy lst)
   (arc:reduce cons '() lst))
