@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-bison.scm,v 1.1 2003/04/17 00:02:45 eyestep Exp $
+;; $Id: task-bison.scm,v 1.2 2003/04/22 23:40:43 eyestep Exp $
 
 (arc:provide 'task-bison)
 
@@ -139,10 +139,10 @@
     av))
 
 (define (arc:deps-bison-needs-recompile? sfile ofile)
-  (let ((deps (arc:deps-get-deps sfile 
-                                 (lambda (src)
-                                   (list ofile 
-                                         (list (cons src 0)))))))
+  (let ((deps (arc:deps-get-deps sfile ofile 
+                                 (lambda (src dest)
+                                   (arc:deps-set-deps! (arc:make-deps dest)
+                                                       src)))))
     (if (not (list? deps))
         ;; for some reason we didn't got a dependecy list. assume recompile
         #t

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-flex.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-flex.scm,v 1.3 2003/04/22 23:40:43 eyestep Exp $
 
 (arc:provide 'task-flex)
 (arc:require 'task-c-deps)
@@ -104,10 +104,10 @@
     av))
 
 (define (arc:deps-flex-needs-recompile? sfile ofile)
-  (let ((deps (arc:deps-get-deps sfile 
-                                 (lambda (src)
-                                   (list ofile 
-                                         (list (cons src 0)))))))
+  (let ((deps (arc:deps-get-deps sfile ofile 
+                                 (lambda (src dest)
+                                   (arc:deps-set-deps! (arc:make-deps dest)
+                                                       src)))))
     (if (not (list? deps))
         ;; for some reason we didn't got a dependecy list. assume recompile
         #t
