@@ -15,9 +15,10 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: arcconf.scm,v 1.1 2003/04/12 23:50:49 eyestep Exp $
+;; $Id: arcconf.scm,v 1.2 2003/04/22 23:34:27 eyestep Exp $
 
 (define %arc:env% ())
+(define %arc:volatile-env% ())
 
 ;; loads and evaluates a arcconfig script 
 
@@ -32,14 +33,38 @@
         (set! %arc:env% (cons conf %arc:env%))
         #f)))
 
+(define (arc:push-environment alist)
+  (set! %arc:env% (cons alist %arc:env%)))
+
+(define (arc:pop-environment alist)
+  (if (not (null? %arc:env%))
+      (set! %arc:env% (cdr %arc:env%))))
+
+
 (define (arc:env-get key)
-  (let loop ((ef %arc:env%))
+  (let loop ((ef (cons %arc:volatile-env% %arc:env%)))
     (if (null? ef)
         #f
         (let ((aslot (assoc key (car ef))))
           (if aslot
               (cadr aslot)
               (loop (cdr ef)))))))
+
+(define (arc:env-set! key value)
+  (let ((aslot (assoc key %arc:volatile-env%)))
+    (if aslot
+        (set-cdr! aslot (list value))
+        (set! %arc:volatile-env%
+              (append %arc:volatile-env%
+                      (list (list key value)))))))
+
+(define (arc:env-unset! key)
+  (let ((aslot (assoc key %arc:volatile-env%)))
+    (if aslot
+        (begin
+          (set-cdr! aslot #f)
+          (set-car! aslot #f)))
+    #f))
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
