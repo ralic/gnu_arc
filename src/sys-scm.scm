@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: sys-scm.scm,v 1.3 2003/04/13 23:42:10 eyestep Exp $
+;; $Id: sys-scm.scm,v 1.4 2003/04/17 10:57:28 eyestep Exp $
 
 ;;(load (string-append %arc:home% "/logical.scm"))
 
@@ -72,7 +72,7 @@
 ;; ----------------------------------------------------------------------
 (define (arc:sys.symlink from to)
   (case (car %arc:sysnm%)
-    ((linux beos) (let ((cmd (string-append "ln -s " from " " to)))
+    ((linux beos cygwin) (let ((cmd (string-append "ln -s " from " " to)))
                (if (file-exists? to)
                    (arc:sys.remove-file to))
                (system cmd)))
@@ -151,9 +151,9 @@
 ;; win32 (2000): all directories have 12361 (8192 + 4096 + 64 + 8 + 1) set
 (define (arc:sys.file-directory? fn)
   (case (car %arc:sysnm%)
-    ((linux beos) (if (file-exists? fn)
-                 (= (arc:logand (vector-ref (stat fn) 2) 16384) 16384)
-                 #f))
+    ((linux beos cygwin) (if (file-exists? fn)
+                             (= (arc:logand (vector-ref (stat fn) 2) 16384) 16384)
+                             #f))
     ((win32) (if (file-exists? fn)
                  (= (arc:logand (vector-ref (stat fn) 2) 12361) 12361)
                  #f))
@@ -162,9 +162,9 @@
 
 (define (arc:sys.file-executable? fn)
   (case (car %arc:sysnm%)
-    ((linux beos) (if (file-exists? fn)
-                 (> (arc:logand (vector-ref (stat fn) 2) #o111) 0)
-                 #f))
+    ((linux beos cygwin) (if (file-exists? fn)
+                             (> (arc:logand (vector-ref (stat fn) 2) #o111) 0)
+                             #f))
     ((win32) (if (file-exists? fn)
                  (or (arc:string-suffix? fn ".com")
                      (arc:string-suffix? fn ".exe")
@@ -179,7 +179,7 @@
 ;; ----------------------------------------------------------------------
 (define (arc:sys.copy-file file tofile)
   (case (car %arc:sysnm%)
-    ((linux bsd macosx sunos beos)
+    ((linux bsd macosx sunos beos cygwin)
      (let ((cpcmd (string-append "cp -f " file " " tofile)))
        (= (arc:sys.system cpcmd) 0)))
     ((win32)
@@ -222,7 +222,7 @@
 
 (define (arc:sys.chmod fn mod)
   (case (car %arc:sysnm%)
-    ((linux beos bsd sunos)
+    ((linux beos bsd sunos cygwin)
      (begin
        (if (symbol? mod)
            (case mod
