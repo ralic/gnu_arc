@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib.scm,v 1.2 2003/04/12 23:48:23 eyestep Exp $
+;; $Id: task-lib.scm,v 1.3 2003/04/13 23:46:16 eyestep Exp $
 
 (arc:provide 'task-lib)
 
@@ -65,12 +65,15 @@
 ;; RETURNS
 ;; a attrval containing all created libraries and their used applied
 ;; (short-)names.  The attrval slot ids are: ':shared (the shared library's
-;; main file), ':shared-add-names (additional names [symlinks] for the
-;; shared library, a list of strings), ':static (the static library's
-;; file).  If the host system supports shared libraries the attrval's
-;; default is ':shared.  Additional the slot ':shared-name
-;; resp. ':static-name is set, which contains the library name (a library
-;; libABC.so's name is ABC)
+;; real file name, e.g. libABC.so.1.17.4), ':shared-soname (the shared
+;; library's soname, which is created as a symlink in the build directory,
+;; libABC.so.1), ':shared-linker-name (the shared library's linker name,
+;; created as a symlink in the build directory, libABC.so), ':static (the
+;; static library's file).
+;;
+;; If the host system supports shared libraries the attrval's default is
+;;':shared.  Additional the slot ':shared-name resp. ':static-name is set,
+;;which contains the library name (a library libABC.so's name is ABC)
 
 (define arc:lib-keywords '((files        (strlist attrval) required)
                            (static?      boolean           (req-or shared?))
@@ -118,16 +121,24 @@
               (arc:log 'info "no object files for library!"))
           
           (let* ((vi (arc:aval 'version-info props '(0 0 0)))
-                 (fullnm (<backend> 'make-shared-name outdir libnm
-                                    (car vi) (cadr vi) (caddr vi)))
-                 (shnm (<backend> 'make-shared-name-no-version outdir libnm)))
+                 (names (<backend> 'make-shared-names outdir libnm
+                                   (car vi) (cadr vi) (caddr vi)))
+;                 (fullnm (<backend> 'make-shared-name outdir libnm
+;                                    (car vi) (cadr vi) (caddr vi)))
+;                 (linkernm (<backend> 'make-shared-name-no-version 
+;                                      outdir libnm)))
+                 (realnm (car names))
+                 (soname (cadr names))
+                 (linknm (caddr names))
+                 (int-soname (cadddr names))
+                 )
             
-            (if (arc:deps-lib-needs-rebuild? fullnm files)
+            (if (arc:deps-lib-needs-rebuild? realnm files)
                 (begin
-                  (arc:log 'debug "make dll " fullnm " ...")
+                  (arc:log 'debug "make dll " realnm " ...")
                 
                   (<backend> 'make-shared-lib 
-                             fullnm files
+                             realnm int-soname files
                              (arc:aval 'libdirs props ())
                              (arc:aval 'addlibs props ()))
                   ;; create additional links for this library (i.e. the
@@ -137,14 +148,22 @@
                   ;; against shared libs in the local could not be start
                   ;; unless the library is registered with the system
                   ;; e.g. calling ldconfig
-                  (arc:sys.symlink 
-                   (arc:path->string (arc:path-absolutize 
-                                      (arc:string->path fullnm)))
-                   (arc:path->string (arc:path-absolutize 
-                                      (arc:string->path shnm)))) ))
-            (arc:attrval-set! av 'shared fullnm)
+                  (if (not (equal? linknm soname))
+                      (arc:sys.symlink 
+                       (arc:path->string (arc:path-absolutize 
+                                          (arc:string->path realnm)))
+                       (arc:path->string (arc:path-absolutize 
+                                          (arc:string->path soname)))))
+                  (if (not (equal? linknm realnm))
+                      (arc:sys.symlink 
+                       (arc:path->string (arc:path-absolutize 
+                                          (arc:string->path realnm)))
+                       (arc:path->string (arc:path-absolutize 
+                                          (arc:string->path linknm)))))))
+            (arc:attrval-set! av 'shared realnm)
             (arc:attrval-set! av 'shared-name libnm)
-            (arc:attrval-set! av 'shared-add-names (list shnm))
+            (arc:attrval-set! av 'shared-soname soname)
+            (arc:attrval-set! av 'shared-linker-name linknm)
             (arc:attrval-default-id! av 'shared)))
         )
     av))
