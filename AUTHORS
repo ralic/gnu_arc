@@ -1,7 +1,7 @@
 Gregor Klinke <gck@eyestep.org>
 
-getopt.scm has been taken from the slib package; the original author was
-Aubrey Jaffer
+getopt.scm, hash.scm, and logical.scm has been taken from the slib package;
+the original author was Aubrey Jaffer 
 
 pregexp.scm has been written by Dorai Sitaram and has been adapted to 
 the coding style of arc 

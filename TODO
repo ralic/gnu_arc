@@ -12,6 +12,7 @@
   Make sure that tasks don't continue, when prerequisites (missing params,
   etc) aren't met.  throw an exceptions...!
 
+- extend the orange tasks
 
 - add the missing cvs functions to task-cvs: add, commit, remove, tag
 
@@ -31,10 +32,6 @@
   autoconf.
 
 - strip symbols from installed binaries
-
-- needs a nice abstraction for the deps format used by task-c-deps,
-  task-flex, task-bison, task-c-deps.  In the moment the structure is
-  created in each task anew ...  put this to src/deps.scm
 
 
 
