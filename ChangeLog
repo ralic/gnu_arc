@@ -1,3 +1,44 @@
+2003-04-18    <gck@eyestep.org>
+
+	* the system is now ready for a new release ... 0.3.0 i guess.  a
+	lot have changed radically.  only to mention a few things: 
+
+	* 'real' oop introduced, this makes extensibility easier and more
+	transparent
+
+	* rebuild the system interface layer by using oop.  adding new
+	systems can now happen much more transparent than before.  Even
+	adding new scheme interpreter support is easier, i hope
+
+	* redesigned the task engine, tasks now implement the 'business
+	logic' (dependencies, etc.), whereas the real work is done
+	normally by backend classes.  These backend classes are system
+	dependend and are loaded on demand from declaration files located
+	in src/meta-inf.  Since oop's inheritance scheme, one can write
+	generic task backends, which are used by multiple platforms.
+
+	* redesigned the Arcfile syntax.  Arcfile's are now interpreted by
+	a meta-scheme interpreter -- so they don't run in a different
+	scope, than arc itself, and code from Arcfiles can't clash with
+	arc or	destroy or even misuse arc internals.  Furthermore
+	Arcfiles are much more readible and less 'schemish' (=lowlevel).
+
+	* added first beginnings of the arcconfig subsystem.
+
+	* added a simple exception (try/throw) subsystem, to make the arc
+	system more robust in future
+	
+	* added a number of default tasks: task-bison, task-flex,
+	task-version, first beginning of task-cvs.  Extended an fixed a
+	number of more tasks.  Especially rewritten most of the task-lib
+	stuff.  Shared libraries are now fully compatible with linux ELF
+	system's versioning scheme.
+
+	* added ports to BeOS and FreeBSD
+
+	* added regexp support
+
+	
 2002-08-12    <gck@eyestep.org>
 
 	* extended documentation

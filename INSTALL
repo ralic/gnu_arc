@@ -27,10 +27,11 @@ Required:
       sparc/SunOS 5.8 with gcc
       alpha/Linux Debian 3.0
       BeOS 5.0/x86
+      FreeBSD 5.0/x86
 
 Installation:
 
-    Un*x (Linux/SunOS), BeOS:
+    Un*x (Linux/SunOS/BSD), BeOS:
 
     1) ./configure
 
