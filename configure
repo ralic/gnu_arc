@@ -241,19 +241,17 @@ case "$build" in
     test -z "${bindir}" && bindir="${exec_prefix}/bin"
     test -z "${infodir}" && infodir="${prefix}/info"
     test -z "${mandir}" && mandir="${prefix}/man"
+    test -z "${sysconfdir}" && sysconfdir="${prefix}/etc"
+    test -z "${localstatedir}" && localstatedir="${prefix}/var"
+    test -z "${datadir}" && datadir="${prefix}/share"
     ;;
   *)
     arc_psep="/"
     test -z "${bindir}" && bindir="${exec_prefix}${arc_psep}bin"
     test -z "${datadir}" && datadir="${prefix}${arc_psep}share"
     test -z "${arcdir}" && arcdir="${datadir}${arc_psep}arc"
-    test -z "${sbindir}" && sbindir="${exec_prefix}${arc_psep}sbin"
-    test -z "${libexecdir}" && libexecdir="${exec_prefix}${arc_psep}libexec"
     test -z "${sysconfdir}" && sysconfdir="${prefix}${arc_psep}etc"
-    test -z "${sharedstatedir}" && sharedstatedir="${prefix}${arc_psep}com"
     test -z "${localstatedir}" && localstatedir="${prefix}${arc_psep}var"
-    test -z "${libdir}" && libdir="${exec_prefix}${arc_psep}lib"
-    test -z "${includedir}" && includedir="${prefix}${arc_psep}include"
     test -z "${infodir}" && infodir="${prefix}${arc_psep}info"
     test -z "${mandir}" && mandir="${prefix}${arc_psep}man"
     ;;
@@ -271,8 +269,7 @@ do
 done
 
 # be sure to have absolute paths.
-for arc_var in bindir sbindir libexecdir datadir sysconfdir sharedstatedir \
-              localstatedir libdir includedir infodir mandir
+for arc_var in bindir datadir sysconfdir localstatedir infodir mandir
 do
   eval arc_val=$`echo $arc_var`
   case $arc_val in
@@ -323,14 +320,9 @@ For better control, use the options below.
 Fine tuning of the installation directories:
   --arcdir=DIR           arc home directory [PREFIX/share/arc]
   --bindir=DIR           user executables [EPREFIX/bin]
-  --sbindir=DIR          system admin executables [EPREFIX/sbin]
-  --libexecdir=DIR       program executables [EPREFIX/libexec]
   --datadir=DIR          read-only architecture-independent data [PREFIX/share]
   --sysconfdir=DIR       read-only single-machine data [PREFIX/etc]
-  --sharedstatedir=DIR   modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR    modifiable single-machine data [PREFIX/var]
-  --libdir=DIR           object code libraries [EPREFIX/lib]
-  --includedir=DIR       C header files [PREFIX/include]
   --infodir=DIR          info documentation [PREFIX/info]
   --mandir=DIR           man documentation [PREFIX/man]
 _ACEOF

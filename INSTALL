@@ -26,7 +26,7 @@ Required:
       i386/Windows 2000 with Mingw 2.1
       sparc/SunOS 5.8 with gcc
       alpha/Linux Debian 3.0
-
+      BeOS 5.0/x86
 
 Installation:
 

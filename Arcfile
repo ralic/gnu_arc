@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: Arcfile,v 1.2 2003/04/12 23:42:05 eyestep Exp $
+;; $Id: Arcfile,v 1.3 2003/04/13 23:39:19 eyestep Exp $
 
 ;; arcfile for building, installing, and cleaning arc
 (project arc-app
@@ -92,7 +92,8 @@
                                        "asc/**/*.c"
                                        "asc/**/*.h"
                                        "asc/**/*.h.in"
-                                       "asc/build-unix.sh"
+                                       "asc/(build-.*.sh$)"
+                                       "asc/(build-.*.bat$)"
                                        "asc/*.scm"
                           
                                        "doc/*.scm"
@@ -203,8 +204,13 @@
 
       (install src: (fileset pattern: "src/tasks/*.scm")
                dest: (-> arc-tasks-dir))
+      (install src: (fileset pattern: "src/tasks/generic/*.scm")
+               dest: (path-append (-> arc-tasks-dir) "generic"))
       (install src: (fileset pattern: "src/tasks/linux/*.scm")
                dest: (path-append (-> arc-tasks-dir) "linux"))
+      (install src: (fileset pattern: "src/tasks/beos/*.scm")
+               dest: (path-append (-> arc-tasks-dir) "beos"))
+
       (install src: (fileset pattern: "src/meta-inf/*.decl")
                dest: (-> arc-meta-inf-dir))
       (install src: (fileset pattern: '("doc/(.*\\.info(-[0-9]+)?$)"))
