@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: ctx.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: ctx.scm,v 1.2 2003/04/13 23:42:10 eyestep Exp $
 
 
 ;; each build script is evaluated in a given context.  the contexts
@@ -72,10 +72,9 @@
         (if old-dir
             (arc:sys.chdir old-dir))
         (set! %arc:contexts% (cdr  %arc:contexts%)))
-      (if %arc:verbose%
-          (begin 
-            (arc:msg "no context to drop. bad stacking")
-            (quit)))))
+      (begin 
+        (arc:log 'error "no context to drop. bad stacking")
+        (quit))))
 
 (define (arc:context-current)
   (if (null? %arc:contexts%)

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: eval.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: eval.scm,v 1.2 2003/04/13 23:42:10 eyestep Exp $
 
 
 ;; find a build script.  If %arc:find-script-rec% is #t, then search the
@@ -118,12 +118,11 @@
   (arc:eval-stmt id))
 
 (define (arc:eval-and-register-stmt stmt)
-  (if %arc:verbose%
-      (arc:msg "eval '" (arc:stmt-display-name stmt) "' "
-	       (let ((info (arc:stmt-info stmt)))
-		 (if info 
-		     (string-append "(" info ")")
-		     ""))))
+  (arc:log 'verbose "eval '" (arc:stmt-display-name stmt) "' "
+           (let ((info (arc:stmt-info stmt)))
+             (if info 
+                 (string-append "(" info ")")
+                 "")))
   (let* ((body (arc:stmt-body stmt))
 	 (once? (arc:stmt-once stmt))
 	 (val (if body

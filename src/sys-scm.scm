@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: sys-scm.scm,v 1.2 2003/04/12 23:55:54 eyestep Exp $
+;; $Id: sys-scm.scm,v 1.3 2003/04/13 23:42:10 eyestep Exp $
 
 ;;(load (string-append %arc:home% "/logical.scm"))
 
@@ -35,11 +35,10 @@
             (if (not (file-exists? aps))
                 (if (not (arc:sys.mkdir aps))
                     (begin
-                      (arc:msg "failed to create directory '" aps "'")
+                      (arc:log 'error "failed to create directory '" aps "'")
                       #f)
                     (begin
-;                      (if %arc:verbose%
-;                          (arc:msg "directory '" aps "' created"))
+                      (arc:log 'debug "directory '" aps "' created")
                       (loop (+ pc 1))))
                 (loop (+ pc 1))))))))
 
@@ -48,11 +47,10 @@
 ;; remove
 ;; ----------------------------------------------------------------------
 (define (arc:sys.remove-file path)
-  (if %arc:verbose%
-      (arc:msg "remove file '" path "'"))
+  (arc:log 'debug "remove file '" path "'")
   (if (not (delete-file path))
       (begin
-        (arc:msg "failed to delete file '" path "'")
+        (arc:log 'error "failed to delete file '" path "'")
         #f)
       #t))
 
@@ -61,10 +59,9 @@
                     (lambda (kind fn)
                       (case kind
                         ((:dir) (begin
-                                  (if %arc:verbose%
-                                      (arc:msg "remove dir '" 
-                                               (arc:path->string fn) 
-                                               "'"))
+                                  (arc:log 'debug "remove dir '" 
+                                           (arc:path->string fn) 
+                                           "'")
                                   (rmdir (arc:path->string fn))))
                         ((:file) (arc:sys.remove-file (arc:path->string fn))))))
   (rmdir path))
@@ -75,12 +72,13 @@
 ;; ----------------------------------------------------------------------
 (define (arc:sys.symlink from to)
   (case (car %arc:sysnm%)
-    ((linux) (let ((cmd (string-append "ln -s " from " " to)))
+    ((linux beos) (let ((cmd (string-append "ln -s " from " " to)))
                (if (file-exists? to)
                    (arc:sys.remove-file to))
                (system cmd)))
     ((win32) (begin 
-               (arc:msg "symlinks are not supported on windows plattforms")
+               (arc:log 'error
+                        "symlinks are not supported on windows plattforms")
                #f))
     ;; unknown, how other system do this
     (else #f)))
@@ -89,8 +87,7 @@
 ;; directory navigation
 ;; ----------------------------------------------------------------------
 (define (arc:sys.chdir path)
-  (if %arc:verbose%
-      (arc:msg "change to path '" path "'"))
+  (arc:log 'debug "change to path '" path "'")
   (chdir path))
 
 (define (arc:sys.getcwd)
@@ -98,9 +95,10 @@
 
 (define (arc:sys.homedir)
   (case (car %arc:sysnm%)
-    ((win32) (let ((hm (getenv "HOME")))
-               (or hm
-                   "c:/")))
+    ((win32) (or (getenv "HOME")
+                 "c:/"))
+    ((beos) (or (getenv "HOME")
+                "/boot/home"))
     (else (getenv "HOME"))))
 
 ;; executes a system command, whereby the command may be accessable through
@@ -153,7 +151,7 @@
 ;; win32 (2000): all directories have 12361 (8192 + 4096 + 64 + 8 + 1) set
 (define (arc:sys.file-directory? fn)
   (case (car %arc:sysnm%)
-    ((linux) (if (file-exists? fn)
+    ((linux beos) (if (file-exists? fn)
                  (= (arc:logand (vector-ref (stat fn) 2) 16384) 16384)
                  #f))
     ((win32) (if (file-exists? fn)
@@ -164,7 +162,7 @@
 
 (define (arc:sys.file-executable? fn)
   (case (car %arc:sysnm%)
-    ((linux) (if (file-exists? fn)
+    ((linux beos) (if (file-exists? fn)
                  (> (arc:logand (vector-ref (stat fn) 2) #o111) 0)
                  #f))
     ((win32) (if (file-exists? fn)

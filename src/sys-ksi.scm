@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: sys-ksi.scm,v 1.2 2003/04/12 23:55:54 eyestep Exp $
+;; $Id: sys-ksi.scm,v 1.3 2003/04/13 23:42:10 eyestep Exp $
 
 
 ;; ----------------------------------------------------------------------
@@ -36,8 +36,7 @@
                       (arc:msg "failed to create directory '" aps "'")
                       #f)
                     (begin
-;                      (if %arc:verbose%
-;                          (arc:msg "directory '" aps "' created"))
+                      (arc:log 'debug "directory '" aps "' created")
                       (loop (+ pc 1))))
                 (loop (+ pc 1))))))))
 
@@ -57,10 +56,9 @@
                     (lambda (kind fn)
                       (case kind
                         ((:dir) (begin
-                                  (if %arc:verbose%
-                                      (arc:msg "remove dir '" 
-                                               (arc:path->string fn) 
-                                               "'"))
+                                  (arc:log 'debug "remove dir '" 
+                                           (arc:path->string fn) 
+                                           "'")
                                   (rmdir (arc:path->string fn))))
                         ((:file) (delete-file (arc:path->string fn))))))
   (rmdir path))
@@ -71,7 +69,7 @@
 ;; ----------------------------------------------------------------------
 (define (arc:sys.symlink from to)
   (case (car %arc:sysnm%)
-    ((linux) (let ((cmd (string-append "ln -s " from " " to)))
+    ((linux beos) (let ((cmd (string-append "ln -s " from " " to)))
                (if (file-exists? to)
                    (arc:sys.remove-file to))
                (system cmd)))
@@ -87,8 +85,7 @@
 (define (arc:sys.chdir path)
   (if (file-exists? path)
       (begin
-        (if %arc:verbose%
-            (arc:msg "change to path '" path "'"))
+        (arc:log 'debug "change to path '" path "'")
         (chdir path)
         #t)
       #f))
@@ -98,9 +95,10 @@
 
 (define (arc:sys.homedir)
   (case (car %arc:sysnm%)
-    ((win32) (let ((hm (getenv "HOME")))
-               (or hm
-                   "c:/")))
+    ((win32) (or (getenv "HOME")
+                 "c:/"))
+    ((beos) (or (getenv "HOME")
+                "/boot/home"))
     (else (getenv "HOME"))))
 
 
@@ -152,11 +150,11 @@
 ;; system dependend data, which is in itself consistent.  But I've no idea,
 ;; which flags are used by the specific operating system.  
 ;;
-;; linux uses: 16384 has directory flag
+;; linux/beos uses: 16384 has directory flag
 ;; win32 (2000): all directories have 12361 (8192 + 4096 + 64 + 8 + 1) set
 (define (arc:sys.file-directory? fn)
   (case (car %arc:sysnm%)
-    ((linux) (if (file-exists? fn)
+    ((linux beos) (if (file-exists? fn)
                  (= (arc:logand (vector-ref (stat fn) 2) 16384) 16384)
                  #f))
     ((win32) (if (file-exists? fn)
@@ -167,7 +165,7 @@
 
 (define (arc:sys.file-executable? fn)
   (case (car %arc:sysnm%)
-    ((linux) (if (file-exists? fn)
+    ((linux beos) (if (file-exists? fn)
                  (> (arc:logand (vector-ref (stat fn) 2) #o111) 0)
                  #f))
     ((win32) (if (file-exists? fn)
