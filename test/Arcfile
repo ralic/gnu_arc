@@ -1,0 +1,218 @@
+;; this is a test file, to be used by the arc system
+
+;; $Id: Arcfile,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+
+(project grovekit
+         info: "The GroveKit library"
+         project: "GroveKit Library"
+         basedir: "."	
+         default: 'make-lib )
+
+(stmt c-headers
+      info: "Determine all header files"
+      (fileset pattern: "*.h"))
+
+(stmt c-sources
+      info: "Determine all C source files"
+      (fileset pattern: "*.c"))
+
+(stmt objc-sources
+      info "Determine all objective C source files"
+      (fileset pattern: "*.m"))
+
+(stmt java-sources 
+      info: "Determine all java source files"
+      (fileset pattern: "*.java"))
+
+(stmt build-dir
+      info: "The build directory"
+      once?: #f
+      "_build")
+
+
+
+(stmt init 
+      info: "Prepare the build area"
+      (mkdir dir: (-> build-dir)))
+
+(stmt deps
+      (c-deps sources: (-> c-sources)
+              outdir: (-> build-dir)
+              includes: '(".")
+              objext: "o"))
+
+(stmt c-compile
+      depends: 'init
+      info: "Compiles all c sources"
+      (c-compile sources: (-> c-sources)
+                 includes: '(".")
+                 outdir: (-> build-dir)
+                 debug?: #t
+                 shared?: #t
+                 static?: #t
+                 warn-level: 'high
+                 opt-level: 'high ))
+
+(stmt m-compile
+      depends: 'init
+      info: "Compiles all c sources"
+      (objc-compile sources: (-> objc-sources)
+                    includes: '(".")
+                    outdir: (-> build-dir)
+                    debug?: #t
+                    shared?: #t
+                    static?: #t
+                    warn-level: 'high
+                    opt-level: 'high ))
+
+(stmt java-compile 
+      depends: 'init
+      info: "Compiles all java sources"
+      (java-compile sources: (-> java-sources)
+                    debug?: #t
+		    outdir: (-> build-dir)))
+
+(stmt compile 
+      info: "Compiles all source files"
+      (concat (-> c-compile)
+              (-> m-compile)))
+
+(stmt make-lib
+      info: "Builds the library"
+      os: 'linux
+      (lib libnm: "GroveKit"
+           shared?: #t
+           outdir: (-> build-dir)
+           files: (-> c-compile)
+           version-info: '(1 17 4)))
+
+(stmt app
+      info: "Builds the application"
+      depends: 'make-lib
+      (link outdir: (-> build-dir)
+            files: (-> c-compile) 
+            libs: '("GroveKit")
+            libdirs: (list (-> build-dir))
+            shared?: #t
+            appnm: "hw"))
+
+(stmt mapp
+      info: "Builds the application"
+      depends: 'make-lib
+      (link outdir: (-> build-dir)
+            files: (-> m-compile) 
+            shared?: #t
+            appnm: "tst"))
+
+
+
+;; check tar and untar
+(stmt tar
+      (tar tarfile: "dist-x.x.x.tar.gz"
+           zip-mode: 'gzip
+           force?: #t
+           files: (list (-> build-dir))))
+
+(stmt untar
+;;  depends: 'tar
+  ;;  (mkdir dir: "extract")
+      (echo (untar tarfile; "dist-x.x.x.tar.gz"
+                   ;;':outdir "extract"
+                   force?: #f
+                   zip-mode: 'gzip)))
+
+
+;; delete, mkdir tests
+(stmt mkdir-s
+      (mkdir dir: "s/a/b/c/d/e/f")
+      (mkdir dir: "s/a/b/n/m/o"))
+
+(stmt delete-s
+      (delete pathnm: "s"
+              recursive?: #t))
+
+(stmt touch
+      (touch file: "mueller-turgau.w"))
+
+
+(stmt test-type
+      (if (eq? (file-type src: "x") 'executable)
+          (echo "X: " (file-type src: "x") #\nl
+                "Y: " (file-type src: "y") #\nl
+                "Z: " (file-type src: "z") #\nl)))
+
+
+
+;; ----------------------------------------------------------------------
+;; copy test
+(stmt test-copy
+      (mkdir dir: "e")
+      (copy file: "io.c"
+            todir: "e"
+            flatten?: #t
+            force?: #t))
+
+
+(stmt clean
+      (clean res: (list (-> build-dir))))
+
+
+
+(stmt funcs-tests
+      (echo (let* ((abc "hello")
+                   (def (string-append abc ":" abc)))
+              (let ((abc "123")
+                    (def (string-append "456:" abc)))
+                (echo "abc(2) is " def))
+              (echo "abc(1) is " def)
+              12))
+      (echo "lv " (let loop ((x '(1 2 3 4 5 6 7 8 9 ))
+                             (lv #f))
+                    (if (null? x)
+                        lv
+                        (begin
+                          (echo (car x))
+                          (loop (cdr x) (* (car x)(car x)))))))
+      (echo (map (lambda (x) (* x x))
+                 '(1 2 3 4 5)))
+      (echo (for-each (lambda x x)
+                      '(1 2 3 4 5)))
+
+      (echo "------ path functions: ")
+      (echo " length of /usr/local/id" (path-length "/usr/local/id"))
+      (echo " list->path " (list->path '("/" "usr" "local" "share" "mymacro")))
+      (echo " - last ext " (path-without-last-ext "/usr/lib/libGrove.so"))
+      (echo " ext " (path-ext "/usr/lib/libGrove.so"))
+      (echo " last comp " (path-last-comp "/usr/lib/libGrove.so"))
+      (echo " +- last ext " (path-replace-last-ext "/usr/lib/libGrove.so"
+                                                   "dll"))
+      (echo " - last comp " (path-without-last-comp "/usr/lib/libGrove.so"))
+      (echo " + ext " (path-append-ext "/usr/lib/libGrove.so"
+                                       "1.1.7"))
+      
+      (echo " append " (path-append-ext "/usr/lib/Jenny" "tiff"))
+      (echo " cwd " (path-cwd))
+
+      (let ((x '("/usr/local/lib" "~/dot.conf" "abc.html")))
+        (echo " abs? " x ": " (map (lambda (d) 
+                                     (path-absolute? d))
+                                   x)))
+      (let ((x '("/usr/local/lib" "~/dot.conf" "/usr/share/abc.html")))
+        (echo " begins-with? " x ": " (map (lambda (d) 
+                                             (path-absolute? d "/usr"))
+                                           x)))
+      (echo " abbr " (path-abbreviate "/home/gregor/dot.getw"))
+      (echo " norm " (path-abbreviate "~/../dot.getw"))
+      (echo " abso " (path-abbreviate "~/../dot.getw"))
+
+      
+      
+      (if (equal? (prop project) "arc")
+          (echo "is an arc")
+          (echo "or not")))
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:
+

@@ -1,0 +1,99 @@
+.\" -*- nroff -*-
+.\" This file is part of the arc package 
+.\" Copyright (c) 2002, 2003 by Gregor Klinke
+.\" 
+.\" This program is free software; you can redistribute it and/or modify it
+.\" under the terms of the GNU General Public License as published by the
+.\" Free Software Foundation; either version 2 of the License, or (at your
+.\" option) any later version.
+.\" 
+.\" This program ist distributed in the hope that it will be useful, but
+.\" WITHOUT ANY WARRANTY; without even the implied warranty of
+.\" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+.\" General Public Lincense for more details.
+.\" 
+.\" You should have received a copy of the GNU General Public License along
+.\" with this program; if not, write to the Free Software Foundation, Inc.,
+.\" 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
+.ds VE arc-@arc-version@
+.TH arc 1 \*(VE "arc"
+.ig
+2002/08/06
+..
+.\" Please update the above date whenever this man page is modified.
+.SH NAME
+arc \- the fully extensible, open and scriptable build tool
+.SH SYNOPSIS
+.B arc
+[
+.B options
+]
+.I statement
+.\"
+.SH DESCRIPTION
+.I Arc
+is a utility to maintain source trees of programs.  It is used to build
+programs, libraries, documentations, and maintain dependecies of 
+source files.  \fIArc\fP is used to process \fBArcfiles\fP.
+
+.I Arc
+is a complete replacement for the make utility, but offers large
+scripting possibilities and is platform transparent.
+
+.SH OPTIONS
+.TP 5
+.BI \-C " dir"
+Change to directory \fIdir\fP before reading a build script or doing
+anything else.  The 'current working directory' is moved to \fIdir\fP,
+so that configuration files, etc. are located in the given directory,
+not in the current working directory, from where arc has been called.
+.TP 5
+.BI \-f " file"
+Load \fIfile\fP as build script instead of utilizing the normal search
+for a build file.  If the option \fI-r\fP is specified, too, search's for
+this file recursively upwards the directory hierachy.
+.TP 5
+.B \-r
+By default arc searchs for a build script only in the current working
+directory.  If the \fI-r\fP options is specified it tries to search for a
+build script recursively upwards from the current working directory and
+uses the first found.
+.TP 5
+.B \-k
+Continue as much as possible after an error; continue if statement failed
+.TP 5
+.BI \-o " os"
+Assumes the operating system \fIos\fP during evaluation.  \fIOS\fP is set by default to
+the symbolic name of the current machine but using this switch one can
+force the selection of targets with special \fIos:\fP properties
+.TP 5
+.B \-i
+Show information about the callable statements in the script to be loaded
+and exit
+.TP 5
+.B \-v
+Be verbose.
+.TP 5
+.B \-h
+Print an informative help message describing the options and then exit.
+.TP 5
+.B \-V
+Print the version number of Arc on the standard error output and then exit.
+
+.SH "SEE ALSO"
+The full documentation for
+.B arc
+is maintained as a Texinfo manual.  If the
+.B info
+and
+.B arc
+programs are properly installed at your site, the command
+.IP
+.B info arc
+.PP
+should give you access to the complete manual.
+
+.BR make "(1)"
+.br
+.SH AUTHOR
+Gregor Klinke <gck@@eyestep.org>.

@@ -1,0 +1,2471 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@setfilename arc.info
+@settitle arc -- the fully extensible, open and scriptable build tool
+@finalout
+@setchapternewpage odd
+@c %**end of header
+
+@c This file is processed by Arc! Placeholders are surrounded by &&
+@c (amp) and not by @ (at) as normally, since Texinfo uses @ as markup maker!
+@set VERSION &arc-version&
+@set PROGNAME @command{arc}
+
+@ifinfo
+This file documents the @value{PROGNAME} command which is a build tool
+
+Copyright (C) 2002, 2003 Gregor Klinke
+
+Permission is granted to make and distribute example copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+
+@end ignore
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for example copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.
+@end ifinfo
+
+@titlepage
+@title arc
+@subtitle the fully extensible, open and scriptable build tool
+@subtitle for arc vr. @value{VERSION}
+@author by Gregor Klinke
+
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright{} 2002, 2003 Gregor Klinke
+
+Permission is granted to make and distribute example copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for example copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.
+@end titlepage
+
+@c All the nodes can be updated using the EMACS command
+@c texinfo-every-node-update, which is normally bound to C-c C-u C-e.
+@node Top, Introduction, (dir), (dir)
+
+@ifinfo
+This manual documents how to install and run @value{PROGNAME}, a
+portable build tool based on the functional programing language
+scheme.  @value{PROGNAME} is completely written in that language and
+build scripts, as scriptlets, are using a subset of Scheme, too.
+Therefore this manual assumes a certain knowledge of the Scheme
+programming language.  On the other side, in normal scriptlets it is
+not necessary to write custom Scheme code, other than the
+"declarative" statements.
+@end ifinfo
+
+@c All the menus can be updated with the EMACS command
+@c texinfo-all-menus-update, which is normally bound to C-c C-u C-a.
+@menu
+* Introduction::                Introduction. 
+* Tasks::                       Tasks.
+* Arc scheme::                  The arc scheme dialect.
+* Invoking arc::                How to run @value{PROGNAME}.
+* Extending::                   Extending @value{PROGNAME}.
+* Install::                     Installing @value{PROGNAME}.
+* Problems::                    Reporting bugs.
+* Copying::                     Copyleft
+* Function Index::              Index of functions.
+* Concept Index::               Index of concepts.
+@end menu
+
+
+@c ====================================================================
+@node Introduction, Tasks, Top, Top
+@chapter Introduction
+
+Arc is a build tool, intended as an alternative to make and related
+tools.  It is completely written in Scheme and is therefore fully
+extensible, open and scritable.  It utilizes a modular and plugable
+architecture, very different to that of related tools.  It is
+therefore simple to extend arc with new tasks and functionality.
+
+Arc uses a processing model somewhat different from that of make.
+It's dependency tracing is not primarely based on file dependencies,
+but on statements described in the build scripts.  Statements have
+values (or returnvalues), and describe actions how to compute those
+values.  Statements are actions and properties at the same time.  In
+this way the build chain of a project could be handled in a very
+functional way.
+
+Even if scriptlets (=build scripts) utilizes only a subset of the
+scheme language as described in the "Revised5 Report on the
+Algorithmic Language Scheme", it is possible to write very expressive
+and complex build script in a fully platform indepent fashion,
+including iterations, conditional statements, recursive function, etc.
+
+@menu
+* How it works::                How it works
+* Arcfiles::                    Arcfiles - The 'makefiles' of Arc
+* Requesting Stmt values::      Requesting values from statements
+* Attrvals::                    Attributed values
+* Conditionals::                Conditional statements
+* Runtime::                     Programatic vs. descriptive scriptlets
+@end menu
+
+
+@c --------------------------------------------------------------------
+@node How it works, Arcfiles, Introduction, Introduction
+@section How it works
+@cindex statement, notion
+@cindex statement, value
+@cindex statement, body
+@cindex statement, evaluation
+@cindex statement, dependencies
+@cindex statement, project
+
+The basic entities of arc are @dfn{statements}.  Statements are named
+resources in the building process, which are connected and related to
+each other.  They depend in a defined order.
+
+Each statement has a @dfn{value}, which is described by the @dfn{body}
+of the statement.  This body is a list of @dfn{tasks} or
+@dfn{functions}, to be applied (executed) when requested and whose
+returnvalues are the value of the statement.
+
+Additionally each statement can have a number of @dfn{properties}.
+These properties add additional information to each statement,
+e.g. giving a human readable title, controlling the dependencies or
+specifing conditional evaluation.
+
+Statements are grouped into sets of statements, a so called
+@dfn{project}.  Normally each package does only have one project,
+which controls the complete build chain of the package, but it is
+possible to have multiple projects per package.  Each project is
+stored into one build script, normally called @file{Arcfile}.
+
+When a project is @dfn{evaluated}, the processor starts at a given start
+statement.  This is either given explicitly by the user executing arc or
+by a default setting in the project.  
+
+Evaluating a statement means to return its (computed) value.  If the
+statement's value hasn't been computed yet, the statement's body is
+evaluated and that's returnvalue returned.  But before a statement's
+body is evaluated, the @dfn{dependencies} of the statement are checked
+and followed.  Each statement may have dependencies on other
+statements, and before a statement is evaluated all other statements
+the statement in question depends on, are evaluated first, and so on.
+
+In this way, before any value of a statement is returned, a reverse
+lookup for the complete dependency tree is done, and all dependant
+statements starting from the least dependant are evaluated.
+
+It is important to note that we are talking about statement
+dependencies only at this moment.  We are not talking about source
+file dependencies at all.  And indeed build scripts are not
+necessarily 'build script's in the sense that they are building
+something.  It is perfectly possible to use build scripts as logical
+origanized task scripts, which describe the dependency between tasks.
+
+It is important too, that there's nothing like attributes or variables
+in arc (except for local bindings, which I'll discuss later).  Even
+static attribute settings are to be expressed as statements---but this
+is not a problem, but a feature.
+
+Even if the notion of a statement's value is integral to the idea of
+concatenating statements in arc, the real work (compiling, copying,
+moving files, linking, etc.) is done by the tasks, and therefore as
+side effects of the tasks.  The arc processor itself has no idea of
+all these functions.  It is more or less the glue to concatinate these
+functions.
+
+
+
+
+
+
+@c --------------------------------------------------------------------
+@node Arcfiles, Requesting Stmt values, How it works, Introduction
+@section Arcfiles - The @samp{makefiles} of Arc
+@cindex Arcfiles
+@cindex all
+@cindex statement, all
+@findex project
+@findex stmt
+@findex keywords, info
+@findex keywords, depends
+@findex keywords, version
+@findex keywords, basedir
+@findex keywords, default
+@findex keywords, once?
+@findex keywords, os
+@findex keywords, scope
+
+As stated in the previous section, statements are grouped in projects,
+and each project is stored into a build script.  These build scripts
+are called @dfn{Arcfiles} (similar to Makefiles).
+
+An Arcfile is a simple text file, to be written and edited with any
+text editor.  It normally lives in the base directory of a package (or
+source tree), from where it controls the building and processing of
+source files and resources.  But nothing stops one from putting the
+Arcfile in any directory one likes (e.g. in sub directory
+@file{builds}), since it is possible to give the base directory of the
+controll source tree explicitly in the Arcfile (either relative or
+absolute).
+
+Projects and statements are described by using the special constructs
+@code{project} and @code{stmt}.  These statements (and more others)
+are looking like 'ordinary' Scheme functions, but there are some
+perculiarties about them, making the handling of Arcfiles less
+awkward.
+
+One of these peculiarties is the way to give @dfn{named arguments} to
+tasks and statements.  These named arguments are given as key-value
+pairs, where the key must be a symbol ending in a colon
+(e.g. @code{info:}).  These so called @dfn{keywords} are self
+evaluating and therefore don't need to be quoted.
+
+@defun project id [args]
+This must be the first expression in an Arcfile.  It sets up the
+context proper, defines the default target, etc.  @var{id} is a
+(unquoted) symbol giving the project id (this resource however is
+unused in the moment, even if required).
+
+The arguments:
+
+@table @code
+@item info: @var{string}
+Gives a descriptive text for the project.  This information is not used
+by the processor, but may be used by integrated developing
+environments.  This key is optional.
+
+@item project: @var{string}
+Gives the name of the project.  Some tasks use this information when
+refering to the project.  For example the @code{dist} task creates the
+archive under this name.  This key is optional, but usage is highly
+recommended.
+
+@item version: @var{string}
+Gives the version of the project.  Some tasks use this information
+when refering to the project.  For example the @code{dist} task uses
+this information to create the name of the dist archive.  This key is
+optional, but highly recommended.
+
+@item basedir: @var{string}
+Gives a path to the base directory of the source tree.  All statements
+in this Arcfile are evaluated in the context of this base directory.
+The setting is optional, and if not given, the directory in which the
+Arcfile resides is taken as base directory.  If the current working
+directory (from where arc is executed) should be taken as base directory
+it is possible to use the scheme function @code{path-cwd}.
+
+@item default: @var{symbol}
+Gives the default statement (i.e. the first statement to be evaluated)
+of this project.  This setting is optional, and if missing (and arc is
+called without an explicit statement), the statement @code{all} is
+taken.
+@end table
+
+The context (project) opened by a @code{project} expression reaches
+until the end of a build script, and is terminated automatically by
+the evaluation processor.
+
+Example:
+@example
+(project gfx-api
+         info: "Builds the grafics abstraction layer"
+         basedir: "src/"
+         default: 'lib)
+@end example
+@end defun
+
+Please note that all values to the keywords are ordinary scheme
+expressions (in the scheme subset utilized by Arcfiles).  Symbols, for
+instance to refer to statements, must therefore propertly quoted.
+
+Each statement is declared by an @code{stmt} expression.
+
+
+@defun stmt id [args] body
+This expression defines a new statement in the current context, set up
+by a previous @code{project} expression.
+
+The @var{id} (an unquoted symbol) gives the name of the statement,
+which must be unique throughout the project (but see below).  It is
+possible however to have multiple statements with the same id, when
+their @var{os:} keyword value is different.
+
+The arguments:
+@table @code
+@item info: @var{string}
+Gives a descriptive text for the statement.  This information is used
+by the processor in log messages and in the listings of build scripts.
+This key is optional.
+
+@item depends: (@var{symbol-list} | @var{symbol})
+Sets explicit dependencies for this statement.  The symbols must be
+(existing) names of other statements.  If one dependency is only to
+set, one can use the short variant (to set the symbol only), in the
+case of multiple dependencies one have to use the list.  This setting
+is optional, and if not given, no explicit dependencies are recorded
+(but note that the statement can depend implicitly on other
+statements).
+
+@item os: @var{symbol}
+Gives the operating system, for which this statement is to be evaluated
+only.  This setting is optional and the default is to evaluate for every
+operating system.
+
+@item once?: @var{boolean}
+Normally a statement is evaluated only once, and it's value is cached
+for later requests.  Setting this property to @samp{#f}, the statement
+(and it's value) is calculated on every request.  This setting is
+optional and the default is @samp{#t} (evaluate only once).
+
+@item scope: (local | script | public)
+Gives the visability of the statement.  @var{local} statements are
+referencable (direct or indirect dependencies) only from the Arcfile
+they are defined in, @var{script} statements are usable from the
+Arcfile self and sub-project, and @var{public} statements are fully
+accessable and may be given by the user from the command line
+(@ref{Conditionals}).  Statements are @var{public} by default
+@end table
+
+The function's @var{body} (all arguments to the @code{stmt} function
+after the last key-value pair) body represents the actions to be taken
+to compute the value of the statement.  The body's last evaluation
+(its returnvalue) is taken as value for the statement. [SURE?]
+
+@example
+(stmt compile
+      info: "Compiles the source files"
+      depends: 'prepare
+      (c-compile sources: '("io.c" "list.c" "main.c" "db.c")
+                 includes: '("../include/" "ap64k/")
+                 debug?: #t))
+@end example
+@end defun
+
+The order of the statements is not important.  One can write the file
+from the 'basic' to the 'highest' statements or vice versa.  The only
+thing to be followed is, to have a valid @code{project} expression at
+the beginning of an Arcfile and that all referenced statements are
+defined.
+
+
+@c --------------------------------------------------------------------
+@node Requesting Stmt values, Attrvals, Arcfiles, Introduction
+@section Requesting values from statements
+@cindex implicit statements
+@cindex explicit statements
+@cindex statement, implicit
+@cindex statement, explicit
+@cindex statement values, requesting
+@findex ->
+
+Statements could depend on each other by @dfn{explicit dependencies},
+i.e. those which are stated explicitly by setting the @code{depends:}
+property of the @code{stmt} function.
+
+Beside this it is possible to request the values of statements and use
+these values as "input" for tasks in other statements' bodies.  A
+archive task may request, for instance, the set of compiled object
+files from a compilation task to know which files to archive.  In this
+way it is not necessary for the build script to explicitly handle the
+various forms of source files names (@file{.c}, @file{.o}, and
+@file{.a} suffixes).
+
+The expressiom to request the value of a statement is @code{->}:
+
+@defun -> id
+Returns the value of the statement named @var{id} (@var{id} is an
+quoted symbol).  If the named statement has not been evaluated before
+(or it's @code{once?:} property was set to @samp{#f}), it is evaluated
+in that moment, otherwise only it's (cached) value is returned.  If no
+such statement is found, it signals an error and stops processing.
+
+Example:
+@example
+(stmt compile
+      info: "Compiles the source files"
+      depends: 'prepare
+      (c-compile sources: (-> c-sources)
+                 includes: (-> c-incl)
+                 debug?: #t))
+@end example
+@end defun
+
+By requesting a value from statements a statement sets an
+@dfn{implicit dependency} to other statements.  Implicit dependencies
+are not followed before a stating statement, but only if it's value is
+requested.  They are not @emph{necessarily} evaluated at all, if the
+request is, for example, in the negative branch of a conditional
+expression.  As a consequence, if there is more than one task in a
+statement's body, earlier tasks can't rely on side effects of
+statements only coming into effect from later requests.  For example
+the following code
+
+@example
+(stmt build-dir (mkdir dir: "_build"))
+(stmt main
+      (copy file: "hello.properties" 
+            dir: "_build")
+      (java-compile sources: (fileset pattern: "**/*.java")
+                    outdir: (-> build-dir)) )
+@end example
+
+will fail, because the directory @file{_build} has not been created in
+the @code{copy} task yet.  The directory would only be created by the
+call @code{(-> build-dir)}.
+
+
+@c --------------------------------------------------------------------
+@node Attrvals, Conditionals, Requesting Stmt values, Introduction
+@section Attributed values
+@cindex statement values, attributed
+@cindex statement values, multiple
+@cindex attributed values
+
+The type of value a task returns is defined by the task itself.  Not
+all tasks may work with returnvalues from other task.  But this is not
+a real limitation, since, for example, it makes no sense to try to
+link a compiled java class with a compiled c++ class.
+
+On the other hand some tasks may return values, which depend on
+attribute settings of the host system, on which the arcfile is
+executed.  In this case it would pose to much internal dependency
+knowledge to the arc user, if the pipeline of tasks would be disturbed
+by such information.
+
+For example building shared libraries (@file{.so} or
+@file{.dlls}-files), make it necessary on some platforms to compile
+source files in a special way (e.g. by adding special compiler flags).
+If one needs to provide both funtionalities -- building static and
+shared libraries -- one would have to write four statements: two
+statements for compiling the source files for static and shared
+libraries respectively and two statements for building the two version
+of the library.  This of course is not very elegant, and in some cases
+not portable (there are system, where there's no difference between
+shared or static libraries).
+
+Arc provides a much more elegant and powerful way.  The decision to
+compile special shared object files is driven by simple flags on the
+appropriate tasks (c-compile, lib, etc.), and the return values passed
+between the tasks may contain both representations of object files --
+shared and static variants.  This system is called multiple return
+values or @dfn{attributed values}.  A number of tasks could handle
+attributed values transparent and hidden from the user, and
+understanding the internal details of attributed values is only needed
+for developers, who want to extend Arc or write new tasks.  The
+oridinary Arc user must only be interessted in the decision of which
+tasks are compatible with each other.
+
+In the following example a set of C files should be linked to form a
+static and shared library.  Independent of the hosting platform the
+information, if object files for shared libraries has to be compiled
+or not is hidden from the user.  The user only has to state that the
+compile C files may be used for a shared library, so setting the
+@code{shared?} property on the @code{c-compile} task:
+
+@example
+(stmt compile
+      depends: 'init
+      info: "Compiles all c sources"
+      (c-compile sources: (-> c-sources)
+		 includes: '(".")
+                 shared?: #t
+                 static?: #t ))
+
+(stmt make-lib
+      info: "Builds the library"
+      (lib libnm: "test"
+           shared?: #t
+           files: (-> c-compile)
+           version-info: '(1 17 4) ))
+@end example
+
+
+
+@c --------------------------------------------------------------------
+@node Conditionals, Runtime, Attrvals, Introduction
+@section Conditional statements
+@cindex Conditional statements
+@cindex statement, conditional
+@cindex keywords, os
+@cindex keywords, scope
+
+Each statement may cary conditional properties, which describe its
+validity and scope.  During evaluation of tasks the evalution machine
+first checks if the conditional properties of a statement matches the
+current runtime environment.  If there are, for example, the tasks
+
+@example
+(stmt link
+      os: 'windows
+      ...)
+(stmt link
+      os: 'linux
+      ...)
+(stmt link
+      os: 'sunos
+      ...)
+@end example
+
+on a windows system the first will match and be evaluated, on Linux
+the second and on a SunOS system the third one.  In case there
+conflicts, the first matching will win.  So in the following example:
+
+@example
+(stmt do-something
+      os: 'beos
+      ...)
+(stmt do-something
+      ...)
+@end example
+
+only on a Beos system the first statement will evaluate, but in all
+other cases the second one.  The naming of the operating systems are
+symbolic, and the following system will be detected in the moment:
+
+@table @samp
+@item linux
+All linux systems, regardly for platform or architecture
+@item win32
+Wind32 systems (NT, 2000, XP)
+@item beos
+The various Beos versions, tested is BeOS 5.0.
+@item cygwin
+@item bsd
+@item sunos
+@end table
+
+Besides the yet described @code{os} property, there's the @code{scope}
+property, which describes the visibility of a statement.  It may take
+one of the following values:
+
+@table @samp
+@item local
+The statement is private to the Arcfile it is contained in.  Only
+statements from inside the Arcfile are allowed to depend on this
+statement, either directly or indirectly.
+
+@item script
+The statement may be referenced from inside the Arcfile or any Arcfile
+evaluated from the current Arcfile (as sub-project).
+
+@item public
+The statement is fully referencable from the Arcfile, sub-project and
+the outside, i.e. it may be given by the user from the command line.
+@end table
+
+
+@c --------------------------------------------------------------------
+@node Runtime,  , Conditionals, Introduction
+@section Programatic vs. descriptive scriptlets
+
+Arcfiles are written in a subset of Scheme, and a rich library of
+functions are made available to them.  These functions are available
+on all platforms and the cover most aspects of a build system,
+e.g. path algorithmic, file checks, extended string functions, etc.
+Moreover most of the control expressions of scheme, like @code{let},
+@code{let*}, named let, @code{if} or @code{case} are available.
+
+This said it is clear that complex conditional evaluations of tasks
+are possible, probably based on input values or even user interaction.
+Iteration (by means of tail-recursive named lets) and recursion is
+available, too, of course.
+
+In the following example the decision which source files are to be
+compiled are coded explicitly, based on the value of the system
+property @code{release}, instead of using the builtin conditional
+evaluation apparatus.
+
+@example
+(stmt my-stmt
+      (c-compile sources: (case (prop release)
+                           (("1.4") (-> sources-1.4))
+                           (("1.5") (-> sources-1.5))
+                           (("1.6") (-> sources-1.6))) )))
+@end example
+
+It depends on the nature of a project, if a more declarative style of
+scriptlets are used, in which most of the work is done by the
+dependency machine of Arc and simple tasks declaring the actions to be
+taken.  Or if most the work is explicitly stated by iterations,
+filtering certain filetypes, requesting user interaction, etc.  Arc
+supports both models, and, due to the uniformly syntax there is no
+break between the twem.
+
+
+
+@c ====================================================================
+@node Tasks, Arc scheme, Introduction, Top
+@chapter Tasks
+@cindex task
+
+The real work in arc is done by @dfn{tasks}.  Tasks are well defined
+portions of functionality, implemented in modules.  The standard
+distribution of arc comes with a set of modules encompassing the
+functions normaly used in build systems.  But third parties can extend
+Arc by writing new modules and tasks, which simply can be installed to
+the Arc system.  Arc has not to be modified for this.  Details for how
+to extend or write new task modules follow in a later chapter.  This
+chapter describes the default tasks, the properties, return values and
+possible interactions.
+
+@menu
+* Filesystem tasks::            Filesystem tasks
+* Compiler tasks::              Compiler tasks
+* Archiving tasks::             Archiving tasks
+* Version control tasks::       Version control tasks
+* Documentation tasks::         Documentation preparing tasks
+* Highlevel tasks::             Highlevel tasks
+* Misc tasks::                  Various tasks
+@end menu
+
+@c ontinue
+@c --------------------------------------------------------------------
+@node Filesystem tasks, Compiler tasks, Tasks, Tasks
+@section Filesystem tasks
+
+Arc provides a number of tasks for basic file and directory management.
+Some of this tasks have no effect on some operating system due to
+limitations of those systems.  Their behaviour on such systems is
+described in the respective subsection.
+
+Paths and filenames are highly system specific.  The best (and most
+obvious) example is the path seperator on Unix and Windows platforms.
+Arc tries to normalize this interface to some extend, but a number of
+incompatibilities remain, as for example drive letters in windows
+system, which don't have equivalents in Posix environments.  Paths as to
+be written with "/" as path seperator always.  Arc maps it to the os
+convention. (** to be extended **)
+
+@menu
+* Task mkdir::                  Creating directories
+* Task delete::                 Removing files and directories
+* Task copy::                   Copying files and directories
+* Task rename::                 Renaming and moving files and directories
+* Task touch::                  Touching files and directories
+* Task file props::             Changing file and directory properties
+* Task file-type::              Working with file types
+@end menu
+
+
+@c ....................................................................
+@node Task mkdir, Task delete, Filesystem tasks, Filesystem tasks
+@subsection Creating directories
+@cindex Creating directories
+@findex mkdir
+
+@defun mkdir properties
+Creates a directory or a list of directories.
+
+The arguments:
+
+@table @code
+@item dir: @var{string} @strong{required}
+The path of the directory to create.  All directories in the path, which
+are missing, are created.
+@end table
+
+The return value is unspecified.
+@end defun
+
+
+@c ....................................................................
+@node Task delete, Task copy, Task mkdir, Filesystem tasks
+@subsection Removing files and directories
+@cindex Removing files and directories
+@findex delete
+
+@defun delete args
+Deletes a file or a directory recursively. 
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item pathnm: @var{string} @strong{required}
+The path of the directory or file to remove.  Only the last path
+component is removed.
+
+@item recursive?: @var{bool}
+If @var{:pathnm} specified a directory, this specifies if it deleted
+recursively.  If #t it is removed recursively, if #f the directory must be 
+empty before removed.  The default if #f (not recursive).
+
+@item ignore-missing?: @var{bool}
+If #t, Arc does not complain about a missing directory/file, which
+should be deleted, otherwise it does.  Default is #f (to complain).
+@end table
+
+The return value is unspecified.
+@end defun
+
+
+@c ....................................................................
+@node Task copy, Task rename, Task delete, Filesystem tasks
+@subsection Copying files and directories
+@cindex Copying files and directories
+@findex copy
+
+@defun copy args
+Copies a file, a set of files or a complete directory (recursively) to
+another location.
+
+@var{properties} is a list of key value pairs.  Exactly one of the
+following key-value has to be given:
+
+@table @code
+@item dir: @var{string}
+The path of the directory to copy.  The directory is copied recursively,
+including the directory itself.
+
+@item files: @var{strlist}
+A list of files to copy.  
+
+@item file: @var{string}
+Copy exactly this one file.
+@end table
+
+Further allowed keywords are:
+@table @code
+@item todir: @var{string}
+The destination directory to copy to.  The destination must be an
+existing directory, which is writable.  This property has to be set
+when @var{dir} or @var{files} has been given.
+
+@item tofile: @var{string}
+The destination to copy the source file to.  This property gives a
+file name.  If the file exists already it is overritten, unless
+@var{force?}  is set to @code{#f}.  This property can only be used, if
+the @var{file} property is used.
+
+@item force?: @var{boolean}
+If #t an existing destination file is overwritten.
+
+@item flatten?: @var{boolean}
+Normally when files from @var{files} and @var{file} properties are
+copied to a directory (@var{todir}), this task creates the complete
+directories in the file path, unless this is property is set to #t.
+In that case directory paths are "flattened", by copying only the
+files into one directory.
+
+The following example copy the complete source directory structure:
+
+@example
+(copy file: "org/eyestep/src/names.1"
+      todir: "_dest")
+@result{}_dest/
+    de/
+      eyestep/
+        src/
+          names.1
+@end example
+
+On the other hand, if @var{flatten?} is @code{#t}, the result would
+be:
+
+@example
+@result{}_dest/
+    names.1
+@end example
+
+@end table
+
+The returnvalue is unspecified.
+@end defun
+
+
+
+@c ....................................................................
+@node Task rename, Task touch, Task copy, Filesystem tasks
+@subsection Renaming and moving files and directories
+@cindex Renaming files and directories
+@cindex Moving files and directories
+@findex rename
+
+rename/move  -- to write --
+
+
+
+@c ....................................................................
+@node Task touch, Task file props, Task rename, Filesystem tasks
+@subsection Touching files and directories
+@cindex Touching files and directories
+@findex touch
+
+@defun touch args
+Updates the access and modification times of a file to the current
+time.  If the file does not exists yet, it is created.
+
+This task should work on each operating system, even if some operating
+systems doesn't support the notion of "modification time", in that
+case the file is "simply" created.
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item file: @var{string} @strong{required}
+The path of the file to touch.  Only the real file is touched, no
+directories in the path---if missing---are created.
+@end table
+
+The returnvalue is unspecified.
+@end defun
+
+
+@c ....................................................................
+@node Task file props, Task file-type, Task touch, Filesystem tasks
+@subsection Changing file and directory properties
+@cindex Changing file and directory properties
+@cindex Changing file and directory ownership
+@findex chmod
+@findex chown
+
+chmod, chown  -- to write --
+
+
+@c ....................................................................
+@node Task file-type,  , Task file props, Filesystem tasks
+@subsection Working with file types
+@cindex Working with file types
+@findex file-type
+
+@defun file-type args
+Checks the type of a file-system resource and returns its type as one of
+the following symbols:
+
+@table @code
+@item dir
+The file is a directory
+
+@item file
+The file is an "normal" file
+
+@item executable
+The file is an executable.  The notion of "executability" is different
+of various operation systems.  On Unix for example it is indicated by a
+flag, on Windows systems by one of a number of special file suffixes.
+The @code{file-type} task knows about this special things.
+
+@item unknown
+The file is unknown, not readable or does not exist.
+@end table
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item src: @var{string}
+The path of the file or directory to check
+@end table
+
+The returnvalue is one of the symbols stated above.
+@end defun
+
+@c --------------------------------------------------------------------
+@node Compiler tasks, Archiving tasks, Filesystem tasks, Tasks
+@section Compiler tasks
+
+The tasks described in this section are used to compile source files in
+various languages, to link the resulting object files into libraries or
+build executable from them.  Source file dependency is controlled by the
+tasks themselves, since a number of languages (tools) have their own
+knowledge of dependency checking, which sometimes conflict with build
+tool dependency checking.
+
+@menu
+* Task c-compile::              Compiling C sources
+* Task cpp-compile::            Compiling C++ sources
+* Task java-compile::           Compiling Java sources
+* Task link::                   Making executables
+* Task lib::                    Making libraries and archives
+@end menu
+
+
+
+@c ....................................................................
+@node Task c-compile, Task cpp-compile, Compiler tasks, Compiler tasks
+@subsection Compiling C sources
+@cindex C sources
+@cindex Objective C sources
+@cindex Compiling C sources
+@cindex Compiling Objective C sources
+@findex c-compile
+@findex objc-compile
+@cindex .c-files
+@cindex .m-files
+
+@defun c-compile args
+Compiles a set of C files into object files.  Needs a working C compiler
+installed and available in den execution path.
+
+TODO: The majority of settings, e.g. which c compiler to use, which default
+flags to specify, etc. should be set by a system configuration and read
+in by the master arc-script (if available).
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item sources: @var{strlist} @strong{required}
+A list of C sourcefile names which should be compiled.
+
+@item flags: @var{string-list}
+A list of strings which should be added as flags to the C compiler; this
+settings depend on the real compiler used, so should be used with care,
+to ensure portability
+
+@item includes: @var{string-list}
+A list of additional include directories.  Only the names of the
+directories are to be added (i.e. without any compiler specific options
+prefix).
+
+@item depends: @var{dependencies}
+A list of dependencies as generated by the @code{c-deps} task.  This
+target is optional and should normally not be used; if it is missing
+the dependencies are calculated automatically from the sources.
+
+@item debug?: @var{boolean}
+Indicates whether debug information should be compiled in. Default is
+@code{#f} (not include debug information).
+
+@item ansi?: @var{boolean}
+Indicates whether the C compiler should treat the code as pure ansi C.
+Default is @code{#f}.
+
+@item signed-char?: @var{boolean}
+Indicates whether the c compiler should treat chars as signed.  Default
+is @code{#f}.
+
+@item warn-level: (@var{high} | @var{medium} | @var{low})
+Specifies the warn level to use.  
+
+@item opt-level: (@var{high} | @var{medium} | @var{no})
+Specifies the optimization level to be used by the compiler.
+
+@item outdir: @var{string}
+Sets the directory to write the created object file to.  The default is
+to write the object files into the same directory where the source files
+live.
+
+@item objext: @var{string}
+Sets the object extension for static compiled objects to use.  This
+defaults normally to ".o" (depending on the platform) and should
+normally not be used.
+
+@item sobjext: @var{string}
+Sets the object extension for shared compiled objects to use.  This
+defaults normally to @file{.lo} (depending on the platform) and should
+normally not be used.
+ 
+@item shared?: @var{boolean}
+This flag indicates whether the source files should be compiled for a
+shared library.  The default is @code{#f}, i.e. don't compiled shared
+objects.  On platforms which don't support shared objects, this
+property is ignored.  On platforms where static and shared objects are
+the same only one set of files is compiled, otherwise two objects
+files---one for shared use and one for static use---are combiled.
+
+@item static?: @var{boolean}
+This flag indicates whether the source files should be compiled
+static.  The default is @code{#t}, i.e. source files should always be
+compiled for static linking or libraries by default.  On platforms
+where shared and static objects are the same, only one set of object
+files is compiled.
+@end table
+
+The return value is an attrval with all object files under control of
+this task.  Shared compiled objects and static compiled objects are
+listed separatly under the keys @code{:shared-objs} and @code{:objs}
+respectively.
+
+The special properties @code{:static?} and @code{:shared?} are used to
+indicate whether sourcefiles should be compiled for shared library
+support.  On a number of platforms, sources has to be compiled with
+special compiler settings and options, so that they can be linked to
+form a dynamic linked library.  This setting is done manual and not
+automatically, since it is a decision which should be done by the user
+really.
+
+@end defun
+
+
+@defun objc-compile args
+This task compiles Objective C sources into objects.  This task is a
+strict subclass of the @code{c-compile} task and understands the same
+properties and semantics.  The return values are identical.
+
+Depending on the Objective C compiler used by the backend this task
+adds additionally the library @code{objc}---and propably further
+libraries---to the returnvalue under the key @code{dep-libs}, which is
+used by the @code{link} and @code{lib} tasks.
+
+Additionaly this task takes a further keyword:
+
+@table @samp
+@item warn-protocol?: @var{boolean}
+If @code{#t} warn about not complete protocol implementations.
+@end table
+
+@end defun
+
+
+@c ....................................................................
+@node Task cpp-compile, Task java-compile, Task c-compile, Compiler tasks
+@subsection Compiling C++ sources
+@cindex Compiling C++ sources
+@findex c++-compile
+
+c++-compiler -- to write --
+
+
+@c ....................................................................
+@node Task java-compile, Task link, Task cpp-compile, Compiler tasks
+@subsection Compiling Java sources
+@cindex Compiling Java sources
+@findex java-compile
+
+@defun java-compile args
+
+Compiles a set of java source files into java byte code class files.
+
+** extend **
+
+@end defun
+
+
+
+
+@c ....................................................................
+@node Task link, Task lib, Task java-compile, Compiler tasks
+@subsection Making executables and archives
+@cindex Making executables and archvies
+@findex link
+
+@defun link args
+Creates an application/executable by linking object files and libraries.
+Only compatible object files may be linked.
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item files: (@var{string-list} | @var{attrval}) @strong{required}
+A list of object files to link into the executable.  If an attrval type
+is passed, the tasks selects the correct set of objects files from it
+depending on the @code{:shared?} setting.
+
+@item libs: @var{string-list}
+A list of libraries to link with the executable.  The entries has to
+give the "base library name" only, so for e.g. for "libAbcX.so" give
+"AbcX".  This task looks in the places given by ":libdirs" for
+libraries and shared objects
+
+@item shared?: @var{boolean}
+If @code{#t}, use shared libraries for the executable.  If @code{#f},
+try to avoid linking against shared libraries, but build a static
+application.
+
+@item appnm: @var{string}
+The executable name to use.  This should not include probably necessary
+name extensions, used to indicate executable files on some platforms.
+ 
+@item appext: @var{string}
+The extension to use for the application.  This is only used if an
+unusal executable extension should be used and overrides a probably
+platform specific executable extension.
+
+@item outdir: @var{string}
+The directory to build the executable in.  By default der executable
+is build in the current working directory.
+
+@item libdirs: @var{string-list}
+A list of directories where to look for depending shared
+objects/libraries.  Give only the directory names themselves (without
+any additional option, e.g. without "-L" for gcc).  Depending on the
+source files the object files to link, additional libraries may be
+added to this list automatically, which are needed to link these
+object files against.
+
+@item nostdlib: @var{boolean}
+If @code{#t}, don't use the standard system libraries and startup
+files when linking.  Only the files you specify will be passed to the
+linker.  Default is @code{#f}.
+@end table
+
+This task returns the name of the build application.
+@end defun
+
+
+@c ....................................................................
+@node Task lib,  , Task link, Compiler tasks
+@subsection Making libraries
+@cindex Making libraries
+@findex lib
+
+@defun lib args
+Creates an archive (static library) or a shared library (dynamic load
+library) from objects files.  Both the functionality to create static
+and dynamic libraries are supported in one task, so a number of
+properties only work with either of both functionality.
+
+Building a static and a shared library could be done in one task call
+by setting the @code{shared?} and @code{static?} properties to
+@code{#t}.
+
+The passed in object files list (@code{files}) has to include the
+correct set of object files for both or either of both libraries to
+build.
+
+@var{properties} is a list of key value pairs; the following keywords
+are allowed:
+
+@table @code
+@item files: (@var{string-list} | @var{attrval}) @strong{required}
+A list of object files to build the library from.  If an attrval type is
+passed in, the task selects the objects files automatically from it,
+depending on the @code{shared?} and @code{static?} settings.
+
+@item static?: @var{boolean}
+If #t build a static library.
+ 
+@item shared?: @var{boolean}
+If @code{#t} build a shared library; building a shared library needs a
+compiler to have produced shared objects (setting an appropriate
+@code{shared?}  property).
+
+@item libnm: @var{string}
+The library name to use.  This gives only the base name, i.e. without
+any additional prefixes (e.g. "lib") or suffixes (e.g. ".so").  The
+real name is build from the platform specific settings and other
+properties (e.g. version-info for shared libraries) and returned as
+the task's value.
+ 
+@item outdir: @var{string}
+The directory to build the library in.  By default the libraries are
+build in the current working directory.
+
+@item version-info: @var{list}
+This information is used for shared libraries on ELF systems.  It has
+to contain 3 integer or string values indicating the "version current"
+(first), "version revision" (second) and "version age" (third)
+information.  Ignored for static libraries, and for ELF systems
+defaults to @code{(0 0 0)}.
+
+@item libdirs: @var{string-list}
+For shared libraries on ELF systems only: A list of directories where
+to look for depending shared objects/libraries.  Give only the
+directory names themselves (without any additional option,
+e.g. without "-L" for gcc).
+
+@item addlibs: @var{string-list}
+For shared libraries on ELF systems only: A list of additional
+libraries the build library depends on.  The entries has to give the
+"base library name" only, so for e.g. libAbcX.so give "AbcX".
+@end table
+ 
+This task returns an attrval containing all created libraries and their
+applied (short-)names.  The attrval slot ids are: 
+
+@table @code
+@item shared
+the shared library's main file
+
+@item shared-add-names 
+additional names [symlinks] for the shared library, a list of strings
+
+@item static
+the static library's file
+@end table
+
+
+If the host system supports shared libraries the attrval's default is
+@code{shared}.  Additionally the slot @code{shared-name}
+resp. @code{static-name} is set, which contains the library's base
+name (libABC.so's name is ABC).
+@end defun
+
+
+
+
+
+
+@c --------------------------------------------------------------------
+@node Archiving tasks, Version control tasks, Compiler tasks, Tasks
+@section Archiving tasks
+
+Archiving tasks allow to create and maintained archives of files and a
+normally used for building distributions.  These tasks required the
+appropriate external tools to be installed in the system and are
+therefore only a available if the tools are available.
+
+@menu
+* Task gzip::                   Compress and uncompressing with gzip
+* Task zip::                    Compress and uncompressing with zip
+* Task bzip2::                  Compress and uncompressing with bzip2
+* Task jar::                    Compress and uncompressing with jar
+* Task tar::                    Managing tar archives
+@end menu
+
+
+@c ....................................................................
+@node Task gzip, Task zip, Archiving tasks, Archiving tasks
+@subsection Compress and uncompressing with gzip
+@cindex Compress and uncompressing with gzip
+@findex gzip
+@findex gunzip
+
+The @code{gzip} and @code{gunzip} tasks are used to compress and
+decompress a single file using the @code{GNU gzip} tool.  This
+compressing tool is widely available on most operating systems, and is
+the mostly used tool for building distributions.
+
+@defun gzip args
+Compresses a single file.  The original (source) file is not changed,
+but a new file is always created.
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item file: @var{string} @strong{required}
+The path of the file to compress.  Must be a single file.
+
+@item zipfile: @var{string} @strong{required}
+The path of the zipfile to produce.  If such a file exists already, 
+the target is removed first.
+
+@item compress-level: @var{integer}
+Specifies the compression level to use and must be a value between 1--9,
+where 1 is optimization for speed and 9 is optimization for space.  The
+default values is 6.
+@end table
+
+The task's returnvalue is unspecified.
+@end defun
+
+@defun gunzip args
+Decompresses a single file.  The original file is not changed, but a
+new file is created.  In contrast to the command line gunzip or gzip
+tool, the destination file name always must be given.
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item file: @var{string} @strong{required}
+The path of the file to decompress.
+
+@item dest: @var{string} @strong{required}
+The path of the destination file to produce.  If a file with such a name
+exists already it is overwritten (see property @code{force?}).
+
+@item force?: @var{boolean}
+By default the zipped file is decompressed only, if the zipped file's
+modification time is later than the destination file's modtime.  If
+the this property is set to @code{#t} the zip file is decompressed
+always (i.e. an existing target file is overwritten).  The default is
+@code{#f} (don't overwrite).
+@end table
+
+The task's returnvalue is unspecified.
+@end defun
+
+
+Note that the @code{tar} and @code{untar} tasks has builtin knowledge
+about zipping and unzipping of archives with gzip (and other compress
+tools), so that it is not necessary always to work with @code{gzip}
+and @code{tar} to create a distribution file.
+
+
+@c ....................................................................
+@node Task zip, Task bzip2, Task gzip, Archiving tasks
+@subsection Compress and uncompressing with zip
+@cindex Compress and uncompressing with zip
+@findex zip
+@findex unzip
+
+zip, unzip -- to write --
+
+@c ....................................................................
+@node Task bzip2, Task jar, Task zip, Archiving tasks
+@subsection Compress and uncompressing with bzip2
+@cindex Compress and uncompressing with bzip2
+@findex bzip2
+@findex bunzip2
+
+bzip2, bunzip2 -- to write --
+
+
+@c ....................................................................
+@node Task jar, Task tar, Task bzip2, Archiving tasks
+@subsection Compress and uncompressing with jar
+@cindex Compress and uncompressing with jar
+@findex jar
+@findex unjar
+
+jar, unjar -- to write --
+
+
+
+
+@c ....................................................................
+@node Task tar,  , Task jar, Archiving tasks
+@subsection Managing tar archives
+@cindex Managing tar archives
+@findex tar
+@findex untar
+
+The @code{tar} and @code{untar} tasks maintain tar-archives as created
+with the GNU tar tool.  Be sure that the @command{tar} command
+installed on your system is a GNU tar (sometime named gtar also),
+since tar archives are compatible between different versions.
+
+The tasks have builtin logic for compressed archives.  To use the
+compression functionality (by setting the @code{zip-mode:} property),
+the appropriate compression utilities has to be installed (compress,
+gzip or bzip2).
+
+@defun tar args
+Creates a (file) tar archive using the GNU tar tool.  Returns the name
+of the file which had been created or @code{#f}, if no file had been
+created.
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item tarfile: @var{string} @strong{required}
+The path of the tar archive.  Must be a single file.
+
+@item files: @var{strlist}
+A list of files (pathes) to add to the archive.  Directories are added
+recursively.
+
+@item deref-symlinks?: @var{boolean}
+Indicates whether symbolic links (on platforms supporting symbolic
+links) should be dereferenced, i.e. the files the symbolic links are
+pointing to should be included, not the links only.  The default is
+@code{#f} (don't dereference).
+
+@item absolute-paths?: @var{boolean}
+If @code{#t} don't strip leading '/' from paths.  Default is
+@code{#f}.
+
+@item zip-mode: (none | compress | gzip | bzip2)
+Indicates the zip mode using during creation of the tar archive.
+
+@item force?: @var{boolean}
+If @code{#t} removes an existing tar file before creating the new one;
+if @code{#f} doesn't create a tar file, if it exists already.  Default
+is @code{#t} (overwrite).
+@end table
+
+This task returns the name of the created tar file or #f if it couldn't
+be created.
+@end defun
+
+
+@defun untar args
+Extracts a (file) tar archive using the GNU tar tool.  Returns a list
+of all files extracted. If no file could be extracted returns the
+empty list (@code{()}).
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item tarfile: @var{string} @strong{required}
+The path of the tar archive.  Must be a single file.
+
+@item absolute-paths?: @var{boolean}
+If @code{#t} don't strip leading '/' from paths.
+
+@item zip-mode: (none | compress | gzip | bzip2)
+Specifies which zip mode to use during extraction of tar archive.  The
+zip mode to use have to match the real file type.
+
+@item force?: @var{boolean}
+If @code{#t} removes old files before extracting new ones; @code{#f}
+keeps the old ones; default is @code{#t}.
+
+@item preserve-perm?: @var{boolean}
+Preserves all file system permission on extraction; default is
+@code{#t}, but it is ignored if the platform does not support
+permission flags.
+
+@item outdir: @var{string}
+Extracts the files into the directory given instead of the current
+directory.
+@end table
+
+This task returns a list (string-list) of all extracted files and
+directories, if the extraction succeeded.  The list is empty if the task
+failed or no files has been extracted.
+@end defun
+
+
+
+
+@c --------------------------------------------------------------------
+@node Version control tasks, Documentation tasks, Archiving tasks, Tasks
+@section Version control tasks
+
+** write **
+cvs-add, cvs-update, cvs-remove, cvs-commit
+
+
+
+
+@c --------------------------------------------------------------------
+@node Documentation tasks, Highlevel tasks, Version control tasks, Tasks
+@section Documentation preparing tasks
+@cindex Preparing documentations
+@cindex Processing Texinfo files
+@cindex .texinfo-files
+@cindex Texinfo
+
+@defun texinfo args
+Processes texinfo documentation files producing pdf, html, dvi or info
+files depending on the settings.  Needs a fair good amount of third
+party software installed (like makeinfo, texi2pdf, texi2dvi, etc.)
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item src: @var{string} @strong{required}
+The main source file to process.  Only takes the main file; subordinate
+texinfo files are normally included by texinfo statements.
+
+@item dest: @var{string}
+Used for html format only to write all html files to that particular 
+directory.  If the directory does not exist yet, it is created.
+
+@item format: (info | html | plain | dvi | pdf)
+Specifies the output format to be used.  Default is info.
+
+@item split?: @var{boolean}
+If @code{#t} split the output into multiple equal sized modules, if
+@code{#f} splitting is suppressed.  Splitting is default for info and
+html files; dvi, pdf and plain files are never splitted.
+@end table
+
+This task returns a list of all files generated.  This fails for the
+info format if the texinfo files contains a @code{@@setfilename}
+statement, which generates a filename different from the
+inputfilename.  Only the "real" documentation files generated are
+included, temporary files needed for processing are not part of the
+return value.
+
+The outputfile name is created automatically depending on the format.
+For an input file @file{x.texi} the following files are generated:
+
+@table @strong
+@item info
+@file{x.info}, @file{x.info-1}, @file{x.info-2}, ...
+
+@item pdf
+@file{x.pdf}
+
+@item html
+@file{x.html}, or when @option{dest} is set: @file{dest/*.html}, ...
+
+@item dvi
+@file{x.dvi}
+
+@item plain
+@file{x.txt}
+@end table
+@end defun
+
+
+
+
+
+
+
+@c --------------------------------------------------------------------
+@node Highlevel tasks, Misc tasks, Documentation tasks, Tasks
+@section Highlevel tasks
+@cindex Preparing distributions
+
+Highlevel tasks are complex actions, which may combine sometimes such
+diverse actions as copying and filtering files, creating archives etc.
+These tasks are provided to group often used project maintainance
+tasks, like installation, packaging, cleaning up, etc.  Most of these
+tasks are build on top of ofter, more lowlevel tasks.
+
+@menu
+* Prepare dists::               Preparing distribution files
+* Clean::                       Cleaning up the project space
+* Task install::                Installing packages
+@end menu
+
+@c ....................................................................
+@node Prepare dists, Clean, Highlevel tasks, Highlevel tasks
+@subsection Preparing distribution files
+@cindex Distribution files
+@cindex Preparing packages
+@findex dist
+
+@defun dist args
+
+Prepares a distribution file by creating a temporary directory,
+copying (or linking) all source files into it, and building a tar file
+on it.  The name of the distribution file is prepared along the usual
+open source distribution file name scheme.  A package @samp{foo} of
+version @samp{0.2.1} will be named @samp{foo-0.2.1.tar.gz}.  The
+package name and version may be specified manually or, as a default,
+are requested from the settings in the current context definition.
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item distnm: @var{string}
+Specifies the name of the distribution (@samp{foo}).  The default is to
+use the project property in the current context.
+
+@item version: @var{string}
+Specifies the version part of the distribution (e.g. @samp{0.2.1}).
+The default is to use the version property in the current context.
+
+@item files: @var{string-list} @strong{required}
+Gives a list of files to be included in the distribution.
+@end table
+
+This task returns the name of the distribution file it has created.
+@end defun
+
+
+@c ....................................................................
+@node Clean, Task install, Prepare dists, Highlevel tasks
+@subsection Cleaning up the project space
+@cindex Cleaning up the project space
+@cindex Removing build files
+@findex clean
+
+@defun clean args
+
+Cleans the working directory of a project.
+
+** extend **
+@end defun
+
+
+@c ....................................................................
+@node Task install,  , Clean, Highlevel tasks
+@subsection Installing packages
+@cindex Installing packages
+@findex install
+
+@defun install args
+
+Installs a file or a set of files from a source into a
+destination location.
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item src: (@var{string} | @var{string-list}) @strong{required}
+the path to the file to copy or a list of source paths.
+
+@item dest: @var{string} @strong{required}
+the destination path
+
+@item strip?: @var{bool}
+indicates whether symbol tables should be stripped
+
+@item group: @var{integer}
+set the group id.  Platforms not supporting group information on files
+ignore this setting.
+
+@item owner: @var{integer}
+set the owner id.  Platforms not supporting owner informations on files
+ignore this setting.
+
+@item mode: (@var{integer} | exec | file)
+set the file mode to a specific setting, or if the symbol values are
+used, the file mode is set to a platform dependent value.  For Unix
+platforms this is normally
+
+@table @samp
+@item file
+This is an 'normal' data file, and is set on most platforms to 0644.
+
+@item exec
+An executable file, marked for general executation.  On most platforms
+the value 0755 is used.
+@end table
+
+Platforms, that don't support file flags ignore this setting
+@end table
+
+The returnvalue of this task is unspecified.
+@end defun
+
+
+
+
+
+
+
+@c --------------------------------------------------------------------
+@node Misc tasks,  , Highlevel tasks, Tasks
+@section Various tasks
+@cindex Filtering files
+@cindex Replacing placeholders in files
+@cindex Finding files
+@findex filter
+@findex fileset
+
+@defun filter args
+Filters a file from a source to a destination by replacing placeholders
+with values from an alist.
+
+The input file and output file must not be equal.  Words surrounded by
+the seperator char (normally @samp{@@}) are recognized as keys and
+looked up in a table (an alist).  The alist entries cadr is printed
+out to the output file instead of the key (including the seperator
+chars), when such a key is found.  An empty keyword (@samp{@@@@}) is
+printed as single seperator char itself (@samp{@@}) to the output
+stream.  If a keyword is not found in the alist nothing is printed to
+the outstream, but the placeholder is removed too and a warning
+message is presented to standard error, unless the @option{quiet?}
+property is set to @samp{#t}.
+
+
+The following keys in @var{properties} are allowed:
+
+@table @code
+@item src: @var{string} @strong{required}
+The path of the input file.  This file is not changed.
+
+@item dest: @var{string}
+The destination file the filtered stream is written to.  If the
+destination file is not given and the input file has the suffix
+@file{.in} the destination file is named after the input file by
+removing the @file{.in} suffix and stored to the same directory.
+Otherwise the task complains about a missing destination file name and
+does nothing.
+
+@item force?: @var{boolean}
+Overwrite an yet existing destination file (default is @samp{#t}).
+
+@item seperator: @var{char}
+The seperator to user instead of @samp{@@}.
+
+@item values: @var{alist} @strong{required}
+Gives the alist of key-values pairs containing the keywords to replace
+in the source files.  The keywords' values are printed out using the
+Scheme @code{display} function, therefore any Scheme type is allowed as
+replacement text.
+@end table
+
+The task returns the name of the destination file.
+@end defun
+
+
+@defun fileset args
+
+This task is used to build lists of file(names).  To achieve this, one
+gives any number of directory and file patterns, which are matches
+against a given working directory.  The list so returned can be used
+in all places where lists of files or directories are requested by
+other tasks.
+
+Pattern use the following syntax:
+
+@enumerate 
+@item
+directories are seperated by a solidus (@samp{/}), independant of the
+host operating system.
+
+@item
+to match one level of directories set a @samp{*}.
+
+@item
+to search recursively through any number of directories levels, set a
+@samp{**}.
+
+@item
+filenames can be matched either by @samp{*} (which matches any
+filename), by @samp{*SUFFIX}, which matches any files ending in
+@code{SUFFIX}, or by @samp{(REGEXP)}, a regular expression.  Note that
+regular expressions must be included in paranthesis.  Regular
+expressions are much slower than the suffix matching, which is enough
+in most cases.
+@end enumerate
+
+Therefore the following patterns are valid patterns:
+@example
+de/mycomp/myproject/*.java
+*.c
+src/*~
+doc/myapp.pdf
+doc/(.*\\.info(-[0-9]+)?)
+@end example
+
+Note that there's no way to match for a solidus (@samp{/}) in a
+regular expression, since patterns are matched per directory level
+step only.
+
+The arguments:
+
+@table @code
+@item dir: @var{string} 
+If this property is given the patterns are matched starting form
+@var{dir}; by default the search starts from the current working
+directory.
+
+@item pattern: @var{string} | @var{string-list}
+Gives a simple pattern or a list of pattern to match against file
+names.  For the allowed patterns see above.
+@end table
+
+This task returns a list of all matched files.  If no file matches the
+returned list is empty.
+
+Example:
+@example
+(fileset pattern: '("asc/*.o"
+                    "asc/asc"
+                    "test/_build"
+                    "*.tar.gz"))
+(fileset pattern: "src/**/*.scm")
+@end example
+
+@end defun
+
+
+
+
+@c ====================================================================
+@node Arc scheme, Invoking arc, Tasks, Top
+@chapter The Arc scheme dialect
+
+Even if the algorithmic programming language Scheme is a highly
+standardized Language, it's standard define a very restricted language
+only, with only a limited set of standard functionality.  Most scheme
+implementation extend this function body by adding more functionality,
+e.g. modules, dynamic library loading, GUI interfacing, etc.  Most of
+these extensions are not compatible, even if the SRFI (Scheme Request
+For Implemention, @w{@url{http://srfi.schemers.org}}) tries to foster
+a kind of standardization between the regular language revisions.
+
+To hide these language details from the writer of Arcfiles, Arc
+defines a special dialect of the Scheme language.  A number of special
+features available in R5RS Scheme, as for instance continuations,
+macros or the full number tower, are removed from it, since there is
+no need for these advanced features in build scripts.  A large number
+of special functions are added however, to ease the interfacing to the
+underlying operating system.
+
+This chapter lists all functions, which are available in the build
+scripts, besides the tasks discussed in the previous chapter.
+
+@menu
+* Functions vs Tasks::          Functions vs. Tasks
+* Control structures::          Control structures
+* Logical functions::           Logical functions
+* Predicates::                  Predicates
+* String functions::            String functions
+* Path functions::              Path functions
+* List functions::              List functions
+* Numerical functions::         Numerical functions
+* io functions::                IO functions
+@end menu
+
+@c ....................................................................
+@node Functions vs Tasks, Control structures, Arc scheme, Arc scheme
+@subsection Functions vs. Tasks
+
+What are the differences between functions and tasks? Aren't tasks
+functions?  Even if functions and tasks look similar from the build
+script author's view, there are some notable differences between them:
+
+@enumerate
+@item
+Tasks are normally complex operations working on the dependency chain
+between statements, i.e. consuming and producing attributed values.
+Functions in contrast are lowlevel, working on basic strings or
+numbers, adding iteration support, etc.  Functions may provide values
+for statement return values, but normally don't.
+
+@item
+Tasks normally hide special system and platforms knowledge for a given
+operation.  Tasks are small facades for possible large sets of special
+(and mostly dirty) implementations and are often only wrappers for
+platform specific subclasses.  Functions work identical on all
+platforms.
+
+@item
+Tasks use the keyword argument notation and always does now about
+default values for optional parameters, when no arguments are given.
+Functions are strict in number of arguments.
+
+@item
+Functions often provide direct access to the underlying scheme
+implementation of Arc, but hide the Arc processor's kernel from bad or
+broken scriptlets.
+@end enumerate  
+
+
+@c ....................................................................
+@node Control structures, Logical functions, Functions vs Tasks, Arc scheme
+@subsection Control structures
+
+@defun (let (@var{bindings}) @var{body})
+@end defun
+
+@defun (let* (@var{bindings}) @var{body})
+@end defun
+
+@defun (let @var{loop name} (@var{arguments}) @var{body})
+@end defun
+
+@defun (if @var{condition} @var{true-branch} [@var{false-branch}])
+@end defun
+
+@defun (case @var{comparator} (@var{key-mapping})* [(else @var{else-expr})])
+@end defun
+
+@defun (or @var{e1} @var{e2} ... @var{en})
+@end defun
+
+
+
+@c ....................................................................
+@node Logical functions, Predicates, Control structures, Arc scheme
+@subsection Logical functions
+
+@defun > @var{k1} @var{k2} ... @var{kn}
+Indicates whether every @var{kx} is larger than all its successors.
+All @var{kx} must have numerical type.
+
+@example
+(> 1 2 3 4)
+@result{} #f
+(> 10 9 8 7)
+@result{} #t
+(> 15 1 4)
+@result{} #f
+@end example
+@end defun
+
+@defun < @var{k1} @var{k2} ... @var{kn}
+Indicates whether every @var{kx} is smaller than all its successors.
+All @var{kx} must have numerical type.
+@example
+(< 1 2 3 4)
+@result{} #t
+(< 10 9 8 7)
+@result{} #f
+(< 15 1 4)
+@result{} #f
+@end example
+@end defun
+
+@defun >= @var{k1} @var{k2} ... @var{kn}
+Indicates whether every @var{kx} is larger or equal than all its
+successors.  All @var{kx} must have numerical type.
+@end defun
+
+@defun <= @var{k1} @var{k2} ... @var{kn}
+Indicates whether every @var{kx} is smaller or equal than all its
+successors.  All @var{kx} must have numerical type.
+@end defun
+
+@defun = @var{k1} @var{k2} ... @var{kn}
+Indicates whether all arguments are equal.  All @var{kx} must have
+numerical type.
+@end defun
+
+@defun equal? @var{o1} @var{o2} ... @var{on}
+Indicates whether all arguments are equal.  The arguments @var{ox} may
+have any type (including complex type as lists or pairs).  The
+arguments are compared by their content and type, not by their
+internal representation.
+
+@example
+(equal? '(1 1) '(1 1)
+@result{} #t
+(equal? "abc" (string-append "a" "b" "c"))
+@result{} #t
+(equal? "list?" 'list?)
+@result{} #f
+@end example
+@end defun
+
+@defun not @var{k} 
+Negates the boolean interpretation of the value of argument @var{k},
+i.e. since only @samp{#f} is regarded as false value in scheme, only
+the expression @code{(not #f)} returns @samp{#t}.
+@example
+(not (= 1 2))
+@result{} #t
+(not "abc")
+@result{} #f
+@end example
+@end defun
+
+@defun null? @var{k}
+Indicates whether the argument @var{k} is a null pointer.
+@example
+(null? "abc")
+@result{} #f
+(null? ())
+@result{} #t
+@end example
+@end defun
+
+@defun (and @var{e1} @var{e2} ... @var{en})
+@end defun
+
+@defun (begin @var{e1} @var{e2} ... @var{en})
+@end defun
+
+
+
+@c ....................................................................
+@node Predicates, String functions, Logical functions, Arc scheme
+@subsection Predicates
+
+Predicates are used to test the type of an object.
+
+@defun string? @var{k} -> boolean
+Indicates whether @var{k} is a string.  Note that paths are
+represented as string too.
+@end defun
+
+@defun number? @var{k} -> boolean
+Indicates whether @var{k} is a number, either integer or real.  Since
+real numbers in scheme are not identical to floating point numbers in
+other programming languages, and all integers are real's in scheme,
+too, there's no need for a @code{real?} or @samp{rational?} function
+in Arc scheme.
+@end defun
+
+@defun integer? @var{k} -> boolean      
+Indicates whether @var{k} is an integer.
+@end defun
+
+@defun procedure? @var{k} -> boolean
+Indicates whether @var{k} is a procedure.
+@end defun
+
+@defun list? @var{k} -> boolean
+Indicates whether @var{k} is a list.
+@end defun
+
+@defun pair? @var{k} -> boolean
+Indicates whether @var{k} is a pair.
+@end defun
+
+@defun boolean? @var{k} -> boolean
+Indicates whether @var{k} is a boolean.
+@end defun
+
+@defun symbol? @var{k} -> boolean
+Indicates whether @var{k} is a symbol.
+@end defun
+
+@defun string-list? @var{k} -> boolean
+Indicates whether @var{k} is a list, containing only strings a
+elements.
+@example
+(string-list? '("abc" "def" "xyz"))
+@result{} #t
+(string-list? '(abc "xyz"))
+@result{} #f
+@end example
+@end defun
+
+@defun alist? @var{k} -> boolean
+Indicates whether @var{k} is an alist (association list).
+@end defun
+
+
+@c ....................................................................
+@node String functions, Path functions, Predicates, Arc scheme
+@subsection String functions
+
+@defun string-append @var{s1} @var{s2} ... @var{sn}
+Concates all string arguments @var{sx} to a new string.  If no
+argument is given at all, returns the empty string @samp{""}.
+@example
+(string-append "hello" " " "world")
+@result{} "hello world"
+(string-append "")
+@result{} ""
+@end example
+@end defun
+
+@defun string-split @var{s} @var{c}
+Splits a string @var{s} at the locations of character @var{c}, and
+returns the substrings as a list.
+@example
+(string-split "/usr/local/lib:/usr/lib:/opt/lib" #\:)
+@result{} ("/usr/local/lib" "/usr/lib" "/opt/lib")
+@end example
+@end defun
+
+@defun string-suffix? @var{s1} @var{s2}
+Indicates whether @var{s2} is a common suffix of @var{s1}.
+@example
+(string-suffix? "hello world" "world")
+@result{} #t
+(string-suffix? "abc" "abcx")
+@result{} #f
+@end example
+@end defun
+
+@defun string-prefix? @var{s1} @var{s2}
+Indicates whether @var{s2} is a common prefix with @var{s1}.
+
+@example
+(string-prefix? "hello world" "hel")
+@result{} #t
+(string-prefix? "abc" "abcx")
+@result{} #f
+@end example
+@end defun
+
+@defun string-length @var{s1}
+Returns the length of string @var{s1}.
+@example
+(string-length "abc")
+@result{} 3
+@end example
+@end defun
+
+
+@c ....................................................................
+@node Path functions, List functions, String functions, Arc scheme
+@subsection Path functions
+
+Path functions helps to work with hierachically organized path
+structures.  Path working is done on the logical structure of a path,
+i.e. on the node steps seperated by the path seperated (e.g. / on
+unix).
+
+@defun path-length @var{s} -> integer
+Returns the number of node steps in the path @var{s}.  Note that the
+root node (/ for unix systems) counts!  Therefor @code{(path-length
+"/usr/local")} will return 3, but @code{(path-length "usr/local")}
+only 2.
+@end defun
+
+@defun path->list @var{s} -> list
+Transforms a path @var{s} into a list by spliting the path at it's
+path seperators.  Each node becomes an element on its own.  Note that
+the root node is added seperately.
+
+@example
+(path->list "/usr/local")
+@result{} ("/" "usr" "local")
+@end example
+@end defun
+
+@defun list->path @var{ls} -> s
+Transforms a list @var{ls} (of strings) into a path.
+
+@example
+(list->path '("/" "usr" "local"))
+@result{} "/usr/local"
+@end example
+@end defun
+
+path-without-last-ext
+path-without-last-comp
+path-append
+path-append-ext
+path-replace-last-ext
+path-last-comp
+path-ext
+
+@defun path-cwd ->string
+Returns the current working directory.
+@end defun
+
+@defun path-absolute? @var{s} -> boolean
+Indicates whether the path @var{s} represents an absolute path.  Paths
+are regarded as absolute if the begin with a / (for unix systems), or
+a /, a // or drive name (e.g. "c:") following a / (on windows
+systems).
+@end defun
+
+@defun path-begins-with? @var{s} @var{s1} -> boolean
+Indicates whether a path @var{s} begins with a subpath @var{s1}.
+@end defun
+
+path-abbreviate
+path-normalize
+path-absolutize
+
+@c ....................................................................
+@node List functions, Numerical functions, Path functions, Arc scheme
+@subsection List functions
+
+@defun list @var{o1} @var{o2} ... @var{on}
+@end defun
+
+@defun make-alist @var{key1} @var{val1} @var{key2} @var{val2} ... @var{keyn} @var{valn}
+@end defun
+
+@defun string-list->string @var{sl}
+@end defun
+
+@defun length @var{l}
+Returns the number of elements in list @var{l}.
+@end defun
+
+@defun map @var{proc} @var{l}
+@end defun
+
+@defun for-each @var{proc} @var{l}
+@end defun
+
+
+@c ....................................................................
+@node Numerical functions, io functions, List functions, Arc scheme
+@subsection Numerical functions
+
+
+@c ....................................................................
+@node io functions,  , Numerical functions, Arc scheme
+@subsection I/O functions
+
+@defun echo @var{o1} @var{o2} ... @var{on}
+Print the string representation of all arguments @var{ox} to
+stdout, and break to the next line by printing @samp{#\nl}.
+
+@example
+(echo "compile application ...")
+@result{} compile appication ...
+@end example
+@end defun
+
+
+@c ====================================================================
+@node Invoking arc, Extending, Arc scheme, Top
+@chapter Invoking @value{PROGNAME}
+@cindex invoking
+@cindex version
+@cindex options
+@cindex usage
+@cindex help
+@cindex getting help
+
+The format for running the @value{PROGNAME} program is:
+
+@example
+@value{PROGNAME} @var{options} @var{statement}
+@end example
+
+@value{PROGNAME} supports the following options:
+
+@table @samp
+@item -C @var{dir}
+@itemx --dir @var{dir}
+Change to directory @var{dir} before reading a build script or doing
+anything else.  The 'current working directory' is moved to @var{dir},
+so that configuration files, etc. are located in the given directory,
+not in the current working directory, from where arc has been called.
+
+@item -f @var{file}
+@itemx --script @var{file}
+Load @var{file} as build script instead of utilizing the normal search
+for a build file.  If the option @i{-r} is specified, too, search's for
+this file recursively upwards the directory hierachy.
+
+@item -r
+@itemx --rec
+By default arc searchs for a build script only in the current working
+directory.  If the -r options is specified it tries to search for a
+build script recursively upwards from the current working directory and
+uses the first found.
+
+@item -o @var{OS}
+@itemx --os @var{OS}
+Assumes the operating system @var{OS} during evaluation.  @var{OS} is set by
+default to the symbolic name of the current machine, but using this
+switch one can force the selection of targets with special os:
+properties
+
+@item -k
+@itemx --keep-going
+Continue as much as possible after an error; continue if statement failed
+
+@item -v
+@itemx --verbose
+Be verbose.
+
+@item -i
+@itemx --info
+Show information about the callable statements in the script to be
+loaded and exit
+
+@item -h
+@itemx --help
+Print an informative help message describing the options and then exit.
+
+@item -V
+@itemx --version
+Print the version number and the scheme interpreter Arc runs with to the
+standard error output and then exit.
+@end table
+
+If no @var{statement} is given on the command line arc uses the default
+statement as stated in the @code{defproject} statement in the build
+script used.
+
+
+
+
+@c ====================================================================
+@node Extending, Install, Invoking arc, Top
+@chapter Extending arc
+
+** write **
+
+
+@c ====================================================================
+@node Install, Problems, Extending, Top
+@chapter Installing arc
+@cindex install
+
+Some work has been done to make Arc as far selfcontained as possible.
+I.e. building and installing of Arc should not depend one other build
+systems like make or perl.  Building and installing Arc should
+therefore be simple, if however something awkward.
+
+@menu
+* Scheme interpreter::          Scheme interpreter
+* Install Unix::                Installing Arc on Unix platforms
+* Install Win32::               Installing Arc on Windows platforms
+@end menu
+
+
+@c --------------------------------------------------------------------
+@node Scheme interpreter, Install Unix, Install, Install
+@section Scheme interpreter
+@cindex Schemer interpreter
+
+To run Arc you need a working Scheme interpreter.  Since the Scheme
+standard (R5RS) has a somewhat limited support for system and i/o
+functions, only a subset of possible Scheme implementations available
+(for free) are supported.  At the moment the following Scheme
+implementations are supported:
+
+@table @samp
+@item SCM
+The portable, small and very fast scheme Implementation by Aubrey
+Jaffer.  It is available for free from
+@w{@url{http://swissnet.ai.mit.edu/~jaffer/SCM.html}}, and runs on
+such diverse platforms as Unix, VMS, plan9, Win32, Macintosh, Atari,
+etc.  Some linux distributions have SCM pre-packaged.@refill
+
+@item guile
+The GNU implementation of Scheme, originally based on SCM, but in the
+current version notably different.  Guile comes with an embedable
+library and a standalone Scheme interpreter.  Both versions 1.3 and 1.4
+are tested (see @w{@url{http://www.gnu.org/software/guile}}).  Most GNU
+systems should have guile available nowadays, but also for non obvious
+systems, like BeOS, there are ports available (see
+@w{@url{http://www.bebits.com}}).@refill
+
+@item ksi
+Another embedable Scheme implementation from Russia, which comes with a
+standalone interpreter.  Its quite usable, even if fairly slow.  See
+@w{@url{http://www.sourceforge.net/projects/ksi}}.@refill
+@end table
+
+Arc comes with its own Scheme implementation called @dfn{Asc} (Arc
+Scheme).  This is derived from SCM (by Aubrey Jaffer), but the
+dependencies for SLIB and some other exotic features, not used for Arc
+are removed to make it standalone.  The source code is part of the
+standard distribution.
+
+Asc is builded automatically if you select it as the Scheme
+interpreter to be used with Arc.
+
+
+@c --------------------------------------------------------------------
+@node Install Unix, Install Win32, Scheme interpreter, Install
+@section Installing Arc on Unix platforms
+@cindex Installation, Unix
+
+To install Arc on a Unix platform (Linux, BSD, OpenBSD, FreeBSD, ...) do
+the following:
+
+@table @strong
+@item Decompress the arc package
+Depending on the archive you've got you have to do:
+
+@example
+$ tar xplzvf arc-x.x.x.tgz
+@end example
+
+where @code{x.x.x} stands for the version of arc.  Change to the
+extracted directory @samp{arc-x.x.x}.  All the following commands have
+to be executed from within that directory.
+
+
+
+@item Configure 
+You have to configure the build system before bootstrapping.  
+
+@example
+$ ./configure
+@end example
+
+The configure script will try to find out what system it runs on, which
+Scheme interpreter you have installed etc.  Sometimes (depending on the
+system you have), this will fail.  In that case you have to give the
+selection manually by passing options to the configure scripts.  Here's
+the list of options the configure scripts honors:
+
+@table @code
+@item --build=@var{sys-name}
+Gives the system name.  This is the same as reported by the command
+@command{uname -s}.
+
+@item --exec-prefix=@var{dir}
+The directory prefix used for executables.  Defaults to
+@file{$prefix/bin}.
+
+@item --prefix=@var{dir}
+Specifies the directory prefix used for the installation process. This
+defaults to @file{/usr/local}.
+
+@item --datadir=@var{dir}
+The system's datadir, this is defaults to @file{$prefix/share}.
+
+@item --bindir=@var{dir}
+Where to install the Arc binary; defaults to @file{$exec_prefix/bin}.
+
+@item --infodir=@var{dir}
+Where to install the info (texinfo) files; defaults to @file{$prefix/info}.
+
+@item --arcdir=@var{dir}
+Gives the home directory of the Arc system, where the Arc file will be
+installed.  By default this is @file{$datadir/arc}.
+
+@item --mandir=@var{dir}
+Where to install manual pages; defaults to @file{$prefix/man}.
+
+@item --scheme=@var{scheme-impl}
+Gives the Scheme interpreter to use.  This settings disables the search
+for an existing Scheme interpreter.  The following values are possible:
+@samp{scm}, @samp{guile}, @samp{ksi}, @samp{asc}.
+@end table
+
+Notably the @samp{--scheme} options is important, if you want to use the
+included Scheme interpreter Asc (which normally is only a fallback if no
+other Scheme interpreter could be found).
+
+The configuration writes a file @file{bootstrap.sh} in the packages
+root directory.
+
+
+
+@item Building
+After configuration it is time to build the system.
+
+@example
+$ ./bootstrap.sh
+@end example
+
+Depending on the settings during configuration, this creates now a set
+of scripts, configuration files, etc. which makes Arc working in the
+current working directory---enough working at least to process its own
+installation and maintaining.  If the included Scheme interpreter Asc
+has been selected, this step starts to compile the C files in the
+directory Asc.  Note that you need to have a working (and supported) C
+compiler installed for this.
+
+If this step finishes successfully, your Arc system works already
+(part of the bootstrapping is Arc configuring itself!).  It's now time
+for installation.
+
+
+
+@item Installing
+Installation is easy as well (you need to have root privileges for
+this, if your installation destination requires that):
+
+@example
+$ ./arc install
+@end example
+
+This should copy the necessary files, binaries, scripts and
+documentation to the appropriate places in your system.
+@end table
+
+
+@c --------------------------------------------------------------------
+@node Install Win32,  , Install Unix, Install
+@section Installing Arc on Windows platforms
+@cindex Installation, Windows
+
+-- to write --
+
+
+@c ====================================================================
+@node Problems, Copying, Install, Top
+@chapter Reporting Bugs
+@cindex bugs
+@cindex problems
+
+If you find a bug in Arc, please use the bug reporting tools on
+@w{@url{http://savannah.gnu.org/projects/arc}}, or send an e-mail to
+@email{gck@@eyestep.org}.  You should include the version number,
+which you can find by running @command{arc --version}, information
+about the system, plattform and scheme interpreter used.@refill
+
+If you have other questions, comments or suggestions about
+@command{arc}, contact the author via email to @email{gck@@eyestep.org}.
+The author will try to help you out, although he may not have time to
+fix your problems.
+
+
+
+
+@c ====================================================================
+@node Copying, Function Index, Problems, Top
+@include gpl.texinfo
+
+
+
+
+@c ====================================================================
+@node Function Index, Concept Index, Copying, Top
+@unnumbered Index of functions
+
+@printindex fn
+
+@c ====================================================================
+@node Concept Index,  , Function Index, Top
+@unnumbered Index of concepts
+
+@printindex cp
+
+@shortcontents
+@contents
+@bye
+

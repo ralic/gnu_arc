@@ -1,0 +1,209 @@
+;;  This file is part of the arc package
+;;  Copyright (C) 2002, 2003 by Gregor Klinke
+;;
+;;  This library is free software; you can redistribute it and/or modify it
+;;  under the terms of the GNU Lesser General Public License as published
+;;  by the Free Software Foundation; either version 2.1 of the License, or
+;;  (at your option) any later version.
+;;
+;;  This library is distributed in the hope that it will be useful, but
+;;  WITHOUT ANY WARRANTY; without even the implied warranty of
+;;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;;  Lesser General Public License for more details.
+;;
+;;  You should have received a copy of the GNU Lesser General Public
+;;  License along with this library; if not, write to the Free Software
+;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+;; $Id: Arcfile,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+
+;; arcfile for building, installing, and cleaning arc
+(project arc-app
+         project: "arc"
+         version: "0.2.0"
+         info: "Arc application"
+         basedir: "."
+         default: 'all)
+
+;; properties
+(stmt prefix 
+      scope: 'local 
+      "/opt/test")
+(stmt bindir 
+      scope: 'local 
+      (string-append (-> prefix) "/bin"))
+(stmt infodir 
+      scope: 'local  
+      (string-append (-> prefix) "/share/info"))
+(stmt arcdir 
+      scope: 'local 
+      (string-append (-> prefix) "/share/arc"))
+(stmt arc-tasks-dir
+      scope: 'local
+      (string-append (-> prefix) "/share/arc/tasks"))
+
+(stmt configure
+      info: "configures the application"
+      (let ((values (make-alist "arc-version" (prop version))))
+        (filter src: "src/version.scm.in"
+                values: values)
+        (filter src: "doc/arc.texinfo.in"
+                separator: #\&
+                values: values)
+        (filter src: "doc/arc.1.in"
+                values: values)))
+
+(stmt doc-pdf
+      depends: 'configure
+      (echo (texinfo src: "doc/arc.texinfo"
+                     format: 'pdf)))
+(stmt doc-info
+      depends: 'configure
+      (echo (texinfo src: "doc/arc.texinfo"
+                     split?: #t
+                     format: 'info)))
+(stmt doc-dvi
+      depends: 'configure
+      (echo (texinfo src: "doc/arc.texinfo"
+                     format: 'dvi)))
+(stmt doc-plain
+      depends: 'configure
+      (echo (texinfo src: "doc/arc.texinfo"
+                     format: 'plain)))
+
+(stmt doc
+      depends: '(doc-pdf doc-dvi doc-info doc-plain)
+      #t)
+
+(stmt all
+      depends: 'configure
+      'done)
+
+
+(stmt dist
+      depends: 'all
+      (dist files: (fileset pattern: '("src/**/*.scm"
+                                       "src/**/*.in"
+                                       "src/**/*.decl"
+                          
+                                       "boot/*.scm"
+                                       "asc/**/*.c"
+                                       "asc/**/*.h"
+                                       "asc/**/*.h.in"
+                                       "asc/build-unix.sh"
+                                       "asc/*.scm"
+                          
+                                       "doc/*.scm"
+                                       "doc/*.in"
+                                       "doc/gpl.texinfo"
+                          
+                                       "test/*.m"
+                                       "test/*.c"
+                                       "test/*.h"
+                                       "test/*.java"
+                                       "test/Arcfile"
+                          
+                                       "doc/texinfo.tex"
+                                      
+                                       "README"
+                                       "NEWS"
+                                       "TODO"
+                                       "INSTALL"
+                                       "ChangeLog"
+                                       "COPYING"
+                                       "Arcfile"
+                                       "AUTHORS"
+                                       "configure"))))
+
+(stmt clean
+      (clean res: (fileset pattern: '("asc/*.o"
+                                      "asc/asc"
+                                      "test/_build"
+                                      "doc/*.aux"
+                                      "doc/*.cp"
+                                      "doc/*.cps"
+                                      "doc/*.fn"
+                                      "doc/*.fns"
+                                      "doc/*.ky"
+                                      "doc/*.log"
+                                      "doc/*.pg"
+                                      "doc/*.toc"
+                                      "doc/*.tp"
+                                      "doc/*.vr"
+                                      "*.tar.gz"))))
+
+(stmt distclean
+      depends: 'clean
+      (clean res: (fileset files: '("bootstrap.sh"
+                                    "src/config.scm"
+                                    "src/version.scm"
+                                    "asc-init.scm"
+                                    "arc"
+                                    "doc/arc.1"
+                                    "app"
+                                    "doc/*.pdf"
+                                    "doc/*.dvi"
+                                    "doc/*.info"
+                                    "doc/*.info-1"
+                                    "doc/*.info-2"
+                                    "doc/*.info-3"
+                                    "doc/*.info-4"
+                                    "doc/*.info-5"))))
+
+
+;; --------------------------------------------------------------------
+;; building asc from the arcfile
+;; --------------------------------------------------------------------
+(stmt c-sources
+      scope: 'local
+      depends: 'configure
+      (fileset pattern: "asc/*.c"))
+
+(stmt compile-asc
+      info: "compiles all c sources."
+      (c-compile sources: (-> c-sources)
+                 includes: '("asc")
+                 debug?: #f
+                 shared?: #f
+                 static?: #t
+                 warn-level: 'high
+                 opt-level: 'high))
+
+(stmt link-asc
+      os: 'windows
+      (echo "Windows platforms not supported yet"))
+
+(stmt link-asc
+      os: 'linux
+      (link outdir: "asc"
+            files: (-> compile-asc)
+            libs: '("m")
+            shared?: #f
+            appnm: "asc"))
+
+(stmt asc
+      (copy file: (-> link-asc)
+            force?: #t
+            tofile: "app/arc"))
+
+
+;; --------------------------------------------------------------------
+;; installing asc/arc
+;; --------------------------------------------------------------------
+(stmt install
+      depends: 'all
+      (install src: "app/arc"
+               dest: (-> bindir))
+      (install src: (fileset pattern: "src/*.scm")
+               dest: (-> arcdir))
+      (install src: (fileset pattern: "src/tasks/*.scm")
+               dest: (-> arc-tasks-dir))
+      (install src: (fileset pattern: '("doc/(.*\\.info(-[0-9]+)?$)"))
+               dest: (-> infodir)))
+
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:
+

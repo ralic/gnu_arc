@@ -1,0 +1,73 @@
+;;  This file is part of the arc package
+;;  Copyright (C) 2002, 2003 by Gregor Klinke
+;;
+;;  This library is free software; you can redistribute it and/or modify it
+;;  under the terms of the GNU Lesser General Public License as published
+;;  by the Free Software Foundation; either version 2.1 of the License, or
+;;  (at your option) any later version.
+;;
+;;  This library is distributed in the hope that it will be useful, but
+;;  WITHOUT ANY WARRANTY; without even the implied warranty of
+;;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;;  Lesser General Public License for more details.
+;;
+;;  You should have received a copy of the GNU Lesser General Public
+;;  License along with this library; if not, write to the Free Software
+;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+;; $Id: task-clean.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+
+
+(arc:provide 'task-clean)
+
+
+(arc:log 'debug "loading 'clean' task")
+
+;; cleans a project area.  "Cleaning" means, removing all implicitly or
+;; explicitly build files and directories.  
+;;
+;; Keywords:
+;; :dir STRING
+;; start clean operation from this base directory; by default the clean
+;; operation starts always from the directory stated as basedir in the
+;; current working context
+;;
+;; :res STRING-LIST
+;; a list of all "resources" (files and directories) to be removed.  
+;; directories are always deleted recursively 
+;;
+;; RETURNS
+;; <unspecified>
+
+(define arc:clean-keywords '((dir string optional)
+                             (res strlist required)) )
+
+(define (arc:clean props body)
+  (let* ((res (arc:aval 'res props ())) 
+         (dir (arc:aval 'dir props 
+                        (arc:context-basedir (arc:context-current)))) )
+    
+
+    (arc:log 'debug "clean ... (root: " dir ")")
+    
+    (arc:clean-implicit dir)
+    
+    (let loop ((r res))
+      (if (null? r)
+          'done
+          (begin
+            (cond
+             ((arc:sys.file-directory? (car r)) (arc:sys.remove-dir (car r)))
+             ((arc:sys.file-exists? (car r)) (arc:sys.remove-file (car r)))
+             (else 'ignore))
+            (loop (cdr r)))))
+    ;; do something more?
+    )
+  '<unspecified>)
+
+(arc:register-task 'clean arc:clean arc:clean-keywords)
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:

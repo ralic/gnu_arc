@@ -1,0 +1,13 @@
+- c-compile: extend.  Add more compiler-flag abstractions
+
+- java-compile: extend.  Support more compiler-flags.  Compare different
+  compilers (javac, jikes, kopi, etc.) to support a generic api for all.
+
+- implement dependency control for the java compiler.
+
+- implement a ":depends" keyword on the "arc:deps" task.  This will make
+  .dep files depend on the source files!
+
+
+
+

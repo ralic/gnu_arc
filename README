@@ -1,0 +1,229 @@
+The Arc build tool project
+
+    The Arc build tool project is an experiment in developing a new build
+    tool chain for the development of everyday applications and utilities.
+    It should combine most of the functions now found in tools like
+    autoconf, automake, libtool and make.
+
+    
+
+Why another build system?
+
+    I found myself repeatedly spend more time in managing the build system
+    than writing "real" code.  If I interpret frequently repeated criticism
+    on the net correctly, then I'm no the only one, who experiences severe
+    limitations of the make tools and its various frontends,
+    e.g. autoconf/automake.  So what is really wrong with
+    make/autoconf/automake or to put it better: What can be improved? (All
+    the following is not new, and does not offspring necessarily my limited
+    understandings of how make and its companions are working in deepest
+    detail, but I collected most of what I read by others and experienced
+    myself during years of work with make and different generations of
+    automake and autoconf).
+
+    - automake builds on top of make and Makefiles, which themselves have a
+      number of severe limitations.  They are not portable, even between
+      related platforms (as e.g. the most common UN*X platforms), and is
+      sometimes really difficult to understand which builtin patterns match
+      and which not.  Furthermore makefiles are limited to one level
+      directories.  Managing complex, multilevel directory projects
+      therefore required repeated recursive Makefile structures, with
+      Makefile calling itself over and over again, which is not even not
+      only slow, but also tend to become unnecessary complex.
+
+    - Makefiles work mostly by internal magics.  A large number of actions
+      are builtin (e.g. how to compile C files), but even more are not.  In
+      Makefiles all the additional logic necessary to work with complex
+      packages and software is missing, e.g. renaming, moving or deleting
+      files, zipping and unzipping, filtering and replacing templates, etc.
+      To achieve this one have to write "bash commands" into the Makefile
+      itself, small pieces of system shell code, which are defacto seldomly
+      portable.
+     
+    - Moreover this "internal magic" limits the extensibility of make and
+      makefiles.  Not to say that it is impossible, but extending make for
+      new languages or applications introduces to much logic into the
+      Makefiles, which should normally be hidden from the normal Makefile
+      "user".
+
+    - Automake is kind of frontend to the make system; it generates
+      Makefiles from a simplified Makefile extract.  Principal a good idea
+      and for a lot of projects really usefull, automake lacks the total
+      availability to be extensible.  Automake can't be extended (or even
+      modified) without a thorough understand of automake's kernel logic.
+
+
+
+Features Arc aims at:
+
+    The following is only a short list of ideas and features the Arc build
+    system should provide:
+
+    - Portability. Build scripts should work for most applications and
+      platforms without system specific code and without any platform
+      modifications.  Conditional dependency tracking, dependending on the
+      local host and os system, should be integrated.
+
+    - Task based. Very similar to the desprictive nature of the ant system
+      (http://jakarta.apache.org/ant) the real work should be done by
+      "tasks".  Tasks are subportions of functionality, e.g. for compiling
+      C source files, copying files, creating directories, etc.  Tasks are
+      pluggable, and the core distribution should come with a set of task
+      mostly used in normal applications and distributing packages.
+
+    - API for Tasks. To write a new task (i.e. to extend
+      Arc), should only need to understand the API (i.e. the input
+      values, the return values) and how to encapsulate the action in
+      scheme code.
+
+    - Absolutely no magic. The Arc kernel does no magic, i.e. it does not
+      now how do calculate dependencies for '.o'-files related to
+      '.c'-files.  It has no builtin variables, etc.
+    
+
+Why Scheme
+
+    Arc will be written entirely in Scheme (except for the kernel, which is
+    written in C), a small but very powerful language.  Even if some
+    features are missing, which seems to make other languages a better
+    candidate for such a tool (e.g. perl or bash), the scheme language is
+    outstanding in its reduced elegance and simplicity and very simple to
+    learn.  There's is nearly nothing which can not be done in scheme
+    (without changing the language itself).  But one of the major features
+    (which it shares with other LISP dialects and similar languages) is
+    that code can be treated as data, and data as code.  In this way users
+    may mix statements and targets with real scheme code, and there's no
+    need for a declarative Makefile syntax and an scripting extension
+    language.
+
+
+
+Processing model
+
+    The processing model of arc is leaned on the experience with the ant
+    make tool.  But the philosophy of arc is somewhat different to that of
+    ant and make.
+
+    In Arc one provides one or more "Arcfile"s for a project, in which a
+    number of "statements" are given.  These "statements" are somewhat
+    similar to targets in ant and make, since they are combined by static
+    and lazy dependencies.  Differently to make, these "targets" never
+    automatically embrace dependencies between source and object files, but
+    only between statements in the Arcfile itself.  Sourcefile dependency
+    are handled seperatedly by the different tasks.
+
+    **Rationale**: Dependencies are handled quite different in different
+    language environments.  Various Java compilers for instance handle the
+    dependencies between source files on their own, which sometimes leads
+    to conflicts between the make system and the language tool.
+    
+    For example the following Arcfile builds a sample application:
+
+
+         1 (defproject 'sample-project
+         2   ':builddir "src/"
+         3   ':default 'link)
+         4
+         5 (defstmt 'build-dir
+         6   (lambda () "_build"))
+         7
+         8 (defstmt 'init
+         9   (lambda () (arc:mkdir ':dir ($ 'build-dir))))
+        10
+        11 (defstmt 'c-sources
+        12   (lambda () 
+        13     (arc:fileset ':pattern "*.c")))
+        14
+        15 (defstmt 'compile
+        16   ':depends 'init
+        17   (lambda () 
+        18     (arc:c-compile ':sources ($ 'c-sources)
+        19                    ':outdir ($ 'build-dir) )))
+        20
+        21 (defstmt 'link
+        22   (lambda ()
+        23     (arc:link ':static? #f
+        24               ':objfiles ($ 'compile)
+        25               ':dest "hello-world")))
+
+
+    This short example shows some major features.  (1) In line 18 the
+    normal compilation is stated (by the Arc task "arc:c-compile").  It
+    takes a list of c sources, by requesting the value of the statement
+    "c-sources" ("($ 'c-sources)") (a so called "lazy dependency", since
+    statements which depend on the "c-sources" statement are only
+    evaluated, when the return value is requested here).  (2) Each
+    statement has a return value, which is set by the tasks in its body.
+    The return value of the "arc:fileset" task is a list of all matched
+    files (line 13).  The return value of the "arc:c-compile" task is a
+    list of all object files under the control of the c-compiler.  (3) The
+    Arc system ensures, that the "c-sources" statement is evaluated only
+    once, its returnvalue is cached and delivered correctly to requesters.
+    The "compile" statement shows a "static dependency", too, by declaring
+    "':depends 'init".
+
+    To "run" this Arcfile a user would be somewhere in the source
+    directory, and execute the following command:
+
+        $> arc
+
+    which would start dependency tracking at the default target stated in
+    the "defproject" header of the Arcfile (here line 3: "':default
+    'link").  The user can specify a different default statement:
+
+        $> arc compile
+
+    There are many other features, e.g. conditional dependencies,
+    non-cached statements, etc.  Please see the documentation for more
+    details.
+
+
+Status
+    
+    Arc is far from begin complete.  The current code is a first draft, but
+    already shows the path to go.  The number of available tasks is very
+    limited, and the tasks themselves lack a number of functionalities one
+    would expect.  Here's a list of things to be done:
+
+    - Integrate operating and machine specifics (e.g. which C compiler to
+      use, which options are accepted).  This information should be added
+      to a database, and a checking tool would set up a (project) local
+      "Arcconfig" file, which would be used by the arc process.
+
+    - Write tasks!
+
+    - Implement a test only mode (just print the command, do not work
+      really)
+
+    - Better error management
+
+    - Precheck dependencies; check for cyclical dependencies
+
+    - a lot more ...
+
+
+Installation
+
+    See the file INSTALL for details
+
+
+    
+Where to get and find arc
+
+    The latest version can be downloaded from http://www.eyestep.org/arc/
+
+    For comments and feedback: gck@eyestep.org
+    Homepage: http://www.eyestep.org/arc
+
+
+
+Copyright and License
+
+    Arc is released under the LGPL, the Lesser GNU Puplic License.  For
+    full detail see COPYING.
+
+
+Have fun!
+
+
+Gregor Klinke

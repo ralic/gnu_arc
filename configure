@@ -1,0 +1,471 @@
+#!/bin/sh
+
+# this is an install script which installs Arc on a Unix system.  Parts of
+# this scripts are extracted from automatic generated autoconf configure
+# scripts
+
+if expr a : '\(a\)' >/dev/null 2>&1; then
+  as_expr=expr
+else
+  as_expr=false
+fi
+
+# Name of the executable.
+as_me=`(basename "$0") 2>/dev/null ||
+$as_expr X/"$0" : '.*/\([^/][^/]*\)/*$' \| \
+	 X"$0" : 'X\(//\)$' \| \
+	 X"$0" : 'X\(/\)$' \| \
+	 .     : '\(.\)' 2>/dev/null ||
+echo X/"$0" |
+    sed '/^.*\/\([^/][^/]*\)\/*$/{ s//\1/; q; }
+  	  /^X\/\(\/\/\)$/{ s//\1/; q; }
+  	  /^X\/\(\/\).*/{ s//\1/; q; }
+  	  s/.*/./; q'`
+
+build=`uname -s 2>/dev/null` || build="unknown"
+
+case "$build" in
+  Linux | SunOS)
+    arc_default_prefix=/usr/local
+    ;;
+  Cygwin* )
+    arc_default_prefix=/usr
+    ;;
+  BeOS)
+    arc_default_prefix=/boot/home/config
+    ;;
+  Windows | Win32)
+    arc_default_prefix=c:\
+    ;;
+  *)
+    echo "unknown operating system $build"
+    exit -1
+esac
+
+exec_prefix=$arc_default_prefix
+prefix=$arc_default_prefix
+
+arc_init_help=
+arc_scheme_impl=
+
+## check options, to be a little more configure compliant
+arc_prev=
+for arc_option
+do
+  # If the previous option needs an argument, assign it.
+  if test -n "$arc_prev"; then
+    eval "$arc_prev=\$arc_option"
+    arc_prev=
+    continue
+  fi
+
+  arc_optarg=`expr "x$arc_option" : 'x[^=]*=\(.*\)'`
+
+  # Accept the important Cygnus configure options, so we can diagnose typos.
+  case $arc_option in
+
+  -arcdir | --arcdir | --arcdi | --arcd | --arc | --ar)
+    arc_prev=arcdir ;;
+  -arcdir=* | --arcdir=* | --arcdi=* | --arcd=* | --arc=* | --ar=*)
+    arcdir=$arc_optarg ;;
+
+  -bindir | --bindir | --bindi | --bind | --bin | --bi)
+    arc_prev=bindir ;;
+  -bindir=* | --bindir=* | --bindi=* | --bind=* | --bin=* | --bi=*)
+    bindir=$arc_optarg ;;
+
+  -build | --build | --buil | --bui | --bu)
+    arc_prev=build ;;
+  -build=* | --build=* | --buil=* | --bui=* | --bu=*)
+    build=$arc_optarg ;;
+
+  -datadir | --datadir | --datadi | --datad | --data | --dat | --da)
+    arc_prev=datadir ;;
+  -datadir=* | --datadir=* | --datadi=* | --datad=* | --data=* | --dat=* \
+  | --da=*)
+    datadir=$arc_optarg ;;
+
+  -disable-* | --disable-*)
+    arc_feature=`expr "x$arc_option" : 'x-*disable-\(.*\)'`
+    # Reject names that are not valid shell variable names.
+    expr "x$arc_feature" : ".*[^-_$as_cr_alnum]" >/dev/null &&
+      { echo "$as_me: error: invalid feature name: $arc_feature" >&2
+   { (exit 1); exit 1; }; }
+    arc_feature=`echo $arc_feature | sed 's/-/_/g'`
+    eval "enable_$arc_feature=no" ;;
+
+  -enable-* | --enable-*)
+    arc_feature=`expr "x$arc_option" : 'x-*enable-\([^=]*\)'`
+    # Reject names that are not valid shell variable names.
+    expr "x$arc_feature" : ".*[^-_$as_cr_alnum]" >/dev/null &&
+      { echo "$as_me: error: invalid feature name: $arc_feature" >&2
+   { (exit 1); exit 1; }; }
+    arc_feature=`echo $arc_feature | sed 's/-/_/g'`
+    case $arc_option in
+      *=*) arc_optarg=`echo "$arc_optarg" | sed "s/'/'\\\\\\\\''/g"`;;
+      *) arc_optarg=yes ;;
+    esac
+    eval "enable_$arc_feature='$arc_optarg'" ;;
+
+  -exec-prefix | --exec_prefix | --exec-prefix | --exec-prefi \
+  | --exec-pref | --exec-pre | --exec-pr | --exec-p | --exec- \
+  | --exec | --exe | --ex)
+    arc_prev=exec_prefix ;;
+  -exec-prefix=* | --exec_prefix=* | --exec-prefix=* | --exec-prefi=* \
+  | --exec-pref=* | --exec-pre=* | --exec-pr=* | --exec-p=* | --exec-=* \
+  | --exec=* | --exe=* | --ex=*)
+    exec_prefix=$arc_optarg ;;
+
+  -help | --help | --hel | --he | -h)
+    arc_init_help=x ;;
+
+  -host | --host | --hos | --ho)
+    arc_prev=host ;;
+  -host=* | --host=* | --hos=* | --ho=*)
+    host=$arc_optarg ;;
+
+  -infodir | --infodir | --infodi | --infod | --info | --inf)
+    arc_prev=infodir ;;
+  -infodir=* | --infodir=* | --infodi=* | --infod=* | --info=* | --inf=*)
+    infodir=$arc_optarg ;;
+
+  -mandir | --mandir | --mandi | --mand | --man | --ma | --m)
+    arc_prev=mandir ;;
+  -mandir=* | --mandir=* | --mandi=* | --mand=* | --man=* | --ma=* | --m=*)
+    mandir=$arc_optarg ;;
+
+
+  -prefix | --prefix | --prefi | --pref | --pre | --pr | --p)
+    arc_prev=prefix ;;
+  -prefix=* | --prefix=* | --prefi=* | --pref=* | --pre=* | --pr=* | --p=*)
+    prefix=$arc_optarg ;;
+
+  -q | -quiet | --quiet | --quie | --qui | --qu | --q \
+  | -silent | --silent | --silen | --sile | --sil)
+    silent=yes ;;
+
+  -scheme | --scheme | --schem | --sche | --sch)
+    arc_prev=scheme ;;
+  -scheme=* | --scheme=* | --schem=* | --sche=* | --sch=*)
+    arc_scheme_impl=$arc_optarg ;;
+
+  -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
+    arc_prev=srcdir ;;
+  -srcdir=* | --srcdir=* | --srcdi=* | --srcd=* | --src=* | --sr=*)
+    srcdir=$arc_optarg ;;
+
+
+  -sysconfdir | --sysconfdir | --sysconfdi | --sysconfd | --sysconf \
+  | --syscon | --sysco | --sysc | --sys | --sy)
+    arc_prev=sysconfdir ;;
+  -sysconfdir=* | --sysconfdir=* | --sysconfdi=* | --sysconfd=* | --sysconf=* \
+  | --syscon=* | --sysco=* | --sysc=* | --sys=* | --sy=*)
+    sysconfdir=$arc_optarg ;;
+
+  -target | --target | --targe | --targ | --tar | --ta | --t)
+    arc_prev=target ;;
+  -target=* | --target=* | --targe=* | --targ=* | --tar=* | --ta=* | --t=*)
+    target=$arc_optarg ;;
+
+  -v | -verbose | --verbose | --verbos | --verbo | --verb)
+    verbose=yes ;;
+
+  -version | --version | --versio | --versi | --vers | -V)
+    arc_init_version=x ;;
+
+
+  -with-* | --with-*)
+    arc_package=`expr "x$arc_option" : 'x-*with-\([^=]*\)'`
+    # Reject names that are not valid shell variable names.
+    expr "x$arc_package" : ".*[^-_$as_cr_alnum]" >/dev/null &&
+      { echo "$as_me: error: invalid package name: $arc_package" >&2
+   { (exit 1); exit 1; }; }
+    arc_package=`echo $arc_package| sed 's/-/_/g'`
+    case $arc_option in
+      *=*) arc_optarg=`echo "$arc_optarg" | sed "s/'/'\\\\\\\\''/g"`;;
+      *) arc_optarg=yes ;;
+    esac
+    eval "with_$arc_package='$arc_optarg'" ;;
+
+  -without-* | --without-*)
+    arc_package=`expr "x$arc_option" : 'x-*without-\(.*\)'`
+    # Reject names that are not valid shell variable names.
+    expr "x$arc_package" : ".*[^-_$as_cr_alnum]" >/dev/null &&
+      { echo "$as_me: error: invalid package name: $arc_package" >&2
+   { (exit 1); exit 1; }; }
+    arc_package=`echo $arc_package | sed 's/-/_/g'`
+    eval "with_$arc_package=no" ;;
+
+  -*) { echo "$as_me: error: unrecognized option: $arc_option
+Try '$0 --help' for more information." >&2
+   { (exit 1); exit 1; }; }
+    ;;
+
+  *=*)
+    arc_envvar=`expr "x$arc_option" : 'x\([^=]*\)='`
+    # Reject names that are not valid shell variable names.
+    expr "x$arc_envvar" : ".*[^_$as_cr_alnum]" >/dev/null &&
+      { echo "$as_me: error: invalid variable name: $arc_envvar" >&2
+   { (exit 1); exit 1; }; }
+    arc_optarg=`echo "$arc_optarg" | sed "s/'/'\\\\\\\\''/g"`
+    eval "$arc_envvar='$arc_optarg'"
+    export $arc_envvar ;;
+
+  *)
+    # FIXME: should be removed in autoconf 3.0.
+    echo "$as_me: WARNING: you should use --build, --host, --target" >&2
+    expr "x$arc_option" : ".*[^-._$as_cr_alnum]" >/dev/null &&
+      echo "$as_me: WARNING: invalid host type: $arc_option" >&2
+    : ${build_alias=$arc_option} ${host_alias=$arc_option} ${target_alias=$arc_option}
+    ;;
+
+  esac
+done
+
+if test -n "$arc_prev"; then
+  arc_option=--`echo $arc_prev | sed 's/_/-/g'`
+  { echo "$as_me: error: missing argument to $arc_option" >&2
+   { (exit 1); exit 1; }; }
+fi
+
+case "$build" in
+  win32 | windows)
+    arc_psep="\\"
+    ;;
+  BeOS)
+    arc_psep="/"
+    test -z "${arcdir}" && arcdir="${prefix}/arc"
+    test -z "${bindir}" && bindir="${exec_prefix}/bin"
+    test -z "${infodir}" && infodir="${prefix}/info"
+    test -z "${mandir}" && mandir="${prefix}/man"
+    ;;
+  *)
+    arc_psep="/"
+    test -z "${bindir}" && bindir="${exec_prefix}${arc_psep}bin"
+    test -z "${datadir}" && datadir="${prefix}${arc_psep}share"
+    test -z "${arcdir}" && arcdir="${datadir}${arc_psep}arc"
+    test -z "${sbindir}" && sbindir="${exec_prefix}${arc_psep}sbin"
+    test -z "${libexecdir}" && libexecdir="${exec_prefix}${arc_psep}libexec"
+    test -z "${sysconfdir}" && sysconfdir="${prefix}${arc_psep}etc"
+    test -z "${sharedstatedir}" && sharedstatedir="${prefix}${arc_psep}com"
+    test -z "${localstatedir}" && localstatedir="${prefix}${arc_psep}var"
+    test -z "${libdir}" && libdir="${exec_prefix}${arc_psep}lib"
+    test -z "${includedir}" && includedir="${prefix}${arc_psep}include"
+    test -z "${infodir}" && infodir="${prefix}${arc_psep}info"
+    test -z "${mandir}" && mandir="${prefix}${arc_psep}man"
+    ;;
+esac
+
+# be sure to have absolute paths.
+for arc_var in exec_prefix prefix
+do
+  eval arc_val=$`echo $arc_var`
+  case $arc_val in
+    [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+    *)  { echo "$as_me: error: expected an absolute directory name for --$arc_var: $arc_val" >&2
+   { (exit 1); exit 1; }; };;
+  esac
+done
+
+# be sure to have absolute paths.
+for arc_var in bindir sbindir libexecdir datadir sysconfdir sharedstatedir \
+              localstatedir libdir includedir infodir mandir
+do
+  eval arc_val=$`echo $arc_var`
+  case $arc_val in
+    [\\/$]* | ?:[\\/]* ) ;;
+    *)  { echo "$as_me: error: expected an absolute directory name for --$arc_var: $arc_val" >&2
+   { (exit 1); exit 1; }; };;
+  esac
+done
+
+
+
+#
+# Report the --help message.
+#
+if test "$arc_init_help" = "x"; then
+  cat <<_ACEOF
+'configure' configures this package to be correctly bootstrapped for a
+number of systems.
+
+Usage: $0 [OPTION]... [VAR=VALUE]...
+
+To assign environment variables (e.g., CC, CFLAGS...), specify them as
+VAR=VALUE.  See below for descriptions of some of the useful variables.
+
+Defaults for the options are specified in brackets.
+
+Configuration:
+  -h, --help              display this help and exit
+  -V, --version           display version information and exit
+      --srcdir=DIR        find the sources in DIR [configure dir or '..']
+
+_ACEOF
+
+  cat <<_ACEOF
+Installation directories:
+  --prefix=PREFIX         install architecture-independent files in PREFIX
+                          [$arc_default_prefix]
+  --exec-prefix=EPREFIX   install architecture-dependent files in EPREFIX
+                          [PREFIX]
+
+By default, 'xxxx install' will install all the files in
+'$arc_default_prefix/bin', '$arc_default_prefix/lib' etc.  You can specify
+an installation prefix other than '$arc_default_prefix' using '--prefix',
+for instance '--prefix=\$HOME'.
+
+For better control, use the options below.
+
+Fine tuning of the installation directories:
+  --arcdir=DIR           arc home directory [PREFIX/share/arc]
+  --bindir=DIR           user executables [EPREFIX/bin]
+  --sbindir=DIR          system admin executables [EPREFIX/sbin]
+  --libexecdir=DIR       program executables [EPREFIX/libexec]
+  --datadir=DIR          read-only architecture-independent data [PREFIX/share]
+  --sysconfdir=DIR       read-only single-machine data [PREFIX/etc]
+  --sharedstatedir=DIR   modifiable architecture-independent data [PREFIX/com]
+  --localstatedir=DIR    modifiable single-machine data [PREFIX/var]
+  --libdir=DIR           object code libraries [EPREFIX/lib]
+  --includedir=DIR       C header files [PREFIX/include]
+  --infodir=DIR          info documentation [PREFIX/info]
+  --mandir=DIR           man documentation [PREFIX/man]
+_ACEOF
+
+  cat <<\_ACEOF
+
+System types:
+  --build=BUILD     configure for building on BUILD [guessed]
+  --host=HOST       cross-compile to build programs to run on HOST [BUILD]
+_ACEOF
+
+  cat <<\_ACEOF
+
+Optional Features:
+  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
+  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+
+_ACEOF
+exit 0
+fi
+
+## display a possible version information request
+if test "$arc_init_version" = "x" ; then
+  cat <<_ACEOF
+
+Copyright 2002, 2003 Gregor Klinke
+
+This configure script is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License as
+published by the Free Software Foundation; either version 2.1 of the
+License, or (at your option) any later version.
+_ACEOF
+  exit 0
+fi
+
+
+if test -z "${arc_scheme_impl}"; then
+  if (`scm -b 2>/dev/null` || test $? = "0"); then
+    arc_scheme_impl="scm"
+  elif (`ksi -c '(define arc:x 0)' 2>/dev/null` || test $? = "0"); then
+    arc_scheme_impl="guile"
+  elif (`guile -c '(define arc:x 0)' 2>/dev/null` || test $? = "0"); then
+    arc_scheme_impl="guile"
+  else
+    arc_scheme_impl="asc"
+  fi
+# add more tests
+fi
+
+if test -z "$arc_scheme_impl" ; then
+  echo "$as_me: ERROR: no scheme interpreter found.  Use --scheme to set one"
+  exit 1
+else
+  echo "$as_me: checking for scheme interpreter ... $arc_scheme_impl"
+fi
+
+
+
+case "$arc_scheme_impl" in
+  scm)
+    cat > ./bootstrap.sh <<_ACEOF
+#!/bin/sh
+(cd boot; scm bootstrap-scm.scm -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+./arc configure
+_ACEOF
+    chmod +x ./bootstrap.sh
+    ;;
+
+
+
+  ksi)
+    cat > ./bootstrap.sh <<_ACEOF
+#!/bin/sh
+(cd boot; ksi -s ./bootstrap-ksi.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+./arc configure
+_ACEOF
+    chmod +x ./bootstrap.sh
+    ;;
+
+
+
+  guile)
+    cat > ./bootstrap.sh <<_ACEOF
+#!/bin/sh
+(cd boot; guile -l bootstrap-guile.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+./arc configure
+_ACEOF
+    chmod +x ./bootstrap.sh
+    ;;
+
+
+
+  asc)
+    cat > ./bootstrap.sh <<_ACEOF
+#!/bin/sh
+export ASC_HOME="$arcdir"
+case "$build" in
+  Linux)
+    (cd asc; /bin/sh build-unix.sh)
+    ;;
+  Cygwin* )
+    (cd asc; /bin/sh build-cygwin.sh)
+    ;;
+  BeOS)
+    (cd asc; /bin/sh build-beos.sh)
+    ;;
+  SunOS )
+    (cd asc; /bin/sh build-sun.sh)
+    ;;
+  *)
+    echo "unknown build procedure for system $build"
+    exit 1
+esac
+# copy the asc initializing file for arc
+if [ ! -d "./app" ]; then
+  mkdir ./app
+fi
+cp asc/asc-init.scm ./app/asc-init.scm
+cp asc/asc ./app/arc
+
+export ASC_INIT_FILE="`pwd`/asc/init.scm"
+(cd boot; ../app/arc -s bootstrap-asc.scm -- -s "$build" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
+unset ASC_INIT_FILE
+
+./arc configure
+_ACEOF
+    chmod +x ./bootstrap.sh
+    ;;
+
+
+
+  *)
+    echo "$as_me: ERROR: unknown scheme implementation"
+    exit 1
+    ;;
+esac
+

@@ -1,0 +1,68 @@
+the list of implemented task:
+-----------------------------
+
+fileset                 determine a list of files
+mkdir                   create a directory/path
+delete                  delete a file/directory
+c-compile               compiles c files into object files
+c-deps                  compiles dependencies for C files
+java-compile            compiles java files into class files
+gzip                    zips a file (gzip)
+gunzip                  unzip a file (gzip)
+touch                   updates a file's mod timestamp
+file-type               return the type of a file
+lib                     build static and dynamic libraries
+tar                     creates (gnu) tar archives
+untar                   extractes (gnu) tar archives
+copy                    copies files and directories
+clean                   cleans up a project area
+link                    links object files and libraries to executables
+objc-compile            objective c compile
+filter                  filters a file and replaces placeholder
+install                 install file/files
+texinfo                 process texinfo files
+
+
+additional functions:
+---------------------
+msg                     display all arguments (=echo)
+
+
+to be done:
+-----------
+bunzip2
+bzip2
+zip 
+unzip
+jar
+unjar
+rpm
+dpkg
+
+chmod
+cat
+concat
+diff
+patch
+rename/move
+
+c++-compile
+elisp-compile
+yacc/bison
+orange-compile 
+lex/flex
+
+docbook->xxx
+man-process
+xslt
+dsssl
+javadoc
+orange-doc
+
+cvs-add
+cvs-commit
+cvs-remove
+cvs-update
+eval-script
+gettext
+

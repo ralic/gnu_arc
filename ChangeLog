@@ -1,0 +1,263 @@
+2002-08-12    <gck@eyestep.org>
+
+	* extended documentation
+
+	* added arc:filter, arc:dist, ... tasks
+
+	* added Asc, the Arc Scheme interpreter and build support scripts
+	for it
+
+	* configure (Configuration): completely rewritten the
+	configuration and bootstrapping system.
+
+2002-07-25  Gregor Klinke  <gck@eyestep.org>
+
+	* doc/tasks: updated
+
+	* src/system.scm:
+	replaced by sys-scm.scm and sys-guile.scm
+
+	* src/build-old.scm: unused
+
+	* src/path.scm: modified getcwd to arc:sys.getcwd
+
+	* install.bat: first beginnings
+
+	* boot/bootstrap-arc.scm: removed debug output
+
+	* boot/bstr-win32.scm: fixed missing )
+
+	* src/sysnm.scm: extended
+
+	* configure: written
+
+	* src/misc.scm: implemented arc:readline
+
+	* test/Arcfile: tar/untar tests
+
+	* src/tasks/task-untar.scm: tested; improved (outdir, ...)
+
+	* src/tasks/task-tar.scm:
+	improved (:force?, better error reporting, return value)
+
+2002-07-24  Gregor Klinke  <gck@eyestep.org>
+
+	* doc/tasks: updated
+
+	* src/arc: removed; to be bootstrapped
+
+	* src/tasks/task-tar.scm:
+	fixed parameter for absolute paths
+
+	* src/tasks/task-untar.scm: added
+
+	* src/tasks/task-tar.scm: tar tool added
+
+2002-07-22  Gregor Klinke  <gck@eyestep.org>
+
+	* src/tasks/task-lib.scm: comment
+
+	* src/tasks/task-c-compile.scm:
+	changed verbosity output to only be shown when a compilation is due
+
+	* test/Arcfile: added test for shared libraries
+
+	* src/tasks/task-lib.scm:
+	added shared library support for linux
+
+	* TODO: update
+
+2002-07-21  Gregor Klinke  <gck@eyestep.org>
+
+	* test/Arcfile: modified :dir to :pathnm
+
+	* doc/tasks: updated
+
+	* boot/bstr-beos.scm: updated path
+
+	* src/tasks/task-lib.scm: extended
+
+	* src/tasks/task-delete.scm: changed :dir to :pathnm
+
+	* src/tasks/task-archive.scm: replaced by task-lib
+
+	* src/tasks/task-lib.scm: added for static libs at least
+
+	* doc/tasks: updated
+
+	* doc/gpl.texinfo, doc/arc.texinfo: added
+
+2002-07-20  Gregor Klinke  <gck@eyestep.org>
+
+	* doc/.cvsignore, src/tasks/.cvsignore, src/tasks/task-touch.scm:
+	added
+
+	* src/tasks/task-mkdir.scm, src/tasks/task-java-compile.scm, src/tasks/task-gzip.scm, src/tasks/task-gunzip.scm, src/tasks/task-fileset.scm, src/tasks/task-c-deps.scm, src/tasks/task-c-compile.scm, src/tasks/task-archive.scm:
+	reorganized module loading
+
+	* src/.cvsignore, .cvsignore, boot/.cvsignore:
+	added
+
+	* configure: added .. still empty
+
+	* TODO, ChangeLog: updated
+
+	* src/arc-guile.scm: added as guile start frontend
+
+	* src/bt-tasks.scm:
+	reorganized module loading; only scheme files matching the pattern
+	"task-*.scm" are loaded as task-files from "tasks/"
+
+	* src/config.scm, src/ctx.scm, src/deps.scm, src/eval.scm, src/getopt.scm, src/logical.scm:
+	reorganized module loading
+
+	* src/path.scm:
+	reorganized module loading; removed test stuff; moved pathlist-sep to misc.scm
+
+	* src/require.scm: moved require/provide here from arc.scm
+
+	* src/strings.scm: layout; reorganized module loading
+
+	* src/sysnm.scm:
+	generate a canonical systen name (ala config.guess)
+
+	* src/task-util.scm:
+	moved task related shared functionality from misc.scm here
+
+	* src/version.scm: added
+
+	* src/misc.scm:
+	moved task related functions to task-util.scm; reorganized module loading
+
+	* boot/bootstrap-arc.scm: added copyright note
+
+	* boot/bstr-win32.scm: added for win32 boot strapping
+
+	* boot/bootstrap-arc.scm: boot strapping mechanism
+
+	* boot/bstr-beos.scm: added for beos boot strapping
+
+	* boot/bstr-unix.scm: added for unix bootstraping
+
+	* src/arc-scm.scm:
+	restructed scheme implementation depended functions
+
+	* src/arc.scm:
+	restructed module loading; reorganized scheme implementation and system
+	dependant parts
+
+	* src/traverse.scm, src/tasks/task-delete.scm:
+	restructed module loading
+
+	* src/sys-guile.scm, src/sys-scm.scm:
+	restructed scheme implementation depended functions
+
+	* doc/tasks: updated
+
+	* src/tasks/task-file-type.scm: added
+
+	* test/Arcfile: added more tests
+
+2002-07-20  Gregor Klinke  <gck@eyestep.org>
+
+	* src/arc-guile.scm: added as guile start frontend
+
+	* src/bt-tasks.scm:
+	reorganized module loading; only scheme files matching the pattern
+	"task-*.scm" are loaded as task-files from "tasks/"
+
+	* src/config.scm, src/ctx.scm, src/deps.scm, src/eval.scm, src/getopt.scm, src/logical.scm:
+	reorganized module loading
+
+	* src/path.scm:
+	reorganized module loading; removed test stuff; moved pathlist-sep to misc.scm
+
+	* src/require.scm: moved require/provide here from arc.scm
+
+	* src/strings.scm: layout; reorganized module loading
+
+	* src/sysnm.scm:
+	generate a canonical systen name (ala config.guess)
+
+	* src/task-util.scm:
+	moved task related shared functionality from misc.scm here
+
+	* src/version.scm: added
+
+	* src/misc.scm:
+	moved task related functions to task-util.scm; reorganized module loading
+
+	* boot/bootstrap-arc.scm: added copyright note
+
+	* boot/bstr-win32.scm: added for win32 boot strapping
+
+	* boot/bootstrap-arc.scm: boot strapping mechanism
+
+	* boot/bstr-beos.scm: added for beos boot strapping
+
+	* boot/bstr-unix.scm: added for unix bootstraping
+
+	* src/arc-scm.scm:
+	restructed scheme implementation depended functions
+
+	* src/arc.scm:
+	restructed module loading; reorganized scheme implementation and system
+	dependant parts
+
+	* src/traverse.scm, src/tasks/task-delete.scm:
+	restructed module loading
+
+	* src/sys-guile.scm, src/sys-scm.scm:
+	restructed scheme implementation depended functions
+
+	* doc/tasks: updated
+
+	* src/tasks/task-file-type.scm: added
+
+	* test/Arcfile: added more tests
+
+2002-07-18  Gregor Klinke  <gck@eyestep.org>
+
+	* src/system.scm: added file-directory?
+
+	* src/arc.scm: added traverse require
+
+	* src/logical.scm: added; used by file stats
+
+	* src/traverse.scm: added for generic directory traversal
+
+	* doc/tasks: updated
+
+	* NEWS: added
+
+	* README: rewritten
+
+	* INSTALL, doc/texinfo.tex: NEWS
+
+2002-07-17  Gregor Klinke  <gck@eyestep.org>
+
+	* src/system.scm: added some more basics
+
+	* src/misc.scm:
+	added new type; removed "missing value error msg"
+
+	* src/deps.scm: changed dependency list format to list
+
+	* src/bt-tasks.scm: cleanup
+
+	* src/tasks/task-mkdir.scm, src/tasks/task-gzip.scm, src/tasks/task-gunzip.scm, src/tasks/task-fileset.scm, src/tasks/task-delete.scm, src/tasks/task-c-deps.scm, src/tasks/task-c-compile.scm, src/tasks/task-archive.scm:
+	added returnvalues; implemented lazy-c-dependecy handling
+
+	* test/Arcfile: changed test dependencies
+
+	* src/tasks/task-java-compile.scm:
+	changed for new filesets; added return values
+
+2002-07-17  Gregor Klinke  <gck@eyestep.org>
+
+	* Ok. The name is now "arc".
+
+	* setup the real first package structure.  Even if I'm not going
+	to use the GNU tool chain autoconf and automake, I'll follow the
+	GNU standards for package.
+
