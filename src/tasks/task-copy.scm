@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-copy.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-copy.scm,v 1.2 2003/04/13 23:45:36 eyestep Exp $
 
 (arc:provide 'task-copy)
 
@@ -142,7 +142,7 @@
                  "copy: destination directory is not an "
                  "directory/doesn't exist")
         (if (not (arc:sys.file-exists? file))
-            (arc:log 'info "copy: source file not found")
+            (arc:log 'info "copy: source file not found: " file)
             (let* ((fp (if flatten
                            (arc:path-last-comp (arc:string->path file))
                            (arc:path-abbreviate (arc:string->path file))) )

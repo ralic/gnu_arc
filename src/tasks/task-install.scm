@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-install.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-install.scm,v 1.2 2003/04/13 23:45:36 eyestep Exp $
 
 
 (arc:provide 'task-install)
@@ -90,7 +90,7 @@
         
         (if mode
             (arc:sys.chmod ndest mode)))
-      (arc:log 'info "source file not found")))
+      (arc:log 'info "source file not found: " src)))
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
