@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile.scm,v 1.4 2003/04/22 23:40:24 eyestep Exp $
+;; $Id: task-c-compile.scm,v 1.5 2003/04/23 18:48:58 eyestep Exp $
 
 (arc:provide 'task-c-compile)
 (arc:require 'task-c-deps)
@@ -116,7 +116,7 @@
     (for-each
      (lambda (fn)
        (let* ((compile-file 
-               (lambda (av-slot objext cfl)
+               (lambda (av-slot av-slot2 objext cfl)
                  (let* ((on (<backend> 'make-objfile-name fn outdir objext))
                         (cincls (arc:string-list->string* 
                                  (arc:aval 'includes props ()) " -I")))
@@ -125,6 +125,13 @@
                      (if vv
                          (arc:attrval-set! av av-slot (append vv (list on)))
                          (arc:attrval-set! av av-slot (list on))))
+                   (if av-slot2
+                       (let ((vv (arc:attrval-ref av av-slot2) ))
+                         (if vv
+                             (arc:attrval-set! av av-slot2 
+                                               (append vv (list on)))
+                             (arc:attrval-set! av av-slot2 (list on)))))
+                   
                    (if (arc:deps-c-needs-recompile? depends
                                                     fn on 
                                                     (arc:aval 'includes props ())
@@ -140,14 +147,19 @@
                                   cfl    ; flags
                                   ))))) )
               )
-         (if (arc:aval 'shared? props #f)
-             (compile-file 'shared-objs 
+
+         (if (and (arc:aval 'shared? props #f) 
+                  (<backend> 'need-shared-build))
+             (compile-file 'shared-objs #f
                            (arc:aval 'sobjext props 
                                      (<backend> 'shared-objfile-ext))
                            (string-append cflags " " 
                                           (<backend> 'shared-obj-flag))))
-         (if (arc:aval 'static? props #t)
-             (compile-file 'objs 
+         (if (or (arc:aval 'static? props #t)
+                 (not (<backend> 'need-shared-build)))
+             (compile-file 'objs (if (<backend> 'need-shared-build)
+                                     #f
+                                     'shared-objs)
                            (arc:aval 'objext props 
                                      (<backend> 'objfile-ext))
                            cflags)) ))

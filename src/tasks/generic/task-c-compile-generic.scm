@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile-generic.scm,v 1.3 2003/04/22 23:45:01 eyestep Exp $
+;; $Id: task-c-compile-generic.scm,v 1.4 2003/04/23 18:49:11 eyestep Exp $
 
 
 (arc:provide 'task-c-compile-generic)
@@ -61,7 +61,10 @@
      (debug-flag ,(lambda (self) "-g"))
      (signed-char-flag ,(lambda (self) "-signed-char"))
      (unsigned-char-flag ,(lambda (self) "-unsigned-char"))
-     
+
+     ;; does this platform needs a separate compilation for shared objects?
+     (need-shared-build ,(lambda (self) #t))
+     ;; if so, use the following extra flags for compilation
      (shared-obj-flag ,(lambda (self) "-fpic -DPIC"))
      
      (warn-level-flag 
@@ -102,6 +105,7 @@
      
      (compile-file 
       ,(lambda (self sfile ofile cincs cflags)
+         (arc:log 'debug "compile file " sfile " to " ofile)
          (let ((cmd-str (string-append 
                          (self 'compiler-cmd) " "
                          (self 'default-defs) " "
