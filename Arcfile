@@ -15,32 +15,34 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: Arcfile,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: Arcfile,v 1.2 2003/04/12 23:42:05 eyestep Exp $
 
 ;; arcfile for building, installing, and cleaning arc
 (project arc-app
          project: "arc"
-         version: "0.2.0"
+         version: "0.2.1"
          info: "Arc application"
          basedir: "."
          default: 'all)
 
 ;; properties
 (stmt prefix 
-      scope: 'local 
-      "/opt/test")
+      scope: 'local (prop home))
 (stmt bindir 
       scope: 'local 
-      (string-append (-> prefix) "/bin"))
+      (prop exec-path))
 (stmt infodir 
       scope: 'local  
-      (string-append (-> prefix) "/share/info"))
+      (path-append (prop prefix) "/share/info"))
 (stmt arcdir 
       scope: 'local 
-      (string-append (-> prefix) "/share/arc"))
+      (prop home))
 (stmt arc-tasks-dir
       scope: 'local
-      (string-append (-> prefix) "/share/arc/tasks"))
+      (path-append (prop home) "tasks"))
+(stmt arc-meta-inf-dir
+      scope: 'local
+      (path-append (prop home) "meta-inf"))
 
 (stmt configure
       info: "configures the application"
@@ -112,6 +114,7 @@
                                        "ChangeLog"
                                        "COPYING"
                                        "Arcfile"
+                                       "arc.config.in"
                                        "AUTHORS"
                                        "configure"))))
 
@@ -134,21 +137,18 @@
 
 (stmt distclean
       depends: 'clean
-      (clean res: (fileset files: '("bootstrap.sh"
+      (clean res: (fileset pattern: '("bootstrap.sh"
                                     "src/config.scm"
                                     "src/version.scm"
                                     "asc-init.scm"
                                     "arc"
+                                    "arc.config"
                                     "doc/arc.1"
+                                    "doc/arc.texinfo"
                                     "app"
                                     "doc/*.pdf"
                                     "doc/*.dvi"
-                                    "doc/*.info"
-                                    "doc/*.info-1"
-                                    "doc/*.info-2"
-                                    "doc/*.info-3"
-                                    "doc/*.info-4"
-                                    "doc/*.info-5"))))
+                                    "doc/(.*\\.info(-[0-9]+)?$)"))))
 
 
 ;; --------------------------------------------------------------------
@@ -194,13 +194,21 @@
       depends: 'all
       (install src: "app/arc"
                dest: (-> bindir))
+
       (install src: (fileset pattern: "src/*.scm")
                dest: (-> arcdir))
+
+      (install src: (fileset pattern: "app/*.scm")
+               dest: (-> arcdir))
+
       (install src: (fileset pattern: "src/tasks/*.scm")
                dest: (-> arc-tasks-dir))
+      (install src: (fileset pattern: "src/tasks/linux/*.scm")
+               dest: (path-append (-> arc-tasks-dir) "linux"))
+      (install src: (fileset pattern: "src/meta-inf/*.decl")
+               dest: (-> arc-meta-inf-dir))
       (install src: (fileset pattern: '("doc/(.*\\.info(-[0-9]+)?$)"))
                dest: (-> infodir)))
-
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
