@@ -40,7 +40,7 @@
   (if (symbol? keyw)
       (let ((ks (symbol->string keyw)))
         (string->symbol (substring ks 0 (- (string-length ks) 1))))
-      (error "not-a-keyword")))
+      (arc:throw 'internal "arc:keyword->symbol: not-a-keyword (" keyw ")")))
 
 (define (arc:get-keywords expr)
   (let loop ((res ())
@@ -120,90 +120,102 @@
                        (key keys))
               (if (null? key)
                   res
-                  (loop (let* ((nextval (if (not (null? (cdr key)))
-                                            (cadr key)
-                                            #f))
-                               (keycheck (arc:keytable-valid-keypair? 
-                                          table key nextval)))
-                          (case keycheck
-                            ((:ok) (append res (list (list (car key) 
-                                                           nextval))))
-                            (else (begin
-                                    (arc:msg task-name ": " 
-                                             keycheck " (was: " nextval ")")
-                                    res))))
-                        (if (not (null? (cdr key) ))
-                            (cddr key) 
-                            ()))))))
-    (let loop2 ((retv rx)
-                (ta table))
-      (if (null? ta)
-          retv
-          (loop2 (cond 
-                  ((eq? (caddar ta) 'optional) retv)
-                  ((eq? (caddar ta) 'required) 
-                   (if (assoc (caar ta) rx)
-                       retv
-                       ;; the required value has not been defined!
-                       (begin
-                         (arc:msg task-name ": required keyword '"
-                                  (symbol->string (caar ta))
-                                  "' not specified")
-                         #f)))
-                  ((list? (caddar ta))
-                   (case (car (caddar ta))
-                     ((req-or)
-                      (if (and (not (assoc (caar ta) rx))
-                               (not (assoc (cadr (caddar ta)) rx)))
-                          ;; the required value has not been defined!
-                          (begin
-                            (arc:msg task-name ": neither keyword '"
-                                     (symbol->string (caar ta))
-                                     "' nor '"
-                                     (symbol->string (cadr (caddar ta)))
-                                     "' specified")
-                            #f)
-                          retv))
-                     ((opt-xor)
-                      (if (and (assoc (caar ta) rx)
-                               (assoc (cadr (caddar ta)) rx))
-                          (begin
-                            (arc:msg task-name ": optional exclusive keywords '"
-                                     (symbol->string (caar ta))
-                                     "' and '"
-                                     (symbol->string (cadr (caddar ta)))
-                                     "' specified")
-                            #f)
-                          retv))
-                     ((req-xor)
-                      (if (and (assoc (caar ta) rx)
-                               (assoc (cadr (caddar ta)) rx))
-                          (begin
-                            (arc:msg task-name ": required exclusive keywords '"
-                                     (symbol->string (caar ta))
-                                     "' and '"
-                                     (symbol->string (cadr (caddar ta)))
-                                     "' specified")
-                            #f)
+                  (let* ((nextval (if (not (null? (cdr key)))
+                                      (cadr key)
+                                      #f))
+                         (keycheck (arc:keytable-valid-keypair? 
+                                    table key nextval)))
+                    (if (not (eq? keycheck ':ok))
+                        (begin
+                          (arc:log 'error 
+                                   keycheck " (task: " task-name ", value: "
+                                   nextval ")")
+                          #f)
+                        (loop (append res (list (list (car key) 
+                                                      nextval)))
+                              (if (not (null? (cdr key) ))
+                                  (cddr key) 
+                                  ())))))) ))
+    (if (not rx)
+        #f
+        (let loop2 ((retv rx)
+                    (ta table))
+          (if (null? ta)
+              retv
+              (loop2 (cond 
+                      ((eq? (caddar ta) 'optional) retv)
+                      ((eq? (caddar ta) 'required) 
+                       (if (assoc (caar ta) rx)
+                           retv
+                           ;; the required value has not been defined!
+                           (begin
+                             (arc:log 'error
+                                      task-name ": required keyword '"
+                                      (symbol->string (caar ta))
+                                      "' not specified")
+                             #f)))
+                      ((list? (caddar ta))
+                       (case (car (caddar ta))
+                         ((req-or)
                           (if (and (not (assoc (caar ta) rx))
                                    (not (assoc (cadr (caddar ta)) rx)))
+                              ;; the required value has not been defined!
                               (begin
-                                (arc:msg task-name ": neither keyword '"
+                                (arc:log 'error
+                                         task-name ": neither keyword '"
                                          (symbol->string (caar ta))
                                          "' nor '"
                                          (symbol->string (cadr (caddar ta)))
                                          "' specified")
                                 #f)
-                              retv)))
-                     (else (begin
-                             (arc:msg task-name ": unknown table entry: '"
-                                      (car (caddar ta)) "'")
-                             retv))))
-                  (else (begin
-                          (arc:msg task-name ": unknown table entry: '"
-                                   (car (caddar ta)) "'")
-                          retv)))
-                 (cdr ta))))
+                              retv))
+                         ((opt-xor)
+                          (if (and (assoc (caar ta) rx)
+                                   (assoc (cadr (caddar ta)) rx))
+                              (begin
+                                (arc:log 'error
+                                         task-name
+                                         ": optional exclusive keywords '"
+                                         (symbol->string (caar ta))
+                                         "' and '"
+                                         (symbol->string (cadr (caddar ta)))
+                                         "' specified")
+                                #f)
+                              retv))
+                         ((req-xor)
+                          (if (and (assoc (caar ta) rx)
+                                   (assoc (cadr (caddar ta)) rx))
+                              (begin
+                                (arc:log 'error
+                                         task-name
+                                         ": required exclusive keywords '"
+                                         (symbol->string (caar ta))
+                                         "' and '"
+                                         (symbol->string (cadr (caddar ta)))
+                                         "' specified")
+                                #f)
+                              (if (and (not (assoc (caar ta) rx))
+                                       (not (assoc (cadr (caddar ta)) rx)))
+                                  (begin
+                                    (arc:log 'error
+                                             task-name ": neither keyword '"
+                                             (symbol->string (caar ta))
+                                             "' nor '"
+                                             (symbol->string (cadr (caddar ta)))
+                                             "' specified")
+                                    #f)
+                                  retv)))
+                         (else (begin
+                                 (arc:log 'error
+                                          task-name ": unknown table entry: '"
+                                          (car (caddar ta)) "'")
+                                 #f))))
+                      (else (begin
+                              (arc:log 'error
+                                       task-name ": unknown table entry: '"
+                                       (car (caddar ta)) "'")
+                              #f)))
+                     (cdr ta)))))
     ))
 
 
@@ -220,7 +232,9 @@
                   (if (null? t)
                       (string-append "bad value type for keyword '"
                                      keynm
-                                     "' " (arc:string-list->string (cadr aval)) " expected " (cadr aval))
+                                     "' " (arc:string-list->string* (cadr aval)
+                                                                    " ") 
+                                     " expected " (cadr aval))
                       (if (arc:nextval-type? (car t) keynm nextval)
                           ':ok
                           (loop (cdr t)))))
@@ -239,7 +253,7 @@
     ((strlist) (arc:test-nextval-type arc:string-list? "string-list" keynm nextval))
     ((strlist*) (arc:test-nextval-type arc:string-list? "string-list" keynm nextval))
     ((alist) (arc:test-nextval-type arc:alist? "alist" keynm nextval))
-    ((dependencies) (arc:test-nextval-type arc:deps-alist? "dependencies" 
+    ((dependencies) (arc:test-nextval-type arc:deps? "dependencies" 
                                            keynm nextval))
     ((attrval) (arc:test-nextval-type arc:attrval? "attrvalue" keynm nextval))
     (else (string-append "bad keyword type '" (symbol->string type) "'"))))
