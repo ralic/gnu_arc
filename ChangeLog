@@ -1,3 +1,30 @@
+2003-04-24    <gck@eyestep.org>
+
+	* bumbed version to 0.4.0; release
+	
+	* rebuild the dependency subsystems.  Implemented a simple API
+	which now all tasks, supporting dependency control should use.
+	Dependencies are stored now in a single database file (a hashtable
+	actually), and are referenced by full path name.  Fixed name
+	clashs here therefore
+
+	* added a hash implementation from slib
+
+	* added supported for "rpath" and local execution of
+	applications linked to not installed shared libraries
+
+	* added full freebsd support
+
+	* extended cygwin support, but "local-exec-outdir:" is missing yet
+	
+	* added first real exotic tasks (task-orange-compile,
+	task-orange-deps), as a prove of concept, that extending beyond
+	the scope of standard tools is feasible.
+
+	* documentation
+	
+	* fixed numberous bugs
+
 2003-04-18    <gck@eyestep.org>
 
 	* the system is now ready for a new release ... 0.3.0 i guess.  a
