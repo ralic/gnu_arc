@@ -7,3 +7,17 @@
 
 - implement a ":depends" keyword on the "arc:deps" task.  This will make
   .dep files depend on the source files!
+
+
+- add the missing cvs functions to task-cvs: add, commit, remove, tag
+
+- design a 'task-build': this checksout a module from cvs into a temporary
+  directory, calls a arcfile in this module with default task 'all'; if
+  that was successfull increase a build number in that local working copy,
+  check that build number in.
+
+  needs the following tasks:
+
+  - call arc (in another directory)
+  - increase version number
+  
