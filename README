@@ -120,47 +120,45 @@ Processing model
     For example the following Arcfile builds a sample application:
 
 
-         1 (defproject 'sample-project
-         2   ':builddir "src/"
-         3   ':default 'link)
-         4
-         5 (defstmt 'build-dir
-         6   (lambda () "_build"))
-         7
-         8 (defstmt 'init
-         9   (lambda () (arc:mkdir ':dir ($ 'build-dir))))
-        10
-        11 (defstmt 'c-sources
-        12   (lambda () 
-        13     (arc:fileset ':pattern "*.c")))
-        14
-        15 (defstmt 'compile
-        16   ':depends 'init
-        17   (lambda () 
-        18     (arc:c-compile ':sources ($ 'c-sources)
-        19                    ':outdir ($ 'build-dir) )))
-        20
-        21 (defstmt 'link
-        22   (lambda ()
-        23     (arc:link ':static? #f
-        24               ':objfiles ($ 'compile)
-        25               ':dest "hello-world")))
+     1 (project sample-project
+     2          builddir: "src/"
+     3          default: 'link)
+     4
+     5 (stmt build-dir
+     6       "_build")
+     7
+     8 (stmt init
+     9       (mkdir dir: (-> build-dir))
+    10
+    11 (stmt c-sources
+    12       (fileset pattern: "*.c"))
+    13
+    14 (stmt compile
+    15       depends: 'init
+    16       (c-compile sources: (-> c-sources)
+    17                  outdir: (-> build-dir) ))
+    18
+    19 (stmt link
+    20       (link static?: #f
+    21             objfiles: (-> compile)
+    22             dest: "hello-world"))
 
 
-    This short example shows some major features.  (1) In line 18 the
-    normal compilation is stated (by the Arc task "arc:c-compile").  It
-    takes a list of c sources, by requesting the value of the statement
-    "c-sources" ("($ 'c-sources)") (a so called "lazy dependency", since
-    statements which depend on the "c-sources" statement are only
-    evaluated, when the return value is requested here).  (2) Each
-    statement has a return value, which is set by the tasks in its body.
-    The return value of the "arc:fileset" task is a list of all matched
-    files (line 13).  The return value of the "arc:c-compile" task is a
-    list of all object files under the control of the c-compiler.  (3) The
-    Arc system ensures, that the "c-sources" statement is evaluated only
-    once, its returnvalue is cached and delivered correctly to requesters.
-    The "compile" statement shows a "static dependency", too, by declaring
-    "':depends 'init".
+    This short example shows some major features.  (1) In line 16 the
+    normal compilation is stated (by the arc task c-compile).
+    It takes a list of c sources, by requesting the value of the statement
+    c-sources [ (-> c-sources) ] (a so called "lazy
+    dependency", since statements which are dependend on the
+    c-sources statement are only evaluated, when the return value is
+    requested here).  (2) Each statement has a return value, which is set
+    by the tasks in its body.  The return value of the fileset task
+    is a list of all matched files (line 12).  The return value of the
+    *c-compile* task is a list of all object files under the control
+    of the c-compiler.  (3) The Arc system ensures, that the
+    c-sources statement is evaluated only once, its returnvalue is
+    cached and delivered correctly to requesters.  The compile
+    statement shows a "static dependency", too, by declaring "depends:
+    'init".
 
     To "run" this Arcfile a user would be somewhere in the source
     directory, and execute the following command:
@@ -210,7 +208,8 @@ Installation
     
 Where to get and find arc
 
-    The latest version can be downloaded from http://www.eyestep.org/arc/
+    The latest version can be downloaded from
+    http://savannah.gnu.org/projects/arc/
 
     For comments and feedback: gck@eyestep.org
     Homepage: http://www.eyestep.org/arc

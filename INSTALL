@@ -62,3 +62,20 @@ Installation:
     the moment.
 
 
+
+Compatibility chart:
+
+The following chart gives the supported platforms.  Strictly this is only,
+what I've tested so far.  Development goes (moslty) parallel on Debian
+Linux, BeOS R5, FreeBSD, and Cygwin 5.  Please report any other successfull
+runs on different platforms.
+
+x  = tested successfully
+() = untested/unknown
+N  = failed
+
+                        guile-1.4  guile-1.6     asc     ksi
+GNU/Linux (Debian x86)      x                      x       x
+FreeBSD (5.0 x86)           x                      x       
+BeOS R5                                            x
+Cygwin 5/Win2000                      N            x
