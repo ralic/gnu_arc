@@ -15,25 +15,25 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: linux.decl,v 1.2 2003/04/12 23:47:20 eyestep Exp $
+;; $Id: linux.decl,v 1.3 2003/04/13 23:44:14 eyestep Exp $
 
 (arc:register-handler 'linux 'task-c-deps
                       (lambda ()
                         (arc:require 'task-c-compile-linux 
                                      "linux/task-c-compile-linux")
-                        <arc:linux-c-compile>))
+                        <arc:c-compile-linux>))
 
 (arc:register-handler 'linux 'task-c-compile
                       (lambda ()        
                         (arc:require 'task-c-compile-linux 
                                      "linux/task-c-compile-linux")
-                        <arc:linux-c-compile>))
+                        <arc:c-compile-linux>))
 
 (arc:register-handler 'linux 'task-lib
                       (lambda ()        
                         (arc:require 'task-lib-linux 
                                      "linux/task-lib-linux")
-                        <arc:linux-lib>))
+                        <arc:lib-linux>))
 
 (arc:register-handler 'linux 'task-link
                       (lambda ()
