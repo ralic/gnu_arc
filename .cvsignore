@@ -2,3 +2,6 @@ app
 bootstrap.sh
 *~
 arc
+arc.config
+arc-*.tar.gz
+

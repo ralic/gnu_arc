@@ -22,10 +22,7 @@ filter                  filters a file and replaces placeholder
 install                 install file/files
 texinfo                 process texinfo files
 
-
-additional functions:
----------------------
-msg                     display all arguments (=echo)
+echo                    display all arguments
 
 
 to be done:
