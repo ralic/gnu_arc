@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: arc.scm,v 1.3 2003/04/19 01:07:07 eyestep Exp $
+;; $Id: arc.scm,v 1.4 2003/04/22 23:34:20 eyestep Exp $
 
 ;; setup the require/provide system
 (define %arc:debug% (let ((ff (getenv "ARC_DEBUG")))
@@ -92,6 +92,7 @@
   '("require.scm"
     "getopt.scm"
     "path.scm"
+    "hash.scm"
     "eval.scm"
     "arcconf.scm"
     "show.scm"
