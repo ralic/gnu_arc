@@ -19,5 +19,15 @@
   needs the following tasks:
 
   - call arc (in another directory)
-  - increase version number
   
+- need a cool way to parse settings from a arc.config file to the C
+  compiler (as -Dxxx=value pairs).  Or better: generate a config.h file and
+  parse in the -DHAVE_CONFIG_H key; all the settings would then be
+  generated in the config.h file.  this would allow to combine arc with
+  autoconf.
+
+- strip symbols from installed binaries
+
+- needs a nice abstraction for the deps format used by task-c-deps,
+  task-flex, task-bison, task-c-deps.  In the moment the structure is
+  created in each task anew ...  put this to src/deps.scm
