@@ -20,10 +20,10 @@
 ;; change, e.g. machine type, host type and name, installed os version and
 ;; type, etc.
 
-;; $Id: config.scm.in,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: config.scm.in,v 1.2 2003/04/12 23:51:15 eyestep Exp $
 
 
-(define (arc:include_path) "@include-path@")
+(define (arc:include-path) "@include-path@")
 
 (define (arc:host-os) "@host-os@")
 (define (arc:host-cpu) "@host-cpu@")
