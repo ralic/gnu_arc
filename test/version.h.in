@@ -1,0 +1,5 @@
+#ifndef version_h
+
+#define VERSION "0.1.1 (build: @0011@)"
+
+#endif
