@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-java-compile.scm,v 1.2 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-java-compile.scm,v 1.3 2003/04/22 23:41:40 eyestep Exp $
 
 (arc:provide 'task-java-compile)
 
@@ -70,8 +70,9 @@
      (lambda (fn)
        (let* ( (pn (arc:string->path fn))
 	       (jflags (string-append 
-			"" (arc:string-list->string (arc:aval 'flags 
-							      props ()))
+			"" (arc:string-list->string* (arc:aval 'flags 
+                                                               props ())
+                                                     " ")
 			" "
 			(if (arc:aval 'deprecation? props #f)
 			    (string-append %arc:java-depr-flag% " ") "")
