@@ -1,6 +1,6 @@
 ;; this is a test file, to be used by the arc system
 
-;; $Id: Arcfile,v 1.2 2003/04/12 23:45:35 eyestep Exp $
+;; $Id: Arcfile,v 1.3 2003/04/13 23:43:46 eyestep Exp $
 
 (project grovekit
          info: "The GroveKit library"
@@ -79,7 +79,6 @@
 
 (stmt make-lib
       info: "Builds the library"
-      os: 'linux
       (lib libnm: "GroveKit"
            shared?: #t
            outdir: (-> build-dir)
