@@ -28,10 +28,12 @@
 
 (define %arc:system% "")
 (define %arc:path% "")
+(define %arc:prefix% "/usr")
 (define %arc:exec% "")
 (define %arc:impl% "")
 
 (define arc:opts '((sys "-s" "--sys" #t "the system name")
+                   (pfx "-P" "--prefix" #t "the installation prefix")
                    (path "-p" "--path" #t "the arc home path (e.g. /usr/local/share/arc)")
                    (impl "-i" "--impl" #t "the scheme implementation")
                    (exec "-x" "--exec" #t "the execution path (e.g. /usr/local/bin)") ))
@@ -43,6 +45,7 @@
         (case opt
           ((sys) (set! %arc:system% *arc:optarg*))
           ((path) (set! %arc:path% *arc:optarg*))
+          ((pfx) (set! %arc:prefix% *arc:optarg*))
           ((exec) (set! %arc:exec% *arc:optarg*))
           ((impl) (set! %arc:impl% *arc:optarg*))
           ((#\?) (begin 
@@ -74,7 +77,7 @@
 (define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f #f #f ))
 
 (case (car %arc:sysnm%)
-  ((linux bsd sunos) (load "./bstr-unix.scm"))
+  ((linux bsd sunos cygwin) (load "./bstr-unix.scm"))
   ((beos) (load "./bstr-beos.scm"))
   ((win32) (load "./bstr-win32.scm"))
   (else (begin
@@ -97,8 +100,18 @@
 (bootstrap-script)
 
 (arc:filter-file "../src/config.scm.in" "../src/config.scm"
-                 `(("arc-home" %arc:path%)
-                   ("exec-path" %arc:exec%)
+                 `(("arc-home" ,%arc:path%)
+                   ("exec-path" ,%arc:exec%)
+                   ("include-path" ,(include-path))
+                   ("host-os" ,(car %arc:sysnm%))
+                   ("host-cpu" ,(cadr %arc:sysnm%))
+                   ("host-maker" ,(caddr %arc:sysnm%))
+                   ("host-version" ,(cadddr %arc:sysnm%))) )
+
+(arc:filter-file "../arc.config.in" "../arc.config"
+                 `(("arc-home" ,%arc:path%)
+                   ("prefix" ,%arc:prefix%)
+                   ("exec-path" ,%arc:exec%)
                    ("include-path" ,(include-path))
                    ("host-os" ,(car %arc:sysnm%))
                    ("host-cpu" ,(cadr %arc:sysnm%))
