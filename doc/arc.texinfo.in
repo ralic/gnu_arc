@@ -1686,7 +1686,7 @@ does nothing.
 Overwrite an yet existing destination file (default is @samp{#t}).
 
 @item seperator: @var{char}
-The seperator to user instead of @samp{@@}.
+The seperator to use instead of @samp{@@}.
 
 @item values: @var{alist} @strong{required}
 Gives the alist of key-values pairs containing the keywords to replace
@@ -1697,6 +1697,98 @@ replacement text.
 
 The task returns the name of the destination file.
 @end deffn
+
+
+@deffn {Task} version args
+Takes a text file, extracts a build number from it, increases it by a
+defined step and writes the file back.  This task can be used to
+generate an automatic build number, which is increased on every build
+run.
+
+The build number part in the text file is surrounded by @samp{@@} (or any
+char specified), and could therefore be embedded in programming
+language files of the source tree.
+
+Additionally, this task supports to create a clean copy of the version
+base file, by extracting the markup characters (@samp{@@}) from it.  A
+common usage for this task is to have the following setup:
+
+@example
+(stmt prepare
+      scope: 'local
+      (version src: "version.h.in"
+               clean-copy-tofile: "version.h"))
+
+(stmt c-headers
+      depends: 'prepare
+      (fileset pattern: "*.h"))
+
+(stmt c-sources
+      (fileset pattern: "*.c"))
+
+(stmt compile
+      (c-compile sources: (-> c-sources)
+                 includes: '(".")))
+@dots{}
+@end example
+
+Here the version tasks generates the @file{version.h} file from a
+input @file{version.h.in} file.  The @file{version.h} file is part of
+the sources; if any c file from @code{(-> c-sources)} includes
+@file{version.h}, it happens to be in the dependency list of that
+c-file: therefore everytime the @samp{compile} task is run it will
+compile this c-file (since @file{version.h} is written anew).
+
+The @file{version.h.in} may look like:
+
+@example
+#ifndef version_h
+#define VERSION "0.1.1 (build: @@0011@@)"
+#endif
+@end example
+
+and after a successfull build run, it should look like:
+
+@example
+#ifndef version_h
+#define VERSION "0.1.1 (build: 0012)"
+#endif
+@end example
+
+
+The arguments:
+
+@table @samp
+@item src: @var{string} @strong{required}
+The input version file.
+
+@item tofile: @var{string}
+Where to write the result, defaults to the input version file.
+
+@item clean-copy-tofile: @var{string}
+If set write a copy of the counted data to @var{string}, but removes
+the seperator chars.
+
+@item seperator: @var{char}
+The seperator to use instead of @samp{@@}.
+
+@item step: @var{integer}
+The step to increase the build number by, defaults to 1.
+
+@item fill-to-length: @var{integer}
+Left fill the generated build number at least to this length.  This
+defaults to 4.
+
+@item fill-char: @var{char}
+Left fill with this char, defaults to @code{#\0}.  Valid characters
+are only @samp{0} (zero) and @samp{ } (space), since all other
+characters modify the count number as number, so no further increases
+would be possible.
+@end table
+@end deffn
+
+
+
 
 
 @deffn {Task} fileset args
