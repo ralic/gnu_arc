@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-c-compile.scm,v 1.2 2003/04/12 23:48:23 eyestep Exp $
 
 (arc:provide 'task-c-compile)
 (arc:require 'task-c-deps)
@@ -92,20 +92,19 @@
 
 (define (arc:c-compile props body)
   (let* ((outdir (arc:aval 'outdir props #f))
-         (<handler> (arc:make-instance (arc:handler-factory %arc:sysnm%
-                                                            'task-c-compile)))
+         (<backend> ((arc:handler-factory %arc:sysnm% 'task-c-compile) 'alloc))
          (cflags (string-append 
                   "" (arc:string-list->string (arc:aval 'flags props ()))
                   " "
                   (if (arc:aval 'debug? props #f) 
-                      (string-append (<handler> 'debug-flag) " ") "")
+                      (string-append (<backend> 'debug-flag) " ") "")
                   (if (arc:aval 'ansi? props #f) 
-                      (string-append (<handler> 'ansi-flag) " ") "") 
+                      (string-append (<backend> 'ansi-flag) " ") "") 
                   (if (arc:aval 'signed-char? props #f)
-                      (string-append (<handler> 'signed-char-flag) " ") "")
-                  (<handler> 'opt-level-flag (arc:aval 'opt-level props #f))
+                      (string-append (<backend> 'signed-char-flag) " ") "")
+                  (<backend> 'opt-level-flag (arc:aval 'opt-level props #f))
                   " "                  
-                  (<handler> 'warn-level-flag 
+                  (<backend> 'warn-level-flag 
                              (arc:aval 'warn-level props #f))))
          (sources (arc:aval 'sources props ()))
          (depends (arc:aval 'depends props #f)) 
@@ -117,7 +116,7 @@
      (lambda (fn)
        (let* ((compile-file 
                (lambda (av-slot objext cfl)
-                 (let* ((on (<handler> 'make-objfile-name fn outdir objext))
+                 (let* ((on (<backend> 'make-objfile-name fn outdir objext))
                         (cincls (arc:string-list->string* 
                                  (arc:aval 'includes props ()) "-I")))
                    
@@ -133,23 +132,23 @@
                                                     outdir)
                        (begin
                          (arc:log 'verbose "compile '" fn "' into '" on "'")
-                         (<handler> 'compile-file
-                                    fn     ; source file
-                                    on     ; object file
-                                    cincls ; c includes
-                                    cfl    ; flags
-                                    ))))) )
+                         (<backend> 'compile-file
+                                  fn     ; source file
+                                  on     ; object file
+                                  cincls ; c includes
+                                  cfl    ; flags
+                                  ))))) )
               )
          (if (arc:aval 'shared? props #f)
              (compile-file 'shared-objs 
                            (arc:aval 'sobjext props 
-                                     (<handler> 'shared-objfile-ext))
+                                     (<backend> 'shared-objfile-ext))
                            (string-append cflags " " 
-                                          (<handler> 'shared-obj-flag))))
+                                          (<backend> 'shared-obj-flag))))
          (if (arc:aval 'static? props #t)
              (compile-file 'objs 
                            (arc:aval 'objext props 
-                                     (<handler> 'objfile-ext))
+                                     (<backend> 'objfile-ext))
                            cflags)) ))
      sources)
     av))

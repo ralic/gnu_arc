@@ -15,16 +15,13 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-lib.scm,v 1.2 2003/04/12 23:48:23 eyestep Exp $
 
 (arc:provide 'task-lib)
 
 (arc:require 'oop)
 
 (arc:log 'debug "loading 'lib' task")
-
-(case (car %arc:sysnm%)
-  ((linux) (arc:require 'task-lib-linux "linux/task-lib-linux")) )
 
 
 ;; Creates a archive from objects files.  Both the functionality to create
@@ -89,17 +86,13 @@
          (outdir (arc:aval 'outdir props #f))
          (av (arc:attrval)) 
          
-         (<handler> (case (car %arc:sysnm%)
-                      ((linux) (arc:make-instance <arc:linux-lib>))
-                      (else (begin
-                              (arc:log 'error "library support on " 
-                                       (car %arc:sysnm%) " is not checked yet")
-                              (lambda (x . prms) #f))))) )
+         (<backend> ((arc:handler-factory %arc:sysnm% 'task-lib) 'alloc)))
+    
     (if (= (string-length libnm) 0)
         (arc:log 'fatal "bad or empty library name"))
     
     (if (arc:aval 'static? props #t)
-        (let ((la (<handler> 'make-static-name outdir libnm))
+        (let ((la (<backend> 'make-static-name outdir libnm))
               (files (if (arc:attrval? files*)
                          (arc:attrval-ref files* 'objs)
                          files*)))
@@ -110,7 +103,7 @@
           (if (arc:deps-lib-needs-rebuild? la files)
               (begin
                 (arc:log 'debug "make static " la " ...")
-                (<handler> 'make-static-lib la files)))
+                (<backend> 'make-static-lib la files)))
 
           ;; set the return value
           (arc:attrval-set! av 'static la)
@@ -125,15 +118,15 @@
               (arc:log 'info "no object files for library!"))
           
           (let* ((vi (arc:aval 'version-info props '(0 0 0)))
-                 (fullnm (<handler> 'make-shared-name outdir libnm
+                 (fullnm (<backend> 'make-shared-name outdir libnm
                                     (car vi) (cadr vi) (caddr vi)))
-                 (shnm (<handler> 'make-shared-name-no-version outdir libnm)))
+                 (shnm (<backend> 'make-shared-name-no-version outdir libnm)))
             
             (if (arc:deps-lib-needs-rebuild? fullnm files)
                 (begin
                   (arc:log 'debug "make dll " fullnm " ...")
                 
-                  (<handler> 'make-shared-lib 
+                  (<backend> 'make-shared-lib 
                              fullnm files
                              (arc:aval 'libdirs props ())
                              (arc:aval 'addlibs props ()))

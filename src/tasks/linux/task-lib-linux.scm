@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-linux.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-lib-linux.scm,v 1.2 2003/04/12 23:49:41 eyestep Exp $
 
 (arc:provide 'task-lib-linux)
 
@@ -100,54 +100,61 @@
 
 ;; now concat the class
 (define <arc:linux-lib>
-  (list '<arc:linux-lib>                ; name of the class
-        '((os linux))                   ; slots
-
-        <arc:object>                    ; superclass
+  (arc:make-class 
+   '<arc:linux-lib>                ; name of the class
+   <arc:object>                    ; superclass
+   '((os linux))                   ; slots
+   
         
-        ;; methods
-        `((os ,(lambda (self) linux))
-          (ar-command ,(lambda (self) "ar"))
-          (replace-create-flag ,(lambda (self) "rc"))
-          (ranlib-command ,(lambda (self) "ranlib"))
-          (ranlib-needed? ,(lambda (self) #t))
-          (suffix-shared ,(lambda (self) "so"))
-          (suffix-static ,(lambda (self) "a"))
-                     
-          ;; make a name for a static library 
-          ;; #1: the outdir
-          ;; #2: the libname
-          (make-static-name ,arc:<linux-lib>-make-static-name)
-          
-          ;; make a name for a shared library
-          ;; #1: the outdir
-          ;; #2: the libname
-          ;; #3: the version current
-          ;; #4: the version revision
-          ;; #5: the version age
-          (make-shared-name ,arc:<linux-lib>-make-shared-name)
-          
-          ;; make a name for a shared library without version
-          ;; information
-          ;; #1: the outdir
-          ;; #2: the libname
-          (make-shared-name-no-version 
-           ,(lambda (self outdir libnm)
-              (arc:<linux-lib>-make-shared-name self
-                                                outdir libnm
-                                                #f #f #f)))
-          
-          ;; create static library
-          ;; #1: the (absolute) libraryname 
-          ;; #2: the list of object files
-          (make-static-lib ,arc:<linux-lib>-make-static-lib)
-          
-          ;; make a shared library
-          ;; #1: the (absolute) library name
-          ;; #2: the list of (shared) objects
-          ;; #3: a list of library to look into for 
-          ;;     dependency libs
-          ;; #4: a list of libraries the shared library depends 
-          ;;     on (or () if not needed)
-          (make-shared-lib ,arc:<linux-lib>-make-share-lib)
-          )))
+   ;; methods
+   `((os ,(lambda (self) linux))
+     (ar-command ,(lambda (self) "ar"))
+     (replace-create-flag ,(lambda (self) "rc"))
+     (ranlib-command ,(lambda (self) "ranlib"))
+     (ranlib-needed? ,(lambda (self) #t))
+     (suffix-shared ,(lambda (self) "so"))
+     (suffix-static ,(lambda (self) "a"))
+     
+     ;; make a name for a static library 
+     ;; #1: the outdir
+     ;; #2: the libname
+     (make-static-name ,arc:<linux-lib>-make-static-name)
+     
+     ;; make a name for a shared library
+     ;; #1: the outdir
+     ;; #2: the libname
+     ;; #3: the version current
+     ;; #4: the version revision
+     ;; #5: the version age
+     (make-shared-name ,arc:<linux-lib>-make-shared-name)
+     
+     ;; make a name for a shared library without version
+     ;; information
+     ;; #1: the outdir
+     ;; #2: the libname
+     (make-shared-name-no-version 
+      ,(lambda (self outdir libnm)
+         (arc:<linux-lib>-make-shared-name self
+                                           outdir libnm
+                                           #f #f #f)))
+     
+     ;; create static library
+     ;; #1: the (absolute) libraryname 
+     ;; #2: the list of object files
+     (make-static-lib ,arc:<linux-lib>-make-static-lib)
+     
+     ;; make a shared library
+     ;; #1: the (absolute) library name
+     ;; #2: the list of (shared) objects
+     ;; #3: a list of library to look into for 
+     ;;     dependency libs
+     ;; #4: a list of libraries the shared library depends 
+     ;;     on (or () if not needed)
+     (make-shared-lib ,arc:<linux-lib>-make-share-lib)
+     )))
+
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:
