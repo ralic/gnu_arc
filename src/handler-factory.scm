@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: handler-factory.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: handler-factory.scm,v 1.2 2003/04/13 23:42:42 eyestep Exp $
 
 (define arc:handlers ())
 
@@ -48,12 +48,12 @@
 (define (arc:register-handler system task handler-class)
   (let ((aval (assoc task arc:handlers)))
     (if aval
-        (let ((sysa (assoc system (cadr aval))))
+        (let ((sysa (assoc system (cdr aval))))
           (if sysa
               (set-cdr! sysa handler-class)
               (set-cdr! aval
-                        (append (cadr aval) (list (cons system
-                                                        handler-class))))))
+                        (append (cdr aval) (list (cons system
+                                                       handler-class))))))
         (set! arc:handlers
               (append arc:handlers (list (list task
                                                (list (cons system
