@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile.scm,v 1.2 2003/04/12 23:48:23 eyestep Exp $
+;; $Id: task-c-compile.scm,v 1.3 2003/04/17 00:06:05 eyestep Exp $
 
 (arc:provide 'task-c-compile)
 (arc:require 'task-c-deps)
@@ -171,16 +171,7 @@
         ;; otherwise check if the object file needs recompilation.  this is
         ;; done generic.  probably once replace the modification time
         ;; method by a md5sum based method?
-        (arc:mtime-c-source-changed? (car deps) ofile))))
-
-(define (arc:mtime-c-source-changed? deps ofile)
-  (let ((mtime (arc:sys.get-mtime ofile))
-        (dps (arc:deps-determine-mtime deps)))
-    (let loop ((fc (cadr dps)))
-      (if (null? fc)
-          #f
-          (or (< mtime (cdar fc))
-              (loop (cdr fc))) ))))
+        (arc:mtime-file-changed? (car deps) ofile))))
 
 
 
