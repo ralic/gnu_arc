@@ -1,6 +1,6 @@
 ;; this is a test file, to be used by the arc system
 
-;; $Id: Arcfile,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: Arcfile,v 1.2 2003/04/12 23:45:35 eyestep Exp $
 
 (project grovekit
          info: "The GroveKit library"
@@ -94,6 +94,7 @@
             libs: '("GroveKit")
             libdirs: (list (-> build-dir))
             shared?: #t
+            appext: "app"
             appnm: "hw"))
 
 (stmt mapp
@@ -201,15 +202,39 @@
         (echo " begins-with? " x ": " (map (lambda (d) 
                                              (path-absolute? d "/usr"))
                                            x)))
-      (echo " abbr " (path-abbreviate "/home/gregor/dot.getw"))
-      (echo " norm " (path-abbreviate "~/../dot.getw"))
-      (echo " abso " (path-abbreviate "~/../dot.getw"))
+      (echo " append " (path-append "/home/gregor" "src/*.scm"))
 
-      
+      (let ((x '("/home/gregor/dot.getw"
+                 "~/dot.getw"
+                 "./dot.getw"
+                 "src/fields/../*.scm")))
+        (echo " abbr: " (map (lambda (d)
+                               (string-append "["
+                                              (path-abbreviate d)
+                                              "]"))
+                             x))
+        (echo " norm: " (map (lambda (d)
+                               (string-append "["
+                                              (path-normalize d)
+                                              "]"))
+                             x))
+        (echo " abso: " (map (lambda (d)
+                               (string-append "["
+                                              (path-absolutize d)
+                                              "]"))
+                             x)))
+
+      (echo "--- " (path->list "~/dot.getw"))
       
       (if (equal? (prop project) "arc")
           (echo "is an arc")
           (echo "or not")))
+
+
+
+(stmt xxx
+      (echo (make-alist 'name "mueller, susan" 'street "am gottesacker 11"
+                        'city "berlin" 'zip "10939")))
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
