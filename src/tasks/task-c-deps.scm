@@ -15,10 +15,11 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-deps.scm,v 1.2 2003/04/12 23:48:23 eyestep Exp $
+;; $Id: task-c-deps.scm,v 1.3 2003/04/22 23:40:24 eyestep Exp $
 
 (arc:provide 'task-c-deps)
 
+(arc:require 'task-c-compile "tasks/task-c-compile")
 
 (arc:log 'debug "loading 'c-deps' task")
 
@@ -32,20 +33,22 @@
   (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-c-deps) 'alloc))
          (objext (arc:aval 'objext props (<backend> 'objfile-ext)))
          (outdir (arc:aval 'outdir props "."))
-         (cincs (arc:string-list->string* (arc:aval 'includes props ()) "-I"))
-         (cflags (arc:string-list->string (arc:aval 'flags props ())))
-         (sources (arc:aval 'sources props ())) )
+         (cincs (arc:string-list->string* (arc:aval 'includes props ()) 
+                                          " -I"))
+         (cflags (arc:string-list->string* (arc:aval 'flags props ())
+                                           " "))
+         (sources (arc:-prepare-c-source-list (arc:aval 'sources props ()))))
     (map
-     (lambda (dp)
-       (arc:log 'debug "dependency for: " dp)
-       (arc:deps-get-deps dp 
-                          (lambda (sfile) 
-                            (<backend> 'makedeps 
-                                       sfile
-                                       cflags
-                                       cincs
-                                       outdir
-                                       objext))))
+     (lambda (src)
+       (let ((target (<backend> 'make-objfile-name src outdir objext)))
+         (arc:log 'debug "dependency for: " target)
+
+         (arc:deps-get-deps src target 
+                            (lambda (sfile target) 
+                              (<backend> 'makedeps 
+                                         sfile target
+                                         cflags
+                                         cincs)))))
      
      sources)))
 

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-c-compile.scm,v 1.3 2003/04/17 00:06:05 eyestep Exp $
+;; $Id: task-c-compile.scm,v 1.4 2003/04/22 23:40:24 eyestep Exp $
 
 (arc:provide 'task-c-compile)
 (arc:require 'task-c-deps)
@@ -75,7 +75,7 @@
 ;; to those for static libraries this may result in double compilation.
 ;;
 ;; the return value is a list of all object files controlled by this task
-(define arc:c-compile-keywords '((sources strlist required)
+(define arc:c-compile-keywords '((sources (list attrval) required)
                                  (debug? boolean optional)
                                  (ansi? boolean optional)
                                  (signed-char? boolean optional)
@@ -94,7 +94,8 @@
   (let* ((outdir (arc:aval 'outdir props #f))
          (<backend> ((arc:handler-factory %arc:sysnm% 'task-c-compile) 'alloc))
          (cflags (string-append 
-                  "" (arc:string-list->string (arc:aval 'flags props ()))
+                  "" (arc:string-list->string* (arc:aval 'flags props ())
+                                               " ")
                   " "
                   (if (arc:aval 'debug? props #f) 
                       (string-append (<backend> 'debug-flag) " ") "")
@@ -106,7 +107,7 @@
                   " "                  
                   (<backend> 'warn-level-flag 
                              (arc:aval 'warn-level props #f))))
-         (sources (arc:aval 'sources props ()))
+         (sources (arc:-prepare-c-source-list (arc:aval 'sources props ())))
          (depends (arc:aval 'depends props #f)) 
          (av (arc:attrval)) )
     
@@ -118,7 +119,7 @@
                (lambda (av-slot objext cfl)
                  (let* ((on (<backend> 'make-objfile-name fn outdir objext))
                         (cincls (arc:string-list->string* 
-                                 (arc:aval 'includes props ()) "-I")))
+                                 (arc:aval 'includes props ()) " -I")))
                    
                    (let ((vv (arc:attrval-ref av av-slot) ))
                      (if vv
@@ -174,6 +175,34 @@
         (arc:mtime-file-changed? (car deps) ofile))))
 
 
+(define (arc:-prepare-c-source-list lst)
+  (cond
+   ((string? lst) (list lst))
+   ((list? lst) 
+    (arc:reduce (lambda (elt lst)
+                  (cond
+                   ((string? elt) (cons elt lst))
+                   ((arc:attrval? elt)
+                    (let ((x (arc:attrval-ref elt 'c-source)))
+                      (if (and x
+                               (list? x))
+                          (append x lst)
+                          lst)))
+                   ((list? elt)
+                    (append (arc:-prepare-c-source-list elt)
+                            lst))
+                   (else
+                    lst)))
+                '() 
+                lst))
+   ((arc:attrval? lst)
+    (let ((x (arc:attrval-ref lst 'c-source)))
+      (if (and x
+               (list? x))
+          x
+          ())))
+   (else
+    ())))
 
 (arc:register-task 'c-compile arc:c-compile arc:c-compile-keywords)
 
