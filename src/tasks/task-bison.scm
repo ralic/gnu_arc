@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-bison.scm,v 1.2 2003/04/22 23:40:43 eyestep Exp $
+;; $Id: task-bison.scm,v 1.3 2003/05/05 21:32:38 eyestep Exp $
 
 (arc:provide 'task-bison)
 
@@ -65,6 +65,7 @@
                              (no-lines? boolean optional)
                              (to-c-file string (opt-xor outdir))
                              (to-h-file string optional)
+                             (verbose? boolean optional)
                              (outdir string (opt-xor tofile))) )
   
 (define (arc:bison props body)
@@ -75,6 +76,7 @@
          (no-lines? (arc:aval 'no-lines? props #f))
          (prefix (arc:aval 'prefix props #f))
          (source (arc:aval 'source props #f))
+         (verbose? (arc:aval 'verbose? props #f))
          (av (arc:attrval)) )
 
     (arc:log 'debug "bison ...")
@@ -102,6 +104,9 @@
                                        (arc:path->string x))))
                            y)))
            (bisoncmd (string-append "bison "
+                                    (if verbose?
+                                        "-v "
+                                        "")
                                     (if no-lines?
                                         "-l "
                                         "")
