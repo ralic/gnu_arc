@@ -258,6 +258,7 @@ SCM scm_port_type(port)
   return BOOL_F;
 }
 
+#if 0
 #if (__TURBOC__==1)
 # undef L_tmpnam		/* Not supported in TURBOC V1.0 */
 #endif
@@ -321,6 +322,7 @@ inclp:
   return name;
 }
 #endif /* L_tmpnam */
+#endif
 
 #ifdef M_SYSV
 # define remove unlink
@@ -1177,7 +1179,7 @@ char s_obunhash[] = "object-unhash", s_cache_gc[] = "cache_gc";
 char s_recursive[] = "recursive";
 #define s_gc (s_cache_gc+6)
 static iproc subr0s[] = {
-	{"tmpnam", ltmpnam},
+  /*	{"tmpnam", ltmpnam},*/
 	{"open-ports", scm_open_ports},
 	{0, 0}};
 
