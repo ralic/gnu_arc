@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: meta.scm,v 1.2 2003/04/12 23:52:19 eyestep Exp $
+;; $Id: meta.scm,v 1.3 2003/04/17 00:05:07 eyestep Exp $
 
 
 (define (arc:eval-arc-defines expr)
@@ -67,7 +67,8 @@
                                          (version string optional)
                                          (basedir string optional)
                                          (default symbol optional))
-                                       keys))
+                                       keys
+                                       "project"))
          (ctx (arc:make-context id)))
     ;; the --script-in-loading-- variable is set by the eval-script!
     (arc:context-script-home! ctx 
@@ -151,7 +152,8 @@
                                          (once? boolean optional)
                                          (scope symbol optional)
                                          (depends (symbol list) optional))
-                                       (car keys-body)))
+                                       (car keys-body)
+                                       (symbol->string id)))
          (deps ())
          (bad #f)
          (scope (case (arc:aval 'scope props* 'public)
@@ -286,7 +288,7 @@
       ((alist?) (apply arc:alist? (arc:eval-list (cdr expr))))
 
       ;; string functions
-      ((string-append) (apply string-append (arc:eval-list (cdr expr))))
+      ((string-append) (apply arc:to-str (arc:eval-list (cdr expr))))
       ((string-split) (apply arc:split-string (arc:eval-list (cdr expr))))
       ((string-suffix?) (apply arc:string-suffix? (arc:eval-list (cdr expr))))
       ((string-prefix?) (apply arc:string-prefix? (arc:eval-list (cdr expr))))
@@ -501,7 +503,8 @@
          (rtv (arc:get-keywords-and-body expr))
          (props (if task
                     (or (arc:compile-key-list (caddr task)
-                                              (car rtv))
+                                              (car rtv)
+                                              task-name)
                         (begin
                           (arc:msg "missing properties")
                           (quit)))
@@ -512,7 +515,7 @@
 
 (define (arc:call-task task-name param-alist body)
   (let* ((task (arc:lookup-task task-name))
-         (props (or (arc:compile-key-list (caddr task) param-alist)
+         (props (or (arc:compile-key-list (caddr task) param-alist task-name)
                     (begin
                       (arc:msg "missing properties")
                       (quit)))) )
