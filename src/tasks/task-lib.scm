@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib.scm,v 1.4 2003/04/19 01:08:38 eyestep Exp $
+;; $Id: task-lib.scm,v 1.5 2003/04/22 23:42:24 eyestep Exp $
 
 (arc:provide 'task-lib)
 
@@ -80,6 +80,7 @@
                            (shared?      boolean           (req-or static?))
                            (libnm        string            required)
                            (outdir       string            optional)
+                           (rpath        string            optional)
                            (version-info list              optional)
                            (libdirs      strlist           optional)
                            (addlibs      strlist           optional)) )
@@ -140,7 +141,9 @@
                   (<backend> 'make-shared-lib 
                              realnm int-soname files
                              (arc:aval 'libdirs props ())
-                             (arc:aval 'addlibs props ()))
+                             (arc:aval 'addlibs props ())
+                             (arc:aval 'rpath props #f))
+
                   ;; create additional links for this library (i.e. the
                   ;; short name without the version info added.  This is to
                   ;; support linking against shared libs in the local build

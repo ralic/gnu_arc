@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-beos.scm,v 1.1 2003/04/13 23:47:06 eyestep Exp $
+;; $Id: task-lib-beos.scm,v 1.2 2003/04/22 23:43:16 eyestep Exp $
 
 (arc:provide 'task-lib-beos)
 
@@ -41,6 +41,11 @@
      (ld-outfile-flag ,(lambda (self) "-o"))
      (ld-soname-flag ,(lambda (self soname)
                         (string-append "-soname=" soname)))
+     (ld-rpath-option ,(lambda (self rpath)
+                         (string-append "-rpath=" 
+                                        (arc:path->string
+                                         (arc:path-absolutize
+                                          (arc:string->path rpath))))))
      )))
 
 ;;Keep this comment at the end of the file 
