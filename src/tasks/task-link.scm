@@ -15,17 +15,10 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-link.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-link.scm,v 1.2 2003/04/12 23:48:45 eyestep Exp $
 
 (arc:provide 'task-link)
 
-
-;; gcc specific settings
-(define %arc:link-command% "gcc")
-(define %arc:link-outfile-flag% "-o")
-(define %arc:link-shared-flag% "")
-(define %arc:link-static-flag% "-static")
-(define %arc:link-nostdlib-flag% "-nostdlib")
 
 (arc:log 'debug "loading 'link' task")
 
@@ -78,7 +71,8 @@
                             (nostdlib? boolean optional)
                             (libdirs strlist optional)) )
 (define (arc:link props body)
-  (let* ((shared (arc:aval 'shared? props #t))
+  (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-link) 'alloc))
+         (shared (arc:aval 'shared? props #t))
          (files* (arc:aval 'files props ()))
          (files (if (arc:attrval? files*)
                     (if shared
@@ -92,7 +86,7 @@
                           (arc:attrval-ref files* 'dep-lib-dirs)
                           #f))
          (libs (arc:aval 'libs props ())) 
-         (appext (arc:aval 'appext props (arc:default-appl-extension)))
+         (appext (arc:aval 'appext props (<backend> 'app-ext)))
          (appnm (arc:aval 'appnm props ""))
          (outdir (arc:aval 'outdir props #f))
          (nostdlib (arc:aval 'nostdlib? props #f))
@@ -105,66 +99,15 @@
              (= (length libs) 0))
         (arc:log 'info "no object files/libs for executable!"))
     
-    (let* ((fullnm (arc:-link-make-app-name outdir appnm appext))
-           (linkcmd (string-append 
-                     %arc:link-command% " "
-                     (if libdirs
-                         (string-append (arc:string-list->string* libdirs "-L")
-                                        " ")
-                         "")
-                     (if autolibdirs
-                         (string-append (arc:string-list->string* autolibdirs 
-                                                                  "-L")
-                                        " ")
-                         "")
-                     (if shared
-                         (string-append %arc:link-shared-flag% " ")
-                         (string-append %arc:link-static-flag% " "))
-                     (if nostdlib
-                         (string-append %arc:link-nostdlib-flag% " ")
-                         "")
-                     %arc:link-outfile-flag% " " fullnm " "
-                     (if files
-                         (string-append (arc:string-list->string files) " ")
-                         "")
-                     (if autolibs
-                         (string-append (arc:string-list->string* autolibs 
-                                                                  "-l")
-                                        " ")
-                         "")
-                     (if libs
-                         (string-append (arc:string-list->string* libs "-l")
-                                        " ")
-                         "") )))
-
-      (arc:log 'debug "linking " fullnm " ...")
-
-      (arc:display linkcmd #\nl)
-
-      (if (not (= (arc:sys.system linkcmd) 0))
-          (arc:log 'info "linking '" fullnm "' failed"))
-      
+    
+    (let* ((fullnm (<backend> 'link-app outdir appnm appext
+                              libdirs autolibdirs shared nostdlib
+                              files autolibs libs)))
       fullnm) ))
 
 
 (arc:register-task 'link arc:link arc:link-keywords)
 
-
-(define (arc:-link-make-app-name outdir appnm appext)
-  (let* ((od (if outdir 
-                 (arc:string->path outdir) 
-                 ()))
-         (ap (if (and appext
-                      (> (string-length appext) 0))
-                 (arc:path-replace-last-ext (arc:string->path appnm) appext)
-                 (arc:path-without-last-ext (arc:string->path appnm)))) )
-    (arc:path->string (arc:path-append od ap))))
-
-
-(define (arc:default-appl-extension)
-  (case (car %arc:sysnm%)
-    ((win32) "exe")
-    (else "")))
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
