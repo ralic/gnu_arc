@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: sys-ksi.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: sys-ksi.scm,v 1.2 2003/04/12 23:55:54 eyestep Exp $
 
 
 ;; ----------------------------------------------------------------------
@@ -95,6 +95,13 @@
 
 (define (arc:sys.getcwd)
   (getcwd))
+
+(define (arc:sys.homedir)
+  (case (car %arc:sysnm%)
+    ((win32) (let ((hm (getenv "HOME")))
+               (or hm
+                   "c:/")))
+    (else (getenv "HOME"))))
 
 
 ;; executes a system command, whereby the command may be accessable through
