@@ -31,6 +31,7 @@
            ((string-ci=? os* "beos") 'beos)
            ((or (string-ci=? os* "sunos")
                 (string-ci=? os* "solaris")) 'sunos)
+           ((or (string-ci=? os* "CYGWIN_NT-5.0")) 'cygwin)
            (else 'unknown))
           (cond
            ((or (string-ci=? cpu* "i386")
