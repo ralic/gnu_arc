@@ -15,142 +15,65 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-lib-linux.scm,v 1.2 2003/04/12 23:49:41 eyestep Exp $
+;; $Id: task-lib-linux.scm,v 1.3 2003/04/13 23:48:26 eyestep Exp $
 
 (arc:provide 'task-lib-linux)
 
-(arc:log 'debug "loading 'lib-linux' task")
+(arc:log 'debug "loading 'lib' task [linux]")
 
+(arc:require 'task-lib-generic "generic/task-lib-generic")
 
-;; generate the correct file names for this platform
-(define (arc:<linux-lib>-make-static-name self outdir libnm)
-  (let* ((bn (string-append "lib" libnm "." (self 'suffix-static))))
+(define (arc:<lib-linux>-make-shared-names self outdir libnm 
+                                             vermajor verminor verrelease)
+  (let* ((fvp (if vermajor 
+                  (string-append 
+                   "." (arc:num/str vermajor)
+                   (if verminor
+                       (string-append 
+                        "." (arc:num/str verminor)
+                        (if verrelease
+                            (string-append
+                             "." (arc:num/str verrelease))
+                            ""))
+                       ""))
+                  ""))
+         (svp (if vermajor 
+                  (string-append "." (arc:num/str vermajor))
+                  ""))
+         (linknm (string-append "lib" libnm "."
+                                (self 'suffix-shared)))
+         (realnm (string-append linknm fvp))
+         (soname (string-append linknm svp))
+         )
     (if outdir
-        (arc:path->string (arc:path-append (arc:string->path outdir) bn))
-        bn)) )
+        (let ((rpath (arc:string->path outdir)))
+          (list (arc:path->string (arc:path-append rpath realnm))
+                (arc:path->string (arc:path-append rpath soname))
+                (arc:path->string (arc:path-append rpath linknm))
+                soname))
+        (list realnm soname linknm soname)) ))
 
-(define (arc:<linux-lib>-make-shared-name self outdir libnm 
-                                          vercur verrev verage)
-  (let* ((vp (if (and vercur verrev verage)
-                 (string-append "." (arc:num/str vercur) 
-                                "." (arc:num/str verrev) 
-                                "." (arc:num/str verage))
-                 ""))
-         (bn (string-append "lib" libnm "." 
-                            (self 'suffix-shared)
-                            vp)) )
-    (if outdir
-        (arc:path->string (arc:path-append (arc:string->path outdir) bn))
-        bn)))
-
-
-;; compile a static library
-(define (arc:<linux-lib>-make-static-lib self libnm objs)
-  (if (arc:sys.file-exists? libnm)
-      (arc:sys.remove-file libnm))
-  
-  (let ((arcmd (string-append (self 'ar-command) " "
-                              (self 'replace-create-flag) " "
-                              libnm " "
-                              (arc:string-list->string* objs " ")))
-        (ranlibcmd (string-append (self 'ranlib-command) " " libnm)) )
-    
-    (arc:display arcmd #\nl)
-    
-    (if (not (equal? (arc:sys.system arcmd) 0))
-        (arc:msg "failed to create library " libnm #\nl)
-
-        (if (self 'ranlib-needed?)
-            (begin
-              (arc:display ranlibcmd #\nl)
-              (if (not (equal? (arc:sys.system arcmd) 0))
-                  (arc:msg "failed to run ranlib on " libnm #\nl)))))
-    libnm))
-
-
-;; build a shared library.  This requires the object files to be combiled
-;; properly
-(define (arc:<linux-lib>-make-share-lib self libnm objs libdirs deplibs)
-  (if (arc:sys.file-exists? libnm)
-      (arc:sys.remove-file libnm))
-  
-  (let ((ldmd (string-append 
-               "gcc -shared -Wl,--export-dynamic "
-               (if (and deplibs
-                        (not (null? deplibs)))
-                   (string-append (arc:string-list->string* libdirs "-L") " ")
-                   "")
-               ;; objects
-               (arc:string-list->string* objs " ") " "
-               ;; deplibs
-               (if (and deplibs
-                        (not (null? deplibs)))
-                   (string-append (arc:string-list->string* deplibs "-l") " ")
-                   "")
-               "-o " libnm)) )
-
-    (arc:display ldmd #\nl)
-    
-    (if (not (equal? (arc:sys.system ldmd) 0))
-        (begin
-          (arc:msg "failed to create library " libnm #\nl)
-          #f)
-        libnm) ))
-
-
-;; now concat the class
-(define <arc:linux-lib>
+(define <arc:lib-linux>
   (arc:make-class 
-   '<arc:linux-lib>                ; name of the class
-   <arc:object>                    ; superclass
-   '((os linux))                   ; slots
-   
-        
-   ;; methods
-   `((os ,(lambda (self) linux))
-     (ar-command ,(lambda (self) "ar"))
+   '<arc:lib-linux>                     ; name of the class
+   <arc:lib-generic>                    ; superclass
+   '()                                  ; slots
+   `((ar-cmd ,(lambda (self) "ar"))
      (replace-create-flag ,(lambda (self) "rc"))
-     (ranlib-command ,(lambda (self) "ranlib"))
+     (ranlib-cmd ,(lambda (self) "ranlib"))
      (ranlib-needed? ,(lambda (self) #t))
      (suffix-shared ,(lambda (self) "so"))
      (suffix-static ,(lambda (self) "a"))
      
-     ;; make a name for a static library 
-     ;; #1: the outdir
-     ;; #2: the libname
-     (make-static-name ,arc:<linux-lib>-make-static-name)
+     (ld-cmd ,(lambda (self) "gcc"))
+     (ld-shared-flag ,(lambda (self) "-shared"))
+     (ld-extra-flags ,(lambda (self) "-Wl,--export-dynamic"))
+     (ld-outfile-flag ,(lambda (self) "-o"))
+     (ld-soname-flag ,(lambda (self soname)
+                        (string-append "-Wl,-soname," soname)))
      
-     ;; make a name for a shared library
-     ;; #1: the outdir
-     ;; #2: the libname
-     ;; #3: the version current
-     ;; #4: the version revision
-     ;; #5: the version age
-     (make-shared-name ,arc:<linux-lib>-make-shared-name)
+     (make-shared-names ,arc:<lib-linux>-make-shared-names)
      
-     ;; make a name for a shared library without version
-     ;; information
-     ;; #1: the outdir
-     ;; #2: the libname
-     (make-shared-name-no-version 
-      ,(lambda (self outdir libnm)
-         (arc:<linux-lib>-make-shared-name self
-                                           outdir libnm
-                                           #f #f #f)))
-     
-     ;; create static library
-     ;; #1: the (absolute) libraryname 
-     ;; #2: the list of object files
-     (make-static-lib ,arc:<linux-lib>-make-static-lib)
-     
-     ;; make a shared library
-     ;; #1: the (absolute) library name
-     ;; #2: the list of (shared) objects
-     ;; #3: a list of library to look into for 
-     ;;     dependency libs
-     ;; #4: a list of libraries the shared library depends 
-     ;;     on (or () if not needed)
-     (make-shared-lib ,arc:<linux-lib>-make-share-lib)
      )))
 
 
