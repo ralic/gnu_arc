@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-link.scm,v 1.4 2003/04/22 23:42:16 eyestep Exp $
+;; $Id: task-link.scm,v 1.5 2003/04/24 22:47:13 eyestep Exp $
 
 (arc:provide 'task-link)
 
@@ -65,6 +65,18 @@
 ;; path is statically with the linked executable and therefore should only
 ;; be used for local compilations/linkings (e.g. when a executable is to be
 ;; linked with shared libraries but should not be installed)
+;;
+;; local-exec-outdir: STRING
+;; this option helps during testing applications, which are linked against
+;; shared libraries.  Since on some systems (e.g. ELF) shared libraries are
+;; normally only functional if they are installed and could be found by the
+;; system linker, it is possible to link an application, but not to run it
+;; (unless it is installed).  When this option is given a directory path,
+;; the task links a second copy, with the internal rpath set to all library
+;; search paths given in the libdirs: option.  Doing this, the application
+;; has the paths hardcoded, which are current during linking.  This binary
+;; therefore can be used only in the currently active building environment
+;; (for testing), but not during installation.
 ;;
 ;; RETURNS
 ;; the name of the build application (string)
