@@ -1,0 +1,47 @@
+;;  This file is part of the arc package
+;;  Copyright (C) 2002, 2003 by Gregor Klinke
+;;
+;;  This library is free software; you can redistribute it and/or modify it
+;;  under the terms of the GNU Lesser General Public License as published
+;;  by the Free Software Foundation; either version 2.1 of the License, or
+;;  (at your option) any later version.
+;;
+;;  This library is distributed in the hope that it will be useful, but
+;;  WITHOUT ANY WARRANTY; without even the implied warranty of
+;;  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;;  Lesser General Public License for more details.
+;;
+;;  You should have received a copy of the GNU Lesser General Public
+;;  License along with this library; if not, write to the Free Software
+;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+;; $Id: beos.decl,v 1.1 2003/04/13 23:44:37 eyestep Exp $
+
+(arc:register-handler 'beos 'task-c-deps
+                      (lambda ()
+                        (arc:require 'task-c-compile-linux 
+                                     "linux/task-c-compile-linux")
+                        <arc:c-compile-linux>))
+
+(arc:register-handler 'beos 'task-c-compile
+                      (lambda ()        
+                        (arc:require 'task-c-compile-linux 
+                                     "linux/task-c-compile-linux")
+                        <arc:c-compile-linux>))
+
+(arc:register-handler 'beos 'task-lib
+                      (lambda ()        
+                        (arc:require 'task-lib-beos 
+                                     "beos/task-lib-beos")
+                        <arc:lib-beos>))
+
+(arc:register-handler 'beos 'task-link
+                      (lambda ()
+                        (arc:require 'task-link-linux
+                                     "linux/task-link-linux")
+                        <arc:linux-link>))
+
+;;Keep this comment at the end of the file 
+;;Local variables:
+;;mode: scheme
+;;End:
