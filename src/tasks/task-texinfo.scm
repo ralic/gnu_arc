@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: task-texinfo.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: task-texinfo.scm,v 1.2 2003/04/19 01:08:18 eyestep Exp $
 
 (arc:provide 'task-texinfo)
 
@@ -45,7 +45,9 @@
 ;;
 ;; :dest STRING
 ;; used for html format only to write all html files to that particular 
-;; directory.  If the directory does not exist yet, it is created.
+;; directory.  If the directory does not exist yet, it is created.  This
+;; is only used, when split?: is #t, if not given and split?: is #t, for
+;; a texinfo file 'foo.texinfo' a directory 'foo' is created by default.
 ;;
 ;; :format (info | html | plain | dvi | pdf)
 ;; specifies the output format to be used.  Defaults to info
@@ -64,7 +66,7 @@
 ;; in: x.texi
 ;; info: x.info, x.info-1, x.info-2
 ;; pdf: x.pdf
-;; html: x.html or: dest/x.html, dest/1.html, ...
+;; html: x.html or: dest/x.html, dest/Intro.html, ...
 ;; dvi: x.dvi
 ;; plain: x.txt
 (define arc:texinfo-keywords '((src    string  required)
@@ -76,7 +78,7 @@
          (format (arc:aval 'format props 'info))
          (no-split (not (arc:aval 'split? props #t)))
          (destnm (case format
-                   ((info html) (arc:aval 'dest props #f))
+                   ((html) (arc:aval 'dest props #f))
                    (else #f)))
          (retv ()))
     
@@ -87,6 +89,7 @@
       ((info) (set! retv (arc:-texi-format-info srcnm no-split)))
       ((pdf) (set! retv (arc:-texi-format-pdf srcnm)))
       ((dvi) (set! retv (arc:-texi-format-dvi srcnm)))
+      ((html) (set! retv (arc:-texi-format-html srcnm no-split destnm)))
       (else (begin
               (arc:log 'error "format '" format "' not supported")
               (set! retv #f))))
@@ -104,34 +107,34 @@
          (pattern (arc:path->string (arc:path-replace-last-ext 
                                      (arc:path-last-comp sc)
                                      "info")))
-         (cwd (arc:sys.getcwd))
+         (cwd (arc:sys 'getcwd))
          (cmd (string-append "makeinfo " 
                              srcp
                              (if no-split
                                  (string-append " --no-split") "")))
          (retv #f))
-    (arc:sys.chdir destdir)
+    (arc:sys 'chdir destdir)
     (arc:display cmd #\nl)
-    (if (not (= (arc:sys.system cmd) 0))
+    (if (not (= (arc:sys 'system cmd) 0))
         (begin
           (arc:log 'error "texinfo: processing info '" srcnm "' failed")
           (set! retv #f))
         ;; TODO: find all info files!
         (set! retv (arc:-texi-format-info-find-info-files destdirp pattern)))
     
-    (arc:sys.chdir cwd)
+    (arc:sys 'chdir cwd)
     retv))
 
 ;; find all xxx.info files in the current working directory
 (define (arc:-texi-format-info-find-info-files dirnp pattern)
-  (let ((dp (arc:sys.opendir "."))
+  (let ((dp (arc:sys 'opendir "."))
         (retv ()))
-    (do ((fn (arc:sys.readdir dp) (arc:sys.readdir dp)))
+    (do ((fn (arc:sys 'readdir dp) (arc:sys 'readdir dp)))
         ((not fn) 'done)
       (if (arc:string-prefix? fn pattern)
           (set! retv (append retv (list (arc:path->string 
                                          (arc:path-append dirnp fn)))))))
-    (arc:sys.closedir dp)
+    (arc:sys 'closedir dp)
     retv))
 
 
@@ -144,21 +147,21 @@
                                      (arc:path-last-comp sc)
                                      "txt")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys.getcwd))
+         (cwd (arc:sys 'getcwd))
          (cmd (string-append "makeinfo --no-headers " 
                              srcp
                              " > " destfnm))
          (retv #f))
-    (arc:sys.chdir destdir)
+    (arc:sys 'chdir destdir)
     (arc:display cmd #\nl)
-    (if (not (= (arc:sys.system cmd) 0))
+    (if (not (= (arc:sys 'system cmd) 0))
         (begin
           (arc:log 'error "texinfo: processing plain '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys.chdir cwd)
+    (arc:sys 'chdir cwd)
     retv))
 
 ;; formating pdf text format from texinfo.
@@ -170,19 +173,19 @@
                                      (arc:path-last-comp sc)
                                      "pdf")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys.getcwd))
+         (cwd (arc:sys 'getcwd))
          (cmd (string-append "texi2pdf " srcp))
          (retv #f))
-    (arc:sys.chdir destdir)
+    (arc:sys 'chdir destdir)
     (arc:display cmd #\nl)
-    (if (not (= (arc:sys.system cmd) 0))
+    (if (not (= (arc:sys 'system cmd) 0))
         (begin
           (arc:log 'error "texinfo: processing pdf '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys.chdir cwd)
+    (arc:sys 'chdir cwd)
     retv))
 
 ;; formating dvi text format from texinfo.
@@ -194,19 +197,70 @@
                                      (arc:path-last-comp sc)
                                      "dvi")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys.getcwd))
+         (cwd (arc:sys 'getcwd))
          (cmd (string-append "texi2dvi " srcp))
          (retv #f))
-    (arc:sys.chdir destdir)
+    (arc:sys 'chdir destdir)
     (arc:display cmd #\nl)
-    (if (not (= (arc:sys.system cmd) 0))
+    (if (not (= (arc:sys 'system cmd) 0))
         (begin
           (arc:log 'error "texinfo: processing dvi '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys.chdir cwd)
+    (arc:sys 'chdir cwd)
+    retv))
+
+
+;; formating info text format from texinfo.
+(define (arc:-texi-format-html srcnm no-split destnm)
+  (let* ((sc (arc:string->path srcnm))
+         (destdirp (arc:path-without-last-comp sc))
+         (destdir (if destnm
+                      (if (arc:path-absolute? (arc:string->path destnm))
+                          destnm
+                          (arc:path->string (arc:path-append destdirp
+                                                             (arc:string->path
+                                                              destnm))))
+                      (arc:path->string destdirp)))
+         (srcp (arc:path->string (arc:path-last-comp sc)))
+         
+         (pattern (arc:path->string (arc:path-replace-last-ext sc
+                                                               "html")))
+         (cwd (arc:sys 'getcwd))
+         (cmd (string-append "makeinfo --html " 
+                             (if no-split
+                                 (string-append " --no-split ")
+                                 (if destnm
+                                     (string-append " -o " destnm " ")
+                                     ""))
+                             srcp))
+         (basedir (arc:path->string destdirp))
+         (retv #f))
+    
+    (arc:sys 'chdir basedir)
+    (arc:display cmd #\nl)
+
+    (if (not (= (arc:sys 'system cmd) 0))
+        (begin
+          (arc:sys 'chdir cwd)
+          (arc:throw 'error 
+                     (string-append "processing info '" srcnm "' failed"))))
+
+    (arc:sys 'chdir cwd)
+
+    ;; TODO: find all info files!
+    (if no-split
+        (set! retv pattern)
+        (let ((html-path (if destnm
+                             (string-append destdir "/*.html")
+                             (string-append 
+                              (arc:path->string (arc:path-without-last-ext sc))
+                              "/*.html"))))
+          (set! retv (arc:call-task 'fileset
+                                    (list 'pattern html-path)
+                                    #f)) ))
     retv))
 
 (arc:register-task 'texinfo arc:texinfo arc:texinfo-keywords)
