@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: strings.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: strings.scm,v 1.2 2003/04/17 00:05:28 eyestep Exp $
 
 ;; splits a string into its tokens divided by a separator
 (define (arc:split-string str sep)
@@ -55,6 +55,16 @@
                                    0
                                    pfxl)))))
 
+
+(define (arc:to-str . d)
+  (apply string-append (map (lambda (x)
+                              (cond
+                               ((string? x) x)
+                               ((char? x) (string x))
+                               ((number? x) (number->string x))
+                               ((symbol? x) (symbol->string x))
+                               (else "")))
+                            d)))
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:
