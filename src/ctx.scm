@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: ctx.scm,v 1.3 2003/04/19 01:08:37 eyestep Exp $
+;; $Id: ctx.scm,v 1.4 2003/04/22 23:35:09 eyestep Exp $
 
 
 ;; each build script is evaluated in a given context.  the contexts
@@ -78,7 +78,7 @@
 
 (define (arc:context-current)
   (if (null? %arc:contexts%)
-      ()
+      #f
       (car %arc:contexts%)))
 
 
