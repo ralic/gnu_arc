@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: path.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: path.scm,v 1.2 2003/04/12 23:53:53 eyestep Exp $
 
 
 (define %arc:path-sep% #\/)
@@ -120,6 +120,9 @@
 (define (arc:path-cwd)
   (arc:string->path (arc:sys.getcwd)))
 
+(define (arc:home-dir)
+  (arc:string->path (arc:sys.homedir)))
+
 (define (arc:path-absolute? path)
   (and (list? path)
        (> (length path) 0)
@@ -144,10 +147,15 @@
 ;; parts to the current working directory)
 (define (arc:path-abbreviate path)
   (let* ((cwd (arc:path-cwd))
+         (home (arc:home-dir))
          (normp (arc:path-normalize path)))
-    (if (arc:path-begins-with? normp cwd)
-        (arc:path-subpath normp (length cwd) (length normp))
-        normp)))
+    (cond
+     ((arc:path-begins-with? normp cwd)
+      (arc:path-subpath normp (length cwd) (length normp)))
+     ((arc:path-begins-with? normp home)
+      (arc:path-append '("~")
+                       (arc:path-subpath normp (length home) (length normp))))
+     (else normp))))
 
 ;; normalizes a path by removing and resolving all ".." and "." parts.
 (define (arc:path-normalize path)
@@ -165,6 +173,11 @@
 
 ;; make a path absolute (by adding the current working directory if necessary)
 (define (arc:path-absolutize path)
+  (if (equal? (car path) "~")
+      (set! path (arc:path-append (arc:home-dir)
+                                  (arc:path-subpath path 1 
+                                                    (arc:path-length path)))))
+  (set! path (arc:path-normalize path))
   (if (arc:path-absolute? path)
       path
       (arc:path-append (arc:path-cwd) path)))
