@@ -68,14 +68,14 @@ by the Foundation.
 @node Top, Introduction, (dir), (dir)
 
 @ifinfo
-This manual documents how to install and run @value{PROGNAME}, a
-portable build tool based on the functional programing language
-scheme.  @value{PROGNAME} is completely written in that language and
-build scripts, as scriptlets, are using a subset of Scheme, too.
-Therefore this manual assumes a certain knowledge of the Scheme
-programming language.  On the other side, in normal scriptlets it is
-not necessary to write custom Scheme code, other than the
-"declarative" statements.
+This manual documents how to install and run @value{PROGNAME} version
+@value{VERSION}, a portable, extensible and scriptable build tool.
+@value{PROGNAME} is completely written in the algorithmic and
+functional language Scheme and build scripts, as scriptlets, are using
+a subset of Scheme, too.  Therefore this manual assumes a certain
+knowledge of this Scheme programming language.  However in normal
+scriptlets it is not necessary to write custom Scheme code other than
+the "declarative" statements.
 @end ifinfo
 
 @c All the menus can be updated with the EMACS command
@@ -921,12 +921,13 @@ tool dependency checking.
 Compiles a set of C files into object files.  Needs a working C compiler
 installed and available in den execution path.
 
-TODO: The majority of settings, e.g. which c compiler to use, which default
-flags to specify, etc. should be set by a system configuration and read
-in by the master arc-script (if available).
+@strong{Note:} the C compiler used by default is determined by
+platform depended backend classes of this task and are fixed in the
+moment.  Future version will make this configurable through a autoconf
+like utility.  But for the platforms supported by now, this is not a
+real limitation.
 
-@var{properties} is a list of key value pairs; the following keywords
-are allowed:
+The arguments:
 
 @table @code
 @item sources: @var{strlist} @strong{required}
@@ -998,17 +999,17 @@ files is compiled.
 
 The return value is an attrval with all object files under control of
 this task.  Shared compiled objects and static compiled objects are
-listed separatly under the keys @code{:shared-objs} and @code{:objs}
+listed separatly under the keys @code{shared-objs} and @code{objs}
 respectively.
 
-The special properties @code{:static?} and @code{:shared?} are used to
+The special properties @code{static?} and @code{shared?} are used to
 indicate whether sourcefiles should be compiled for shared library
 support.  On a number of platforms, sources has to be compiled with
 special compiler settings and options, so that they can be linked to
 form a dynamic linked library.  This setting is done manual and not
 automatically, since it is a decision which should be done by the user
-really.
-
+really.  The return attributes @code{shared-objs} and @code{objs} are
+set however in any way according to the selection made.
 @end deffn
 
 
@@ -1087,6 +1088,26 @@ libraries and shared objects
 If @code{#t}, use shared libraries for the executable.  If @code{#f},
 try to avoid linking against shared libraries, but build a static
 application.
+
+@item rpath: @var{string}
+For shared links: this adds a runtime directory to the executable,
+where the linker looks for shared libraries.  Note: this path is
+statically with the linked executable and therefore should only be
+used for local compilations/linkings (e.g. when a executable is to be
+linked with shared libraries but should not be installed).  You
+probably may consider the next option:
+
+@item local-exec-outdir: @var{string}
+This option helps during testing applications, which are linked against
+shared libraries.  Since on some systems (e.g. ELF) shared libraries are
+normally only functional if they are installed and could be found by the
+system linker, it is possible to link an application, but not to run it
+(unless it is installed).  When this option is given a directory path,
+the task links a second copy, with the internal rpath set to all library
+search paths given in the libdirs: option.  Doing this, the application
+has the paths hardcoded, which are current during linking.  This binary
+therefore can be used only in the currently active building environment
+(for testing), but not during installation.
 
 @item appnm: @var{string}
 The executable name to use.  This should not include probably necessary
@@ -1186,6 +1207,15 @@ e.g. without "-L" for gcc).
 For shared libraries on ELF systems only: A list of additional
 libraries the build library depends on.  The entries has to give the
 "base library name" only, so for e.g. libAbcX.so give "AbcX".
+
+@item rpath: @var{string}
+For shared links: this adds a runtime directory to the library, where
+the linker looks for shared libraries, the library depends on.  Note:
+this path is hardcoded with the library and therefore should only be
+used for local compilations/linkings (e.g. when a executable is to be
+linked with shared libraries but should not be installed).  See the
+@code{rpath} and @code{local-exec-outdir} options of the @ref{Task
+link}, too.
 @end table
  
 This task returns an attrval containing all created libraries and
@@ -2005,13 +2035,14 @@ Example:
 @chapter The Arc scheme dialect
 
 Even if the algorithmic programming language Scheme is a highly
-standardized Language, it's standard define a very restricted language
-only, with only a limited set of standard functionality.  Most scheme
-implementation extend this function body by adding more functionality,
-e.g. modules, dynamic library loading, GUI interfacing, etc.  Most of
-these extensions are not compatible, even if the SRFI (Scheme Request
-For Implemention, @w{@url{http://srfi.schemers.org}}) tries to foster
-a kind of standardization between the regular language revisions.
+standardized language, it's specification defines a very restricted
+language only, with only a limited set of standard functionality.
+Most Scheme implementations extend this function body by adding more
+functionality, e.g. modules, dynamic library loading, GUI interfacing,
+etc.  Most of these extensions are not compatible between different
+implementations, even if the SRFI (Scheme Request For Implemention,
+@w{@url{http://srfi.schemers.org}}) tries to foster a kind of
+standardization between the regular language revisions.
 
 To hide these language details from the writer of Arcfiles, Arc
 defines a special dialect of the Scheme language.  A number of special
@@ -2025,6 +2056,7 @@ This chapter lists all functions, which are available in the build
 scripts, besides the tasks discussed in the previous chapter.
 
 @menu
+* Intro into Scheme::           Introduction into Scheme
 * Functions vs Tasks::          Functions vs. Tasks
 * Control structures::          Control structures
 * Logical functions::           Logical functions
@@ -2037,7 +2069,14 @@ scripts, besides the tasks discussed in the previous chapter.
 @end menu
 
 @c ....................................................................
-@node Functions vs Tasks, Control structures, Arc scheme, Arc scheme
+@node Intro into Scheme, Functions vs Tasks, Arc scheme, Arc scheme
+@section Introduction into Scheme
+
+** add a small introduction into scheme here **
+
+
+@c ....................................................................
+@node Functions vs Tasks, Control structures, Intro into Scheme, Arc scheme
 @section Functions vs. Tasks
 
 What are the differences between functions and tasks? Aren't tasks
