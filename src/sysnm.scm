@@ -15,39 +15,44 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
+(define arc:uname-s-matrix
+  '((("linux") linux)
+    (("bsd" "freebsd" "ultrix") bsd)
+    (("win32") win32)
+    (("osx" "darwin") macosx)
+    (("beos") beos)
+    (("sunos" "solaris") sunos)
+    (("CYGWIN_NT-5.0" "cygwin") cygwin)))
+(define arc:uname-m-matrix
+  '((("i386" "i486" "i586" "i686") ix86)
+    (("ppc") ppc)
+    (("alpha" "21064") alpha)
+    (("mk68k" "amiga") m68k)
+    (("sparc" "usparc") sparc)))
+
+(define (arc:find-in-uname-matrix matrix key)
+  (let loop ((mtx matrix))
+    (if (null? mtx)
+        "unknown"
+        (or (let loop2 ((nd (caar mtx)))
+              (if (null? nd)
+                  #f
+                  (if (string-ci=? key (car nd))
+                      (cadar mtx)
+                      (loop2 (cdr nd)))))
+            (loop (cdr mtx))))))
+
+
 (define (arc:canonical-sysnm os maker cpu version)
   (let ((os* (if os os "unknown"))
         (maker* (if maker maker "unknown"))
         (cpu* (if cpu cpu "unknown"))
         (version* (if version version "unknown")))
-    (list (cond 
-           ((string-ci=? os* "linux") 'linux)
-           ((or (string-ci=? os* "bsd")
-                (string-ci=? os* "freebsd")
-                (string-ci=? os* "ultrix")) 'bsd)
-           ((string-ci=? os* "win32") 'win32)
-           ((or (string-ci=? os* "osx")
-                (string-ci=? os* "darwin")) 'macosx)
-           ((string-ci=? os* "beos") 'beos)
-           ((or (string-ci=? os* "sunos")
-                (string-ci=? os* "solaris")) 'sunos)
-           ((or (string-ci=? os* "CYGWIN_NT-5.0")) 'cygwin)
-           (else 'unknown))
-          (cond
-           ((or (string-ci=? cpu* "i386")
-                (string-ci=? cpu* "i486")
-                (string-ci=? cpu* "i586")
-                (string-ci=? cpu* "i686")) 'ix86)
-           ((or (string-ci=? cpu* "ppc")) 'ppc)
-           ((or (string-ci=? cpu* "alpha")
-                (string-ci=? cpu* "21064")) 'alpha)
-           ((or (string-ci=? cpu* "m68k")
-                (string-ci=? cpu* "amiga")) 'm68k)
-           ((or (string-ci=? cpu* "sparc")
-                (string-ci=? cpu* "usparc")) 'sparc)
-           (else 'unknown))
-          maker*
-          version*)))
+    (list 
+     (arc:find-in-uname-matrix arc:uname-s-matrix os*)
+     (arc:find-in-uname-matrix arc:uname-m-matrix cpu*)
+     maker*
+     version*)))
          
 
 ;;Keep this comment at the end of the file 
