@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: deps.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: deps.scm,v 1.2 2003/04/17 00:04:24 eyestep Exp $
 
 
 ;; ----------------------------------------------------------------------
@@ -42,6 +42,19 @@
 (define %arc:deps-directory% ".arc/deps")
 
 (arc:register-built-resource ".arc" 'recursive)
+
+(define (arc:arc-tmp-directory)
+  (let ((p (arc:path-append 
+            (arc:string->path 
+             (if (arc:context-script-home (arc:context-current))
+                 (arc:context-script-home (arc:context-current))
+                 ()))
+            ".arc")))
+    (if (arc:sys.file-exists? (arc:path->string p))
+        p
+        (begin
+          (arc:sys.mkdirs (arc:path->string p))
+          p))))
 
 ;; returns the dependency directory as a path object
 (define (arc:deps-directory)
@@ -92,6 +105,15 @@
               (set-cdr! fc (arc:sys.get-mtime (car fc))) )
             (cadr deps))
   deps)
+
+(define (arc:mtime-file-changed? deps ofile)
+  (let ((mtime (arc:sys.get-mtime ofile))
+        (dps (arc:deps-determine-mtime deps)))
+    (let loop ((fc (cadr dps)))
+      (if (null? fc)
+          #f
+          (or (< mtime (cdar fc))
+              (loop (cdr fc))) ))))
 
 
 ;; loads the dependencies for a source file.  if no such sourcefile has
