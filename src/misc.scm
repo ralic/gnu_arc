@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: misc.scm,v 1.4 2003/04/22 23:37:55 eyestep Exp $
+;; $Id: misc.scm,v 1.5 2009/03/14 16:20:56 eyestep Exp $
 
 (define (arc:reduce fn base-value lst)
   (if (null? lst)
@@ -144,7 +144,7 @@
 
 (define (arc:pathlist-sep)
   (case (car %arc:sysnm%)
-    ((linux bsd beos maxosx) ":")
+    ((linux bsd beos darwin) ":")
     ((win32 os2) ";")
     (else ":")))
 

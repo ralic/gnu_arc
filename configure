@@ -25,7 +25,7 @@ echo X/"$0" |
 build=`uname -s 2>/dev/null` || build="unknown"
 
 case "$build" in
-  Linux | SunOS | FreeBSD )
+  Linux | SunOS | FreeBSD | Darwin)
     arc_default_prefix=/usr/local
     ;;
   Cygwin* | CYGWIN* )
@@ -427,7 +427,7 @@ export ASC_HOME
 _ACEOF
 
 case "$build" in
-  Linux | FreeBSD )
+  Linux | FreeBSD | Darwin)
     asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF

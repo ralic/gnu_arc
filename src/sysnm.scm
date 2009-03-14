@@ -19,7 +19,7 @@
   '((("linux") linux)
     (("bsd" "freebsd" "ultrix") bsd)
     (("win32") win32)
-    (("osx" "darwin") macosx)
+    (("osx" "darwin") darwin)
     (("beos") beos)
     (("sunos" "solaris") sunos)
     (("CYGWIN_NT-5.0" "cygwin") cygwin)))

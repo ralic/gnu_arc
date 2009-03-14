@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: sys.scm,v 1.1 2003/04/19 01:03:35 eyestep Exp $
+;; $Id: sys.scm,v 1.2 2009/03/14 16:20:56 eyestep Exp $
 
 
 (define <arc:sys-generic>
@@ -282,6 +282,10 @@
              (load (string-append %arc:home% "/sys-unix.scm"))
              (load (string-append %arc:home% "/sys-bsd.scm"))
              (<arc:sys-bsd> 'alloc)))
+    ((darwin) (begin
+                (load (string-append %arc:home% "/sys-unix.scm"))
+                (load (string-append %arc:home% "/sys-darwin.scm"))
+                (<arc:sys-darwin> 'alloc)))
     ((sunos) (begin
                (load (string-append %arc:home% "/sys-unix.scm"))
                (load (string-append %arc:home% "/sys-sunos.scm"))

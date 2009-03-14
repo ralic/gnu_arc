@@ -87,7 +87,7 @@
 
 
 (case (car %arc:sysnm%)
-  ((linux bsd sunos cygwin) (load "./bstr-unix.scm"))
+  ((linux bsd sunos cygwin darwin) (load "./bstr-unix.scm"))
   ((beos) (load "./bstr-beos.scm"))
   ((win32) (load "./bstr-win32.scm"))
   (else (begin

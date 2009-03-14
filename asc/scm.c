@@ -618,10 +618,10 @@ void scm_init_from_argv(argc, argv, script_arg, iverbose, buf0stdin)
     do {
       switch (*str) {
       case DIGITS:
-	i = i * 10 + (*str - '0');
-	if (i <= 10000L) continue; /* the size limit should match Init.scm */
+        i = i * 10 + (*str - '0');
+        if (i <= 10000L) continue; /* the size limit should match Init.scm */
       default:
-	i = 0L;
+        i = 0L;
       }
       break;
     } while (* ++str);
