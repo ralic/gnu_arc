@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: ctx.scm,v 1.4 2003/04/22 23:35:09 eyestep Exp $
+;; $Id: ctx.scm,v 1.5 2009/03/14 23:40:18 eyestep Exp $
 
 
 ;; each build script is evaluated in a given context.  the contexts
@@ -180,13 +180,18 @@
   (if (arc:context? ctx)
       (arc:-ctx-meta-info ctx 'script-home)))
 
-
-(define (arc:context-stmt-redefined? stmt os)
+(define (arc:context-os-match stmt os)
   (if stmt
-      (if (equal? (arc:stmt-os stmt) os)
-          #t
-          #f)
+      (let* ((oss (arc:stmt-os stmt)))
+        (cond
+         ( (list? oss)   (list? (memq os oss)) )
+         ( (symbol? oss) (or (equal? oss 'all)
+                             (equal? oss os)) )
+         ( else #f )))
       #f))
+  
+(define (arc:context-stmt-redefined? stmt os)
+  (arc:context-os-match stmt os))
 
 (define (arc:context-stmt! ctx name deps props cmd)
   (if (arc:context? ctx)
@@ -214,8 +219,7 @@
               (if (null? x)
                   #f
                   (if (and (equal? (arc:stmt-id (car x)) name)
-                           (or (equal? (arc:stmt-os (car x)) 'all)
-                               (equal? (arc:stmt-os (car x)) osnm)))
+                           (arc:context-os-match (car x) osnm) )
                       (car x)
                       (loop (cdr x)))))
             (assoc name (vector-ref ctx %ARC:STMT-SLOT%)) ))

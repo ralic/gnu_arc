@@ -6,7 +6,7 @@
 @setchapternewpage odd
 @c %**end of header
 
-@c This file is processed by Arc! Placeholders are surrounded by &&
+@c This file is processed by Arc! Placeholders are surrounded by && 
 @c (amp) and not by @ (at) as normally, since Texinfo uses @ as markup maker!
 @set VERSION &arc-version&
 @set PROGNAME @command{arc}
@@ -327,9 +327,10 @@ is optional, and if not given, no explicit dependencies are recorded
 statements).
 
 @item os: @var{symbol}
-Gives the operating system, for which this statement is to be evaluated
-only.  This setting is optional and the default is to evaluate for every
-operating system.
+Gives the operating system or a list of operating systems, for which
+this statement is to be evaluated only.  Operating systems are
+identified by symbolic names (@ref{Conditionals}).  This setting is
+optional and the default is to evaluate for every operating system.
 
 @item once?: @var{boolean}
 Normally a statement is evaluated only once, and it's value is cached
@@ -519,15 +520,15 @@ current runtime environment.  If there are, for example, the tasks
       os: 'windows
       @dots{})
 (stmt link
-      os: 'linux
+      os: '(linux darwin)
       @dots{})
 (stmt link
       os: 'sunos
       @dots{})
 @end example
 
-on a windows system the first will match and be evaluated, on Linux
-the second and on a SunOS system the third one.  In case there
+on a windows system the first will match and be evaluated, on Linux or
+Darwin the second, and on a SunOS system the third one.  In case there are
 conflicts, the first matching will win.  So in the following example:
 
 @example
@@ -554,6 +555,8 @@ The various Beos versions, tested only on BeOS 5.0.
 Various BSD derivates, like FreeBSD, OpenBSD, NetBSD, etc.  Tested
 only on FreeBSD 5.0.
 @item sunos
+@item darwin
+MacOS X or OpenDarwin
 @end table
 
 Besides the yet described @code{os} property, there's the @code{scope}
@@ -581,11 +584,11 @@ the outside, i.e. it may be given by the user from the command line.
 @section Programatic vs. descriptive scriptlets
 
 Arcfiles are written in a subset of Scheme, and a rich library of
-functions are made available to them.  These functions are available
-on all platforms and the cover most aspects of a build system,
-e.g. path algorithmic, file checks, extended string functions, etc.
-Moreover most of the control expressions of scheme, like @code{let},
-@code{let*}, named let, @code{if} or @code{case} are available.
+functions is made available to them.  These functions are available on
+all platforms and they cover most aspects of a build system, e.g. path
+algorithmic, file checks, extended string functions, etc.  Moreover most
+of the control expressions of scheme, like @code{let}, @code{let*},
+named let, @code{if} or @code{case} are available.
 
 This said it is clear that complex conditional evaluations of tasks
 are possible, probably based on input values or even user interaction.
@@ -921,7 +924,7 @@ tool dependency checking.
 Compiles a set of C files into object files.  Needs a working C compiler
 installed and available in den execution path.
 
-@strong{Note:} the C compiler used by default is determined by
+@strong{Note}: the C compiler used by default is determined by
 platform depended backend classes of this task and are fixed in the
 moment.  Future version will make this configurable through a autoconf
 like utility.  But for the platforms supported by now, this is not a

@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: show.scm,v 1.1 2003/04/12 00:39:29 eyestep Exp $
+;; $Id: show.scm,v 1.2 2009/03/14 23:40:19 eyestep Exp $
 
 (define (arc:display-script script)
   (let ((current-stmt arc:current-stmt))
@@ -78,14 +78,23 @@
       ""
       (make-string (- max-len sym-len) #\space)))
 
+(define (arc:stmt-os-name stmt)
+  (let ((os (arc:stmt-os stmt)))
+    (if (and os
+             (not (equal? os 'all)))
+        (string-append " [" 
+                       (cond
+                        ( (list? os) (arc:string-list->string*
+                                      (map (lambda (s) (symbol->string s)))
+                                      " ") )
+                        ( (symbol? os) (symbol->string os)) )
+                       (else (arc:throw 'assert "Bad OS"))
+                        "]" )
+        "")))
+    
 (define (arc:stmt-display-name stmt)
-  (let ((id (arc:stmt-id stmt))
-        (os (arc:stmt-os stmt)))
-    (string-append (symbol->string id)
-                   (if (and os
-                            (not (equal? os 'all)))
-                       (string-append " [" (symbol->string os) "]")
-                       ""))))
+  (string-append (symbol->string (arc:stmt-id stmt))
+                 (arc:stmt-os-name stmt)) )
 
 (define (arc:show-info-wrapped txt col)
   (let ((dist (- 78 col))

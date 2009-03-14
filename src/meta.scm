@@ -15,7 +15,7 @@
 ;;  License along with this library; if not, write to the Free Software
 ;;  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-;; $Id: meta.scm,v 1.5 2003/04/22 23:37:30 eyestep Exp $
+;; $Id: meta.scm,v 1.6 2009/03/14 23:40:18 eyestep Exp $
 
 
 (define (arc:eval-arc-defines expr)
@@ -172,7 +172,7 @@
   (let* ((id (cadr expr))
          (keys-body (arc:get-keywords-and-body (cddr expr)))
          (props* (arc:compile-key-list '((info string optional)
-                                         (os symbol optional)
+                                         (os (symbol list) optional)
                                          (once? boolean optional)
                                          (scope symbol optional)
                                          (depends (symbol list) optional))
@@ -199,8 +199,9 @@
                       (case (car prop)
                         ((info) (set! props (append props (list 'info
                                                                 (cadr prop)))))
-                        ((os) (set! props (append props (list 'os
-                                                              (cadr prop)))))
+                        ((os) (set! props (append props (if (list? (cadr prop))
+                                                            (cadr prop)
+                                                            (list 'os (cadr prop))))))
                         ((once?) (set! props (append props (list 'once?
                                                                  (cadr prop)))))
                         ((scope) (set! props (append props (list 'scope

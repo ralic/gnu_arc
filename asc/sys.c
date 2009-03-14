@@ -345,10 +345,13 @@ void prinport(exp, port, type)
      SCM exp; SCM port; char *type;
 {
   lputs("#<", port);
-  if CLOSEDP(exp) lputs("closed-", port);
+  if CLOSEDP(exp)
+    lputs("closed-", port);
   else {
-    if (RDNG & CAR(exp)) lputs("input-", port);
-    if (WRTNG & CAR(exp)) lputs("output-", port);
+    if (RDNG & CAR(exp))
+      lputs("input-", port);
+    if (WRTNG & CAR(exp))
+      lputs("output-", port);
   }
   lputs(type, port);
   lputc(' ', port);
@@ -358,24 +361,26 @@ void prinport(exp, port, type)
 #   ifndef AMIGA
 #    ifndef macintosh
 #     ifndef PLAN9
+#       ifndef __APPLE__
   if (OPENP(exp) && tc16_fport==TYP16(exp) && isatty(fileno(STREAM(exp))))
     lputs(ttyname(fileno(STREAM(exp))), port);
   else
+#       endif
 #     endif
 #    endif
 #   endif
 #  endif
 # endif
 #endif
-    {
-      SCM s = PORTP(exp) ? SCM_PORTDATA(exp) : UNDEFINED;
-      if (NIMP(s) && STRINGP(s))
-	iprin1(s, port, 1);
-      else if (OPFPORTP(exp))
-	intprint((long)fileno(STREAM(exp)), 10, port);
-      else
-	intprint(CDR(exp), -16, port);
-    }
+  {
+    SCM s = PORTP(exp) ? SCM_PORTDATA(exp) : UNDEFINED;
+    if (NIMP(s) && STRINGP(s))
+      iprin1(s, port, 1);
+    else if (OPFPORTP(exp))
+      intprint((long)fileno(STREAM(exp)), 10, port);
+    else
+      intprint(CDR(exp), -16, port);
+  }
   lputc('>', port);
 }
 

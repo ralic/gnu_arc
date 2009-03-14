@@ -77,7 +77,6 @@ Wed Feb 21 23:06:35 1996  Aubrey Jaffer  <jaffer@jacal.bertronics>
 # endif
 # ifndef __STDC__
 #  define const /**/
-# endif
 
 # ifdef __FreeBSD__
 /* This might be same for 44bsd derived system. */
@@ -103,6 +102,10 @@ Wed Feb 21 23:06:35 1996  Aubrey Jaffer  <jaffer@jacal.bertronics>
 # endif
 # ifdef GO32
 #  include <sys/stat.h>
+# endif
+# endif
+# ifdef __APPLE__
+#  include <stdlib.h>
 # endif
 
 # ifndef DEFAULT_PATH
