@@ -1,3 +1,18 @@
+2009-03-14  author  <author@localhost>
+
+	* Mac OSX (darwin) support
+	  - Fixed a two compiler warning/errors of asc on Mac OSX
+	  - Added c compile, lib, and link support for Mac OSX
+	  - os: attribute on statement accepts now a list of os names also
+	  - Asc can not be build with arc on Mac OSX, too
+	  - updated documentation
+	
+2003-05-05  author  <author@localhost>
+
+	* src/tasks/task-bison.scm: added verbose? option
+
+	* ChangeLog: updated
+
 2003-05-04    <gck@eyestep.org>
 
 	* src/tasks/task-bison.scm (arc:bison-keywords): added verbose?
