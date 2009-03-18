@@ -100,12 +100,12 @@ the "declarative" statements.
 
 Arc is a build tool, intended as an alternative to make and related
 tools.  It is completely written in Scheme and is therefore fully
-extensible, open and scritable.  It utilizes a modular and plugable
+extensible, open and scriptable.  It utilizes a modular and pluggable
 architecture, very different to that of related tools.  It is
 therefore simple to extend arc with new tasks and functionality.
 
 Arc uses a processing model somewhat different from that of make.
-It's dependency tracing is not primarely based on file dependencies,
+It's dependency tracing is not primarily based on file dependencies,
 but on statements described in the build scripts.  Statements have
 values (or returnvalues), and describe actions how to compute those
 values.  Statements are actions and properties at the same time.  In
@@ -115,7 +115,7 @@ functional way.
 Even if scriptlets (=build scripts) utilizes only a subset of the
 scheme language as described in the "Revised5 Report on the
 Algorithmic Language Scheme", it is possible to write very expressive
-and complex build script in a fully platform indepent fashion,
+and complex build script in a fully platform independent fashion,
 including iterations, conditional statements, recursive function, etc.
 
 @menu
@@ -124,7 +124,7 @@ including iterations, conditional statements, recursive function, etc.
 * Requesting Stmt values::      Requesting values from statements
 * Attrvals::                    Attributed values
 * Conditionals::                Conditional statements
-* Runtime::                     Programatic vs. descriptive scriptlets
+* Runtime::                     Programmatic vs. descriptive scriptlets
 @end menu
 
 
@@ -150,7 +150,7 @@ returnvalues are the value of the statement.
 Additionally each statement can have a number of @dfn{properties}.
 These properties add additional information to each statement,
 e.g. giving a human readable title, controlling the dependencies or
-specifing conditional evaluation.
+specifying conditional evaluation.
 
 Statements are grouped into sets of statements, a so called
 @dfn{project}.  Normally each package does only have one project,
@@ -171,15 +171,15 @@ statements, and before a statement is evaluated all other statements
 the statement in question depends on, are evaluated first, and so on.
 
 In this way, before any value of a statement is returned, a reverse
-lookup for the complete dependency tree is done, and all dependant
-statements starting from the least dependant are evaluated.
+lookup for the complete dependency tree is done, and all dependent
+statements starting from the least dependent are evaluated.
 
 It is important to note that we are talking about statement
 dependencies only at this moment.  We are not talking about source
 file dependencies at all.  And indeed build scripts are not
 necessarily 'build script's in the sense that they are building
 something.  It is perfectly possible to use build scripts as logical
-origanized task scripts, which describe the dependency between tasks.
+organized task scripts, which describe the dependency between tasks.
 
 It is important too, that there's nothing like attributes or variables
 in arc (except for local bindings, which I'll discuss later).  Even
@@ -190,7 +190,7 @@ Even if the notion of a statement's value is integral to the idea of
 concatenating statements in arc, the real work (compiling, copying,
 moving files, linking, etc.) is done by the tasks, and therefore as
 side effects of the tasks.  The arc processor itself has no idea of
-all these functions.  It is more or less the glue to concatinate these
+all these functions.  It is more or less the glue to concatenate these
 functions.
 
 
@@ -225,16 +225,16 @@ source tree), from where it controls the building and processing of
 source files and resources.  But nothing stops one from putting the
 Arcfile in any directory one likes (e.g. in sub directory
 @file{builds}), since it is possible to give the base directory of the
-controll source tree explicitly in the Arcfile (either relative or
+control source tree explicitly in the Arcfile (either relative or
 absolute).
 
 Projects and statements are described by using the special constructs
 @code{project} and @code{stmt}.  These statements (and more others)
 are looking like 'ordinary' Scheme functions, but there are some
-perculiarties about them, making the handling of Arcfiles less
+peculiarities about them, making the handling of Arcfiles less
 awkward.
 
-One of these peculiarties is the way to give @dfn{named arguments} to
+One of these peculiarities is the way to give @dfn{named arguments} to
 tasks and statements.  These named arguments are given as key-value
 pairs, where the key must be a symbol ending in a colon
 (e.g. @code{info:}).  These so called @dfn{keywords} are self
@@ -256,13 +256,13 @@ environments.  This key is optional.
 
 @item project: @var{string}
 Gives the name of the project.  Some tasks use this information when
-refering to the project.  For example the @code{dist} task creates the
+referring to the project.  For example the @code{dist} task creates the
 archive under this name.  This key is optional, but usage is highly
 recommended.
 
 @item version: @var{string}
 Gives the version of the project.  Some tasks use this information
-when refering to the project.  For example the @code{dist} task uses
+when referring to the project.  For example the @code{dist} task uses
 this information to create the name of the dist archive.  This key is
 optional, but highly recommended.
 
@@ -288,7 +288,7 @@ the evaluation processor.
 Example:
 @example
 (project gfx-api
-         info: "Builds the grafics abstraction layer"
+         info: "Builds the graphics abstraction layer"
          basedir: "src/"
          default: 'lib)
 @end example
@@ -296,7 +296,7 @@ Example:
 
 Please note that all values to the keywords are ordinary scheme
 expressions (in the scheme subset utilized by Arcfiles).  Symbols, for
-instance to refer to statements, must therefore propertly quoted.
+instance to refer to statements, must therefore properly quoted.
 
 Each statement is declared by an @code{stmt} expression.
 
@@ -339,11 +339,11 @@ for later requests.  Setting this property to @samp{#f}, the statement
 optional and the default is @samp{#t} (evaluate only once).
 
 @item scope: (local | script | public)
-Gives the visability of the statement.  @var{local} statements are
-referencable (direct or indirect dependencies) only from the Arcfile
+Gives the visibility of the statement.  @var{local} statements are
+referenceable (direct or indirect dependencies) only from the Arcfile
 they are defined in, @var{script} statements are usable from the
 Arcfile self and sub-project, and @var{public} statements are fully
-accessable and may be given by the user from the command line
+accessible and may be given by the user from the command line
 (@ref{Conditionals}).  Statements are @var{public} by default
 @end table
 
@@ -391,7 +391,7 @@ way it is not necessary for the build script to explicitly handle the
 various forms of source files names (@file{.c}, @file{.o}, and
 @file{.a} suffixes).
 
-The expressiom to request the value of a statement is @code{->}:
+The expression to request the value of a statement is @code{->}:
 
 @defun -> id
 Returns the value of the statement named @var{id} (@var{id} is an
@@ -456,7 +456,7 @@ by such information.
 For example building shared libraries (@file{.so} or
 @file{.dlls}-files), make it necessary on some platforms to compile
 source files in a special way (e.g. by adding special compiler flags).
-If one needs to provide both funtionalities -- building static and
+If one needs to provide both functionalities -- building static and
 shared libraries -- one would have to write four statements: two
 statements for compiling the source files for static and shared
 libraries respectively and two statements for building the two version
@@ -473,7 +473,7 @@ values or @dfn{attributed values}.  A number of tasks could handle
 attributed values transparent and hidden from the user, and
 understanding the internal details of attributed values is only needed
 for developers, who want to extend Arc or write new tasks.  The
-oridinary Arc user must only be interessted in the decision of which
+ordinary Arc user must only be interested in the decision of which
 tasks are compatible with each other.
 
 In the following example a set of C files should be linked to form a
@@ -510,8 +510,8 @@ compile C files may be used for a shared library, so setting the
 @cindex keywords, os
 @cindex keywords, scope
 
-Each statement may cary conditional properties, which describe its
-validity and scope.  During evaluation of tasks the evalution machine
+Each statement may carry conditional properties, which describe its
+validity and scope.  During evaluation of tasks the evaluation machine
 first checks if the conditional properties of a statement matches the
 current runtime environment.  If there are, for example, the tasks
 
@@ -545,14 +545,14 @@ symbolic, and the following systems will be detected in the moment:
 
 @table @samp
 @item linux
-All linux systems, regardly for platform or architecture
+All linux systems, regardless of platform or architecture
 @item win32
-Wind32 systems (NT, 2000, XP)
+Win32 systems (NT, 2000, XP)
 @item beos
 The various Beos versions, tested only on BeOS 5.0.
 @item cygwin
 @item bsd
-Various BSD derivates, like FreeBSD, OpenBSD, NetBSD, etc.  Tested
+Various BSD derivatives, like FreeBSD, OpenBSD, NetBSD, etc.  Tested
 only on FreeBSD 5.0.
 @item sunos
 @item darwin
@@ -574,14 +574,14 @@ The statement may be referenced from inside the Arcfile or any Arcfile
 evaluated from the current Arcfile (as sub-project).
 
 @item public
-The statement is fully referencable from the Arcfile, sub-project and
+The statement is fully referenceable from the Arcfile, sub-project and
 the outside, i.e. it may be given by the user from the command line.
 @end table
 
 
 @c --------------------------------------------------------------------
 @node Runtime,  , Conditionals, Introduction
-@section Programatic vs. descriptive scriptlets
+@section Programmatic vs. descriptive scriptlets
 
 Arcfiles are written in a subset of Scheme, and a rich library of
 functions is made available to them.  These functions are available on
@@ -614,7 +614,7 @@ dependency machine of Arc and simple tasks declaring the actions to be
 taken.  Or if most the work is explicitly stated by iterations,
 filtering certain filetypes, requesting user interaction, etc.  Arc
 supports both models, and, due to the uniformly syntax there is no
-break between the twem.
+break between the them.
 
 
 
@@ -626,7 +626,7 @@ break between the twem.
 The real work in arc is done by @dfn{tasks}.  Tasks are well defined
 portions of functionality, implemented in modules.  The standard
 distribution of arc comes with a set of modules encompassing the
-functions normaly used in build systems.  But third parties can extend
+functions normally used in build systems.  But third parties can extend
 Arc by writing new modules and tasks, which simply can be installed to
 the Arc system.  Arc has not to be modified for this.  Details for how
 to extend or write new task modules follow in a later chapter.  This
@@ -650,14 +650,14 @@ possible interactions.
 
 Arc provides a number of tasks for basic file and directory management.
 Some of this tasks have no effect on some operating system due to
-limitations of those systems.  Their behaviour on such systems is
+limitations of those systems.  Their behavior on such systems is
 described in the respective subsection.
 
 Paths and filenames are highly system specific.  The best (and most
 obvious) example is the path separator on Unix and Windows platforms.
 Arc tries to normalize this interface to some extend, but a number of
 incompatibilities remain, as for example drive letters in windows
-system, which don't have equivalents in Posix environments.  Paths as to
+system, which don't have equivalents in POSIX environments.  Paths as to
 be written with "/" as path separator always.  Arc maps it to the os
 convention. (** to be extended **)
 
@@ -758,7 +758,7 @@ when @var{dir} or @var{files} has been given.
 
 @item tofile: @var{string}
 The destination to copy the source file to.  This property gives a
-file name.  If the file exists already it is overritten, unless
+file name.  If the file exists already it is overwritten, unless
 @var{force?}  is set to @code{#f}.  This property can only be used, if
 the @var{file} property is used.
 
@@ -990,7 +990,7 @@ shared library.  The default is @code{#f}, i.e. don't compiled shared
 objects.  On platforms which don't support shared objects, this
 property is ignored.  On platforms where static and shared objects are
 the same only one set of files is compiled, otherwise two objects
-files---one for shared use and one for static use---are combiled.
+files---one for shared use and one for static use---are compiled.
 
 @item static?: @var{boolean}
 This flag indicates whether the source files should be compiled
@@ -1002,7 +1002,7 @@ files is compiled.
 
 The return value is an attrval with all object files under control of
 this task.  Shared compiled objects and static compiled objects are
-listed separatly under the keys @code{shared-objs} and @code{objs}
+listed separately under the keys @code{shared-objs} and @code{objs}
 respectively.
 
 The special properties @code{static?} and @code{shared?} are used to
@@ -1022,11 +1022,11 @@ strict subclass of the @code{c-compile} task and understands the same
 properties and semantics.  The return values are identical.
 
 Depending on the Objective C compiler used by the backend this task
-adds additionally the library @code{objc}---and propably further
+adds additionally the library @code{objc}---and probably further
 libraries---to the returnvalue under the key @code{dep-libs}, which is
 used by the @code{link} and @code{lib} tasks.
 
-Additionaly this task takes a further keyword:
+Additionally this task takes a further keyword:
 
 @table @samp
 @item warn-protocol?: @var{boolean}
@@ -1065,7 +1065,7 @@ Compiles a set of java source files into java byte code class files.
 @c ....................................................................
 @node Task link, Task lib, Task java-compile, Compiler tasks
 @subsection Making executables and archives
-@cindex Making executables and archvies
+@cindex Making executables and archives
 @findex link
 
 @deffn {Task} link args
@@ -1118,11 +1118,11 @@ name extensions, used to indicate executable files on some platforms.
  
 @item appext: @var{string}
 The extension to use for the application.  This is only used if an
-unusal executable extension should be used and overrides a probably
+unusual executable extension should be used and overrides a probably
 platform specific executable extension.
 
 @item outdir: @var{string}
-The directory to build the executable in.  By default der executable
+The directory to build the executable in.  By default the executable
 is build in the current working directory.
 
 @item libdirs: @var{string-list}
@@ -1222,7 +1222,7 @@ link}, too.
 @end table
  
 This task returns an attrval containing all created libraries and
-their various nameforms, as needed for the specific platforms builded
+their various nameforms, as needed for the specific platforms built
 on.  The attrval slot ids are:
 
 @table @code
@@ -1278,8 +1278,8 @@ different names with the @code{to-c-file} and @code{to-h-file}
 arguments.  Output files are located by default in the same directory
 as the input file, unless the @code{outdir} argument is given.
 
-Bison global names are prefixed normally by @samp{yy} to prevend name
-clashs, but if one plans to have two parsers in the same application,
+Bison global names are prefixed normally by @samp{yy} to prevent name
+clashes, but if one plans to have two parsers in the same application,
 that doesn't help.  In this case one can specify a different prefix
 with the @code{prefix:} option (see the 'bison' man page or info
 documentation for how to call such a parser).
@@ -1348,8 +1348,8 @@ The output file's name is normalized, i.e. for an input file
 normally in the same directory as the source, but a different
 directory could be given with the @code{outdir:} argument.
 
-Flex global names are prefixed normally by @samp{yy} to prevend name
-clashs, but if one plans to have two or more lexers in the same
+Flex global names are prefixed normally by @samp{yy} to prevent name
+clashes, but if one plans to have two or more lexers in the same
 application, that doesn't help.  In this case one can specify a
 different prefix with the @code{prefix:} option (see the 'flex' man
 page or info documentation for how to call use a lexer).
@@ -1541,7 +1541,7 @@ The following keys in @var{properties} are allowed:
 The path of the tar archive.  Must be a single file.
 
 @item files: @var{strlist}
-A list of files (pathes) to add to the archive.  Directories are added
+A list of files (paths) to add to the archive.  Directories are added
 recursively.
 
 @item deref-symlinks?: @var{boolean}
@@ -1648,7 +1648,7 @@ Specifies the output format to be used.  Default is info.
 @item split?: @var{boolean}
 If @code{#t} split the output into multiple equal sized modules, if
 @code{#f} splitting is suppressed.  Splitting is default for info and
-html files; dvi, pdf and plain files are never splitted.
+html files; dvi, pdf and plain files are never split.
 @end table
 
 This task returns a list of all files generated.  This fails for the
@@ -1692,9 +1692,9 @@ For an input file @file{x.texi} the following files are generated:
 
 Highlevel tasks are complex actions, which may combine sometimes such
 diverse actions as copying and filtering files, creating archives etc.
-These tasks are provided to group often used project maintainance
+These tasks are provided to group often used project maintenance
 tasks, like installation, packaging, cleaning up, etc.  Most of these
-tasks are build on top of ofter, more lowlevel tasks.
+tasks are build on top of ofter, more low-level tasks.
 
 @menu
 * Prepare dists::               Preparing distribution files
@@ -1791,10 +1791,10 @@ platforms this is normally
 
 @table @samp
 @item file
-This is an 'normal' data file, and is set on most platforms to 0644.
+This is a 'normal' data file, and is set on most platforms to 0644.
 
 @item exec
-An executable file, marked for general executation.  On most platforms
+An executable file, marked for general execution.  On most platforms
 the value 0755 is used.
 @end table
 
@@ -1903,7 +1903,7 @@ Here the version tasks generates the @file{version.h} file from a
 input @file{version.h.in} file.  The @file{version.h} file is part of
 the sources; if any c file from @code{(-> c-sources)} includes
 @file{version.h}, it happens to be in the dependency list of that
-c-file: therefore everytime the @samp{compile} task is run it will
+c-file: therefore every time the @samp{compile} task is run it will
 compile this c-file (since @file{version.h} is written anew).
 
 The @file{version.h.in} may look like:
@@ -1914,7 +1914,7 @@ The @file{version.h.in} may look like:
 #endif
 @end example
 
-and after a successfull build run, @file{version.h} it should look
+and after a successful build run, @file{version.h} it should look
 like:
 
 @example
@@ -1971,7 +1971,7 @@ Pattern use the following syntax:
 
 @enumerate 
 @item
-directories are seperated by a solidus (@samp{/}), independant of the
+directories are separated by a solidus (@samp{/}), independent of the
 host operating system.
 
 @item
@@ -1985,7 +1985,7 @@ to search recursively through any number of directories levels, set a
 filenames can be matched either by @samp{*} (which matches any
 filename), by @samp{*SUFFIX}, which matches any files ending in
 @code{SUFFIX}, or by @samp{(REGEXP)}, a regular expression.  Note that
-regular expressions must be included in paranthesis.  Regular
+regular expressions must be included in parenthesis.  Regular
 expressions are much slower than the suffix matching, which is enough
 in most cases.
 @end enumerate
@@ -2043,7 +2043,7 @@ language only, with only a limited set of standard functionality.
 Most Scheme implementations extend this function body by adding more
 functionality, e.g. modules, dynamic library loading, GUI interfacing,
 etc.  Most of these extensions are not compatible between different
-implementations, even if the SRFI (Scheme Request For Implemention,
+implementations, even if the SRFI (Scheme Request For Implementation,
 @w{@url{http://srfi.schemers.org}}) tries to foster a kind of
 standardization between the regular language revisions.
 
@@ -2090,7 +2090,7 @@ script author's view, there are some notable differences between them:
 @item
 Tasks are normally complex operations working on the dependency chain
 between statements, i.e. consuming and producing attributed values.
-Functions in contrast are lowlevel, working on basic strings or
+Functions in contrast are low-level, working on basic strings or
 numbers, adding iteration support, etc.  Functions may provide values
 for statement return values, but normally don't.
 
@@ -2294,7 +2294,7 @@ Indicates whether @var{k} is an alist (association list).
 @section String functions
 
 @defun string-append @var{s1} @var{s2} @dots{} @var{sn}
-Concates all string arguments @var{sx} to a new string.  If no
+Concatenates all string arguments @var{sx} to a new string.  If no
 argument is given at all, returns the empty string @samp{""}.
 @example
 (string-append "hello" " " "world")
@@ -2363,22 +2363,22 @@ Returns a string with the name of symbol @var{s}.
 @node Path functions, List functions, String functions, Arc scheme
 @section Path functions
 
-Path functions helps to work with hierachically organized path
+Path functions helps to work with hierarchically organized path
 structures.  Path working is done on the logical structure of a path,
-i.e. on the node steps seperated by the path seperated (e.g. / on
-unix).
+i.e. on the node steps separated by the path separated (e.g. / on
+UNIX).
 
 @defun path-length @var{s}
 Returns the number of node steps in the path @var{s}.  Note that the
-root node (/ for unix systems) counts!  Therefor @code{(path-length
+root node (/ for UNIX systems) counts!  Therefor @code{(path-length
 "/usr/local")} will return 3, but @code{(path-length "usr/local")}
 only 2.
 @end defun
 
 @defun path->list @var{s}
-Transforms a path @var{s} into a list by spliting the path at it's
+Transforms a path @var{s} into a list by splitting the path at it's
 path separators.  Each node becomes an element on its own.  Note that
-the root node is added seperately.
+the root node is added separately.
 
 @example
 (path->list "/usr/local")
@@ -2413,7 +2413,7 @@ Returns a copy of path @var{s} with it's last component removed.
 @end defun
 
 @defun path-append @var{s1} @var{s2}
-Concates two paths @var{s1} and @var{s2} to one path a returns it.
+Concatenates two paths @var{s1} and @var{s2} to one path a returns it.
 @var{s1} and @var{s2} are not changed.  @var{s2} must be a valid
 subpath, i.e. must not contain root particles, device information,
 etc.
@@ -2442,7 +2442,7 @@ extension replaced by extension @var{e}.
 
 @defun path-last-comp @var{s}
 Returns the last component of the path @var{s}, incl. the extension.
-(This function is identical to the @command{basename} function on Un*x
+(This function is identical to the @command{basename} function on UN*X
 systems.)
 @example
 (path-last-comp "/usr/lib/libGrove.so")
@@ -2466,14 +2466,14 @@ Returns the current working directory.
 @defun path-homedir
 Returns the home directory of the current active user.  This depends
 on the host system, and one platforms, where no home directory is
-supported, returns some platforms dependend default.  The home
-directory is normaly determined by the environment variable
+supported, returns some platforms dependent default.  The home
+directory is normally determined by the environment variable
 @env{HOME}, but different platforms may behave differently here.
 @end defun
 
 @defun path-absolute? @var{s}
 Indicates whether the path @var{s} represents an absolute path.  Paths
-are regarded as absolute if the begin with a / (for unix systems), or
+are regarded as absolute if the begin with a / (for UNIX systems), or
 a /, a // or drive name (e.g. "c:") following a / (on windows
 systems).
 @end defun
@@ -2615,7 +2615,7 @@ Computes the multiplication of @var{n1} * @var{n2} * @var{n3} *
 @end defun
 
 @defun modulo @var{n1} @var{n2}
-Modulo arimethic, computes the "rest" of an integer division of
+Modulo arithmetic, computes the "rest" of an integer division of
 @var{n1} / @var{n2}.  @var{n2} must not be 0.
 @example
 (modulo 126 4)
@@ -2641,7 +2641,7 @@ stdout, and break to the next line by printing @samp{#\nl}.
 
 @example
 (echo "compile application @dots{}")
-@result{} compile appication @dots{}
+@result{} compile application @dots{}
 @end example
 @end defun
 
@@ -2676,11 +2676,11 @@ not in the current working directory, from where arc has been called.
 @itemx --script @var{file}
 Load @var{file} as build script instead of utilizing the normal search
 for a build file.  If the option @i{-r} is specified, too, search's for
-this file recursively upwards the directory hierachy.
+this file recursively upwards the directory hierarchy.
 
 @item -r
 @itemx --rec
-By default arc searchs for a build script only in the current working
+By default arc searches for a build script only in the current working
 directory.  If the -r options is specified it tries to search for a
 build script recursively upwards from the current working directory and
 uses the first found.
@@ -2734,7 +2734,7 @@ build script used.
 @chapter Installing arc
 @cindex install
 
-Some work has been done to make Arc as far selfcontained as possible.
+Some work has been done to make Arc as far self-contained as possible.
 I.e. building and installing of Arc should not depend one other build
 systems like make or perl.  Building and installing Arc should
 therefore be simple, if however something awkward.
@@ -2768,7 +2768,7 @@ etc.  Some linux distributions have SCM pre-packaged.@refill
 
 @item guile
 The GNU implementation of Scheme, originally based on SCM, but in the
-current version notably different.  Guile comes with an embedable
+current version notably different.  Guile comes with an embeddable
 library and a standalone Scheme interpreter.  Both versions 1.3 and 1.4
 are tested (see @w{@url{http://www.gnu.org/software/guile}}).  Most GNU
 systems should have guile available nowadays, but also for non obvious
@@ -2776,7 +2776,7 @@ systems, like BeOS, there are ports available (see
 @w{@url{http://www.bebits.com}}).@refill
 
 @item ksi
-Another embedable Scheme implementation from Russia, which comes with a
+Another embeddable Scheme implementation from Russia, which comes with a
 standalone interpreter.  Its quite usable, even if fairly slow.  See
 @w{@url{http://www.sourceforge.net/projects/ksi}}.@refill
 
@@ -2787,7 +2787,7 @@ dependencies for SLIB and some other exotic features, not used for Arc
 are removed to make it standalone.  The source code is part of the
 standard distribution.
 
-Asc is builded automatically if you select it as the Scheme
+Asc is built automatically if you select it as the Scheme
 interpreter to be used with Arc.
 @end table
 
@@ -3003,7 +3003,7 @@ If you find a bug in Arc, please use the bug reporting tools on
 @w{@url{http://savannah.gnu.org/projects/arc}}, or send an e-mail to
 @email{gck@@eyestep.org}.  You should include the version number,
 which you can find by running @command{arc --version}, information
-about the system, plattform and scheme interpreter used.@refill
+about the system, platform and scheme interpreter used.@refill
 
 If you have other questions, comments or suggestions about
 @command{arc}, contact either the mailing lists on savannah
