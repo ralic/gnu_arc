@@ -1,46 +1,22 @@
-/* Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1997 Free Software Foundation, Inc.
+/* "time.c" functions dealing with time.
+ * Copyright (C) 1990, 1991, 1992, 1993, 1994, 1995, 1997, 2006 Free Software Foundation, Inc.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2, or (at your option)
- * any later version.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this software; see the file COPYING.  If not, write to
- * the Free Software Foundation, 59 Temple Place, Suite 330, Boston, MA 02111, USA.
- *
- * As a special exception, the Free Software Foundation gives permission
- * for additional uses of the text contained in its release of SCM.
- *
- * The exception is that, if you link the SCM library with other files
- * to produce an executable, this does not by itself cause the
- * resulting executable to be covered by the GNU General Public License.
- * Your use of that executable is in no way restricted on account of
- * linking the SCM library code into it.
- *
- * This exception does not however invalidate any other reasons why
- * the executable file might be covered by the GNU General Public License.
- *
- * This exception applies only to the code released by the
- * Free Software Foundation under the name SCM.  If you copy
- * code from other Free Software Foundation releases into a copy of
- * SCM, as the General Public License permits, the exception does
- * not apply to the code that you add in this way.  To avoid misleading
- * anyone as to the status of such modified files, you must delete
- * this exception notice from them.
- *
- * If you write modifications of your own for SCM, it is your choice
- * whether to permit this exception to apply to your modifications.
- * If you do not wish that, delete this exception notice.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
-/* "time.c" functions dealing with time.
-   Author: Aubrey Jaffer */
+/* Author: Aubrey Jaffer */
 
 #include "scm.h"
 
@@ -89,11 +65,6 @@
 
 #endif
 
-#if __BEOS__
-#  include <sys/times.h>
-#  include <sys/timeb.h>
-#endif
-
 /* Define this if your system lacks ftime(). */
 /* #define LACK_FTIME */
 /* Define this if your system has gettimeofday()
@@ -106,6 +77,9 @@
 # include <sys/types.h>
 # include <sys/time.h>
 # include <sys/timeb.h>
+# include <sys/times.h>
+# include <unistd.h>
+# define CLKTCK (sysconf(_SC_CLK_TCK))
 # define USE_GETTIMEOFDAY
 #endif
 #ifdef __MACH__
@@ -120,6 +94,11 @@
 # include <sys/types.h>
 # include <sys/time.h>
 # include <sys/timeb.h>
+# define USE_GETTIMEOFDAY
+#endif
+#ifdef __NetBSD__
+# include <sys/timeb.h>
+# include <sys/times.h>
 # define USE_GETTIMEOFDAY
 #endif
 #ifdef __OpenBSD__
@@ -153,8 +132,8 @@
 # define LACK_FTIME
 #endif
 #ifdef PLAN9
-#define LACK_FTIME
-#define LACK_TIMES
+# define LACK_FTIME
+# define LACK_TIMES
 #endif
 #ifdef nosve
 # define LACK_FTIME
@@ -219,30 +198,32 @@
 # define LACK_FTIME
 #endif
 
-#ifdef CLK_TCK
-# define CLKTCK CLK_TCK
-# ifdef CLOCKS_PER_SEC
-#  ifdef HAVE_UNIX
-#   ifndef ARM_ULIB
-#    include <sys/times.h>
-#   endif
-#   define LACK_CLOCK
+#ifndef CLKTCK
+# ifdef CLK_TCK
+#  define CLKTCK CLK_TCK
+#  ifdef CLOCKS_PER_SEC
+#   ifdef HAVE_UNIX
+#    ifndef ARM_ULIB
+#     include <sys/times.h>
+#    endif
+#    define LACK_CLOCK
     /* This is because clock() might be POSIX rather than ANSI.
        This occurs on HP-UX machines */
+#   endif
 #  endif
-# endif
-#else
-# ifdef CLOCKS_PER_SEC
-#  define CLKTCK CLOCKS_PER_SEC
 # else
-#  define LACK_CLOCK
-#  ifdef AMIGA
-#   include <stddef.h>
-#   define LACK_TIMES
-#   define LACK_FTIME
-#   define CLKTCK 1000
+#  ifdef CLOCKS_PER_SEC
+#   define CLKTCK CLOCKS_PER_SEC
 #  else
-#   define CLKTCK 60
+#   define LACK_CLOCK
+#   ifdef AMIGA
+#    include <stddef.h>
+#    define LACK_TIMES
+#    define LACK_FTIME
+#    define CLKTCK 1000
+#   else
+#    define CLKTCK 60
+#   endif
 #  endif
 # endif
 #endif
@@ -264,17 +245,17 @@ static long mytime()
 	long sec, mic, mili = 0;
 	struct timerequest *timermsg;
 	struct MsgPort *timerport;
-	if(!(timerport = (struct MsgPort *)CreatePort(0, 0))){
+	if (!(timerport = (struct MsgPort *)CreatePort(0, 0))){
 	lputs("No mem for port.\n", cur_errp);
 		return mili;
 	}
-	if(!(timermsg = (struct timerequest *)
+	if (!(timermsg = (struct timerequest *)
 		 CreateExtIO(timerport, sizeof(struct timerequest)))){
 		lputs("No mem for timerequest.\n", cur_errp);
 		DeletePort(timermsg->tr_node.io_Message.mn_ReplyPort);
 	return mili;
 	}
-	if(!(OpenDevice(TIMERNAME, UNIT_MICROHZ, timermsg, 0))){
+	if (!(OpenDevice(TIMERNAME, UNIT_MICROHZ, timermsg, 0))){
 		timermsg->tr_node.io_Command = TR_GETSYSTIME;
 		timermsg->tr_node.io_Flags = 0;
 		DoIO(timermsg);
@@ -357,9 +338,8 @@ SCM your_time()
   }
   else if ((1 + time_buffer1.time)==time_buffer2.time) ;
   else if (cnt < TIMETRIES) goto tryagain;
-  else {
-    scm_warn("could not read two ftime()s within one second in 10 tries",
-	     "", UNDEFINED);
+  else { /* could not read two ftime()s within one second in 10 tries */
+    scm_warn("ftime()s too fast", "", MAKINUM(TIMETRIES));
     return MAKINUM(-1);
   }
   tmp = CLKTCK*(time_buffer2.millitm - your_base.millitm);
