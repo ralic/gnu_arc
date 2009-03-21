@@ -1,351 +1,580 @@
-2009-03-14  author  <author@localhost>
+2009-03-20 16:45  gnubryant
 
-	* Mac OSX (darwin) support
-	  - Fixed a two compiler warning/errors of asc on Mac OSX
-	  - Added c compile, lib, and link support for Mac OSX
-	  - os: attribute on statement accepts now a list of os names also
-	  - Asc can not be build with arc on Mac OSX, too
-	  - updated documentation
-	
-2003-05-05  author  <author@localhost>
+	* doc/: arc.texinfo.in, fdl.texinfo: Title missing the @unnumbered
+	  next to title - version from FSF @c.
+
+2009-03-20 16:32  gnubryant
+
+	* Arcfile, INSTALL, asc/scmfig.h, asc/time.c: Updated to reflect
+	  fdl.texinfo add and gpl.texinfo removal.
+
+2009-03-20 16:21  gnubryant
+
+	* doc/arc.texinfo.in: Minor paragraph adjustments, update to the
+	  license information in the ignore section.
+
+2009-03-20 15:47  gnubryant
+
+	* doc/: arc.texinfo.in, fdl.texinfo, gpl.texinfo: Updated the Arc
+	  manual from GPLv2 to FDLv1.3.  Removed the old gpl.texinfo file,
+	  added the new fdl.texinfo file.
+
+2009-03-17 18:48  gnubryant
+
+	* doc/arc.texinfo.in: Performed basic spell checking (manually).
+	  Built and tested.  First in a series of technical edits that will
+	  include US English spelling, grammar, and readability updates.
+
+2009-03-15 07:30  eyestep
+
+	* ChangeLog: Updated changelog.
+
+2009-03-14 16:40  eyestep
+
+	* Arcfile, asc/findexec.c, asc/sys.c, doc/arc.texinfo.in,
+	  src/ctx.scm, src/meta.scm, src/show.scm,
+	  src/meta-inf/darwin.decl,
+	  src/tasks/darwin/task-c-compile-darwin.scm,
+	  src/tasks/darwin/task-lib-darwin.scm,
+	  src/tasks/darwin/task-link-darwin.scm,
+	  src/tasks/generic/task-lib-generic.scm,
+	  src/tasks/linux/task-c-compile-linux.scm: More on Mac OSX support
+	  - Fixed a two compiler warning/errors of asc on Mac OSX - Added c
+	  compile, lib, and link support for Mac OSX - os: attribute on
+	  statement accepts now a list of os names also Asc can not be
+	  build with arc on Mac OSX, too
+
+2009-03-14 09:20  eyestep
+
+	* configure, asc/scm.c, boot/bootstrap.scm, src/misc.scm,
+	  src/sys-darwin.scm, src/sys.scm, src/sysnm.scm: Added basic
+	  support for darwin (osx)
+
+2003-05-05 14:32  eyestep
 
 	* src/tasks/task-bison.scm: added verbose? option
 
+2003-05-05 14:32  eyestep
+
 	* ChangeLog: updated
 
-2003-05-04    <gck@eyestep.org>
+2003-04-24 17:06  eyestep
 
-	* src/tasks/task-bison.scm (arc:bison-keywords): added verbose?
-	parameter
+	* INSTALL: updated
 
-2003-04-24    <gck@eyestep.org>
+2003-04-24 17:05  eyestep
 
-	* bumbed version to 0.4.0; release
-	
-	* rebuild the dependency subsystems.  Implemented a simple API
-	which now all tasks, supporting dependency control should use.
-	Dependencies are stored now in a single database file (a hashtable
-	actually), and are referenced by full path name.  Fixed name
-	clashs here therefore
+	* configure: made generated scripts more portable on solaris shells
 
-	* added a hash implementation from slib
+2003-04-24 17:00  eyestep
 
-	* added supported for "rpath" and local execution of
-	applications linked to not installed shared libraries
+	* boot/bstr-unix.scm: made generated scripts more portable on
+	  solaris shells
 
-	* added full freebsd support
+2003-04-24 16:57  eyestep
 
-	* extended cygwin support, but "local-exec-outdir:" is missing yet
-	
-	* added first real exotic tasks (task-orange-compile,
-	task-orange-deps), as a prove of concept, that extending beyond
-	the scope of standard tools is feasible.
+	* src/: meta-inf/sunos.decl, tasks/sunos/task-lib-sunos.scm,
+	  tasks/sunos/task-link-sunos.scm: added
 
-	* documentation
-	
-	* fixed numberous bugs
+2003-04-24 16:05  eyestep
 
-2003-04-18    <gck@eyestep.org>
+	* ChangeLog: updated
 
-	* the system is now ready for a new release ... 0.3.0 i guess.  a
-	lot have changed radically.  only to mention a few things: 
+2003-04-24 15:59  eyestep
 
-	* 'real' oop introduced, this makes extensibility easier and more
-	transparent
+	* INSTALL, README, test/Arcfile, test/version.h.in: updated
 
-	* rebuild the system interface layer by using oop.  adding new
-	systems can now happen much more transparent than before.  Even
-	adding new scheme interpreter support is easier, i hope
+2003-04-24 15:49  eyestep
 
-	* redesigned the task engine, tasks now implement the 'business
-	logic' (dependencies, etc.), whereas the real work is done
-	normally by backend classes.  These backend classes are system
-	dependend and are loaded on demand from declaration files located
-	in src/meta-inf.  Since oop's inheritance scheme, one can write
-	generic task backends, which are used by multiple platforms.
+	* asc/sys.c: removed the tmpnam function
 
-	* redesigned the Arcfile syntax.  Arcfile's are now interpreted by
-	a meta-scheme interpreter -- so they don't run in a different
-	scope, than arc itself, and code from Arcfiles can't clash with
-	arc or	destroy or even misuse arc internals.  Furthermore
-	Arcfiles are much more readible and less 'schemish' (=lowlevel).
+2003-04-24 15:49  eyestep
 
-	* added first beginnings of the arcconfig subsystem.
+	* Arcfile: dumbed version
 
-	* added a simple exception (try/throw) subsystem, to make the arc
-	system more robust in future
-	
-	* added a number of default tasks: task-bison, task-flex,
-	task-version, first beginning of task-cvs.  Extended an fixed a
-	number of more tasks.  Especially rewritten most of the task-lib
-	stuff.  Shared libraries are now fully compatible with linux ELF
-	system's versioning scheme.
+2003-04-24 15:48  eyestep
 
-	* added ports to BeOS and FreeBSD
+	* configure: fixed problem with "not found" errors in certain
+	  shells
 
-	* added regexp support
+2003-04-24 15:48  eyestep
 
-	
-2002-08-12    <gck@eyestep.org>
+	* boot/bootstrap.scm: added missing debug var
 
-	* extended documentation
+2003-04-24 15:48  eyestep
 
-	* added arc:filter, arc:dist, ... tasks
+	* src/meta-inf/bsd.decl: fixed bad reference
 
-	* added Asc, the Arc Scheme interpreter and build support scripts
-	for it
+2003-04-24 15:47  eyestep
 
-	* configure (Configuration): completely rewritten the
-	configuration and bootstrapping system.
+	* src/tasks/task-link.scm: added docs
 
-2002-07-25  Gregor Klinke  <gck@eyestep.org>
+2003-04-24 15:46  eyestep
+
+	* doc/arc.texinfo.in: updated
+
+2003-04-24 14:28  eyestep
+
+	* src/: config.scm, version.scm: removed, since generated
+
+2003-04-23 11:49  eyestep
+
+	* test/version.h.in: updated
+
+2003-04-23 11:48  eyestep
+
+	* src/tasks/: task-c-compile.scm,
+	  generic/task-c-compile-generic.scm: support for platforms where
+	  shared builds are not different
+
+2003-04-23 11:48  eyestep
+
+	* src/deps.scm: mtime fixed
+
+2003-04-23 11:47  eyestep
+
+	* Arcfile, test/Arcfile: cygwin support
+
+2003-04-23 11:45  eyestep
+
+	* src/: meta-inf/cygwin.decl,
+	  tasks/cygwin/task-c-compile-cygwin.scm,
+	  tasks/cygwin/task-lib-cygwin.scm,
+	  tasks/cygwin/task-link-cygwin.scm: added
+
+2003-04-22 16:46  eyestep
+
+	* test/version.h.in: updated
+
+2003-04-22 16:46  eyestep
+
+	* test/Arcfile: [no log message]
+
+2003-04-22 16:45  eyestep
+
+	* src/tasks/generic/task-c-compile-generic.scm: deps API
+
+2003-04-22 16:44  eyestep
+
+	* src/tasks/: generic/task-lib-generic.scm,
+	  generic/task-link-generic.scm, linux/task-lib-linux.scm,
+	  linux/task-link-linux.scm: rpath support; new function API from
+	  strings.scm
+
+2003-04-22 16:43  eyestep
+
+	* src/tasks/generic/task-c-compile-gcc.scm: makedeps should produce
+	  inly local file deps
+
+2003-04-22 16:42  eyestep
+
+	* src/tasks/: task-lib.scm, beos/task-lib-beos.scm: rpath support
+
+2003-04-22 16:42  eyestep
+
+	* src/tasks/task-link.scm: support for local shared-linked
+	  exutables; rpath support
+
+2003-04-22 16:41  eyestep
+
+	* src/tasks/: task-java-compile.scm, task-tar.scm: applied new
+	  function behaviour from strings.scm
+
+2003-04-22 16:40  eyestep
+
+	* src/tasks/: task-bison.scm, task-flex.scm: applied new deps API
+
+2003-04-22 16:40  eyestep
+
+	* src/tasks/: task-c-compile.scm, task-c-deps.scm: applied new deps
+	  API; sources keyword accepts now any mixture of strings, lists
+	  and attrval input
+
+2003-04-22 16:39  eyestep
+
+	* src/meta-inf/: beos.decl, linux.decl: cleanup
+
+2003-04-22 16:38  eyestep
+
+	* src/task-util.scm: improved error handling
+
+2003-04-22 16:37  eyestep
+
+	* src/misc.scm: improved error messages
+
+2003-04-22 16:37  eyestep
+
+	* src/meta.scm: extended
+
+2003-04-22 16:37  eyestep
+
+	* src/eval.scm: added dependency writting at end of script
+
+2003-04-22 16:36  eyestep
+
+	* src/deps.scm: substantially rewritten to have: cleaner API, less
+	  cludge in the deps directory, fixed problems with different files
+	  resulting in equal dep files (scan.y to scan.P and scan.c to
+	  scan.P)
+
+2003-04-22 16:35  eyestep
+
+	* src/ctx.scm: fixed returnvalue problems
+
+2003-04-22 16:34  eyestep
+
+	* src/arcconf.scm: extended properties to be writable in a volatile
+	  environment
+
+2003-04-22 16:34  eyestep
+
+	* src/arc.scm: added hash.scm
+
+2003-04-22 16:32  eyestep
+
+	* AUTHORS, TODO: updated
+
+2003-04-22 16:31  eyestep
+
+	* src/: hash.scm, tasks/task-orange-compile.scm,
+	  tasks/task-orange-deps.scm: added
+
+2003-04-18 18:09  eyestep
+
+	* src/: sys-guile.scm, sys-ksi.scm, sys-scm.scm: replaced by the
+	  new (and better) system abstraction layer
+
+2003-04-18 18:08  eyestep
+
+	* src/tasks/task-texinfo.scm: added html support
+
+2003-04-18 18:07  eyestep
+
+	* src/handler-factory.scm: fixed another bad bug ...
+
+2003-04-18 18:06  eyestep
+
+	* doc/arc.texinfo.in: extended
+
+2003-04-18 18:06  eyestep
+
+	* boot/bootstrap-asc.scm, boot/bootstrap-guile.scm,
+	  boot/bootstrap-ksi.scm, boot/bootstrap-scm.scm,
+	  boot/bootstrap.scm, boot/bstr-beos.scm, boot/bstr-unix.scm,
+	  boot/bstr-win32.scm, src/arc-asc.scm, src/arc-guile.scm,
+	  src/arc-ksi.scm, src/arc-scm.scm, src/arc.scm, src/bt-tasks.scm,
+	  src/config.scm, src/ctx.scm, src/deps.scm, src/eval.scm,
+	  src/fnmatch.scm, src/implicit.scm, src/meta.scm, src/oop.scm,
+	  src/path.scm, src/require.scm, src/traverse.scm, src/version.scm,
+	  src/tasks/task-clean.scm, src/tasks/task-copy.scm,
+	  src/tasks/task-cvs.scm, src/tasks/task-delete.scm,
+	  src/tasks/task-dist.scm, src/tasks/task-file-type.scm,
+	  src/tasks/task-filter.scm, src/tasks/task-flex.scm,
+	  src/tasks/task-gunzip.scm, src/tasks/task-gzip.scm,
+	  src/tasks/task-install.scm, src/tasks/task-java-compile.scm,
+	  src/tasks/task-lib.scm, src/tasks/task-link.scm,
+	  src/tasks/task-mkdir.scm, src/tasks/task-tar.scm,
+	  src/tasks/task-touch.scm, src/tasks/task-untar.scm,
+	  src/tasks/generic/task-c-compile-generic.scm,
+	  src/tasks/generic/task-lib-generic.scm,
+	  src/tasks/generic/task-link-generic.scm,
+	  src/tasks/linux/task-link-linux.scm: redesigned system
+	  abstraction
+
+2003-04-18 18:05  eyestep
+
+	* configure: added FreeBSD support
+
+2003-04-18 18:03  eyestep
+
+	* src/: excp.scm, sys-beos.scm, sys-bsd.scm, sys-cygwin.scm,
+	  sys-linux.scm, sys-sunos.scm, sys-unix.scm, sys.scm,
+	  meta-inf/bsd.decl: added
+
+2003-04-18 18:02  eyestep
+
+	* INSTALL, Arcfile, ChangeLog, TODO: updated
+
+2003-04-17 03:57  eyestep
+
+	* src/sys-scm.scm: added cygwin support
+
+2003-04-17 03:56  eyestep
+
+	* src/sysnm.scm: rewritten
+
+2003-04-16 17:06  eyestep
+
+	* src/tasks/task-version.scm: misspelling
+
+2003-04-16 17:06  eyestep
+
+	* src/tasks/task-c-compile.scm: moved generic dep stuff to
+	  ../task-util.scm
+
+2003-04-16 17:05  eyestep
+
+	* src/task-util.scm: better error msg
+
+2003-04-16 17:05  eyestep
+
+	* src/strings.scm: add arc:to-str
+
+2003-04-16 17:05  eyestep
+
+	* src/meta.scm: better error msg; changed string-append impl
+
+2003-04-16 17:04  eyestep
+
+	* src/deps.scm: moved generic function from task-c-comile here
+
+2003-04-16 17:03  eyestep
+
+	* TODO: updated
+
+2003-04-16 17:02  eyestep
+
+	* src/tasks/: task-bison.scm, task-flex.scm: added
+
+2003-04-14 17:04  eyestep
+
+	* src/misc.scm: fixed a bug in reduce
+
+2003-04-14 17:03  eyestep
+
+	* src/tasks/task-cvs.scm: first version (not complete)
+
+2003-04-14 17:02  eyestep
+
+	* test/.cvsignore, src/tasks/task-version.scm: added
+
+2003-04-14 17:01  eyestep
+
+	* test/version.h.in: added for testing version task
+
+2003-04-14 17:01  eyestep
+
+	* test/hello-world.c: added version
+
+2003-04-14 17:00  eyestep
+
+	* doc/arc.texinfo.in: added task:version task
+
+2003-04-14 17:00  eyestep
+
+	* TODO, test/Arcfile: updated
+
+2003-04-13 16:48  eyestep
+
+	* src/tasks/linux/: task-c-compile-linux.scm, task-lib-linux.scm:
+	  extracted common functionality into the generic backend classes
+
+2003-04-13 16:47  eyestep
+
+	* src/tasks/generic/: task-c-compile-gcc.scm,
+	  task-c-compile-generic.scm, task-lib-generic.scm,
+	  task-link-generic.scm: generic backend classes
+
+2003-04-13 16:46  eyestep
+
+	* src/tasks/task-lib.scm: rewritten shared library support (incl.
+	  sonames, libtool compatible versioning)
+
+2003-04-13 16:45  eyestep
+
+	* src/tasks/: task-copy.scm, task-install.scm: be more informative,
+	  when failing
+
+2003-04-13 16:44  eyestep
+
+	* src/: meta-inf/beos.decl, tasks/beos/task-c-compile-beos.scm,
+	  tasks/beos/task-lib-beos.scm: beos support
+
+2003-04-13 16:44  eyestep
+
+	* src/meta-inf/linux.decl: renamed backend classes
+
+2003-04-13 16:43  eyestep
+
+	* test/Arcfile: removed os condition
+
+2003-04-13 16:43  eyestep
+
+	* src/oop.scm: ws
+
+2003-04-13 16:42  eyestep
+
+	* src/handler-factory.scm: fixed bug with multiple declarations
+
+2003-04-13 16:42  eyestep
+
+	* src/: ctx.scm, eval.scm, sys-guile.scm, sys-ksi.scm, sys-scm.scm:
+	  updated; cleanup
+
+2003-04-13 16:41  eyestep
+
+	* src/config.scm: updated
+
+2003-04-13 16:40  eyestep
+
+	* doc/: arc.texinfo.in, .cvsignore: extended
+
+2003-04-13 16:39  eyestep
+
+	* boot/bstr-beos.scm: missing )
+
+2003-04-13 16:39  eyestep
+
+	* asc/: build-beos.sh, build-cygwin.sh, build-mingw.bat,
+	  build-mingw.sh, build-sun.sh, build-unix.sh: feedback output
+
+2003-04-13 16:39  eyestep
+
+	* Arcfile, INSTALL, TODO, configure: BeOS support
+
+2003-04-12 16:56  eyestep
+
+	* src/version.scm: bumped version
+
+2003-04-12 16:56  eyestep
+
+	* src/sysnm.scm: added CYGWIN id
+
+2003-04-12 16:55  eyestep
+
+	* src/: sys-guile.scm, sys-ksi.scm, sys-scm.scm: added
+	  arc:sys.homedir function
+
+2003-04-12 16:53  eyestep
+
+	* src/path.scm: fixed -normalize, -abbreviate, -absolutize
+
+2003-04-12 16:53  eyestep
+
+	* src/misc.scm: added functions
+
+2003-04-12 16:52  eyestep
+
+	* src/oop.scm: rewritten (new oo system
+
+2003-04-12 16:52  eyestep
+
+	* src/meta.scm: support for arc.config files; extended with more
+	  default functions
+
+2003-04-12 16:51  eyestep
+
+	* src/config.scm.in: typing
+
+2003-04-12 16:50  eyestep
+
+	* src/: arc.scm, arcconf.scm: support for arc.config files
+
+2003-04-12 16:48  eyestep
+
+	* src/tasks/: task-link.scm, linux/task-link-linux.scm: extracted
+	  functionality into backend class
+
+2003-04-12 16:48  eyestep
+
+	* src/tasks/: task-c-compile.scm, task-c-deps.scm, task-lib.scm,
+	  linux/task-c-compile-linux.scm, linux/task-lib-linux.scm: applied
+	  new oo
+
+2003-04-12 16:47  eyestep
+
+	* src/meta-inf/linux.decl: added linux-link task
+
+2003-04-12 16:45  eyestep
+
+	* test/Arcfile: updated test
+
+2003-04-12 16:45  eyestep
 
 	* doc/tasks: updated
 
-	* src/system.scm:
-	replaced by sys-scm.scm and sys-guile.scm
-
-	* src/build-old.scm: unused
-
-	* src/path.scm: modified getcwd to arc:sys.getcwd
-
-	* install.bat: first beginnings
-
-	* boot/bootstrap-arc.scm: removed debug output
-
-	* boot/bstr-win32.scm: fixed missing )
-
-	* src/sysnm.scm: extended
-
-	* configure: written
-
-	* src/misc.scm: implemented arc:readline
-
-	* test/Arcfile: tar/untar tests
-
-	* src/tasks/task-untar.scm: tested; improved (outdir, ...)
-
-	* src/tasks/task-tar.scm:
-	improved (:force?, better error reporting, return value)
-
-2002-07-24  Gregor Klinke  <gck@eyestep.org>
-
-	* doc/tasks: updated
-
-	* src/arc: removed; to be bootstrapped
-
-	* src/tasks/task-tar.scm:
-	fixed parameter for absolute paths
-
-	* src/tasks/task-untar.scm: added
-
-	* src/tasks/task-tar.scm: tar tool added
-
-2002-07-22  Gregor Klinke  <gck@eyestep.org>
-
-	* src/tasks/task-lib.scm: comment
-
-	* src/tasks/task-c-compile.scm:
-	changed verbosity output to only be shown when a compilation is due
-
-	* test/Arcfile: added test for shared libraries
-
-	* src/tasks/task-lib.scm:
-	added shared library support for linux
-
-	* TODO: update
-
-2002-07-21  Gregor Klinke  <gck@eyestep.org>
-
-	* test/Arcfile: modified :dir to :pathnm
-
-	* doc/tasks: updated
-
-	* boot/bstr-beos.scm: updated path
-
-	* src/tasks/task-lib.scm: extended
-
-	* src/tasks/task-delete.scm: changed :dir to :pathnm
-
-	* src/tasks/task-archive.scm: replaced by task-lib
-
-	* src/tasks/task-lib.scm: added for static libs at least
-
-	* doc/tasks: updated
-
-	* doc/gpl.texinfo, doc/arc.texinfo: added
-
-2002-07-20  Gregor Klinke  <gck@eyestep.org>
-
-	* doc/.cvsignore, src/tasks/.cvsignore, src/tasks/task-touch.scm:
-	added
-
-	* src/tasks/task-mkdir.scm, src/tasks/task-java-compile.scm, src/tasks/task-gzip.scm, src/tasks/task-gunzip.scm, src/tasks/task-fileset.scm, src/tasks/task-c-deps.scm, src/tasks/task-c-compile.scm, src/tasks/task-archive.scm:
-	reorganized module loading
-
-	* src/.cvsignore, .cvsignore, boot/.cvsignore:
-	added
-
-	* configure: added .. still empty
-
-	* TODO, ChangeLog: updated
-
-	* src/arc-guile.scm: added as guile start frontend
-
-	* src/bt-tasks.scm:
-	reorganized module loading; only scheme files matching the pattern
-	"task-*.scm" are loaded as task-files from "tasks/"
-
-	* src/config.scm, src/ctx.scm, src/deps.scm, src/eval.scm, src/getopt.scm, src/logical.scm:
-	reorganized module loading
-
-	* src/path.scm:
-	reorganized module loading; removed test stuff; moved pathlist-sep to misc.scm
-
-	* src/require.scm: moved require/provide here from arc.scm
-
-	* src/strings.scm: layout; reorganized module loading
-
-	* src/sysnm.scm:
-	generate a canonical systen name (ala config.guess)
-
-	* src/task-util.scm:
-	moved task related shared functionality from misc.scm here
-
-	* src/version.scm: added
-
-	* src/misc.scm:
-	moved task related functions to task-util.scm; reorganized module loading
-
-	* boot/bootstrap-arc.scm: added copyright note
-
-	* boot/bstr-win32.scm: added for win32 boot strapping
-
-	* boot/bootstrap-arc.scm: boot strapping mechanism
-
-	* boot/bstr-beos.scm: added for beos boot strapping
-
-	* boot/bstr-unix.scm: added for unix bootstraping
-
-	* src/arc-scm.scm:
-	restructed scheme implementation depended functions
-
-	* src/arc.scm:
-	restructed module loading; reorganized scheme implementation and system
-	dependant parts
-
-	* src/traverse.scm, src/tasks/task-delete.scm:
-	restructed module loading
-
-	* src/sys-guile.scm, src/sys-scm.scm:
-	restructed scheme implementation depended functions
-
-	* doc/tasks: updated
-
-	* src/tasks/task-file-type.scm: added
-
-	* test/Arcfile: added more tests
-
-2002-07-20  Gregor Klinke  <gck@eyestep.org>
-
-	* src/arc-guile.scm: added as guile start frontend
-
-	* src/bt-tasks.scm:
-	reorganized module loading; only scheme files matching the pattern
-	"task-*.scm" are loaded as task-files from "tasks/"
-
-	* src/config.scm, src/ctx.scm, src/deps.scm, src/eval.scm, src/getopt.scm, src/logical.scm:
-	reorganized module loading
-
-	* src/path.scm:
-	reorganized module loading; removed test stuff; moved pathlist-sep to misc.scm
-
-	* src/require.scm: moved require/provide here from arc.scm
-
-	* src/strings.scm: layout; reorganized module loading
-
-	* src/sysnm.scm:
-	generate a canonical systen name (ala config.guess)
-
-	* src/task-util.scm:
-	moved task related shared functionality from misc.scm here
-
-	* src/version.scm: added
-
-	* src/misc.scm:
-	moved task related functions to task-util.scm; reorganized module loading
-
-	* boot/bootstrap-arc.scm: added copyright note
-
-	* boot/bstr-win32.scm: added for win32 boot strapping
-
-	* boot/bootstrap-arc.scm: boot strapping mechanism
-
-	* boot/bstr-beos.scm: added for beos boot strapping
-
-	* boot/bstr-unix.scm: added for unix bootstraping
-
-	* src/arc-scm.scm:
-	restructed scheme implementation depended functions
-
-	* src/arc.scm:
-	restructed module loading; reorganized scheme implementation and system
-	dependant parts
-
-	* src/traverse.scm, src/tasks/task-delete.scm:
-	restructed module loading
-
-	* src/sys-guile.scm, src/sys-scm.scm:
-	restructed scheme implementation depended functions
-
-	* doc/tasks: updated
-
-	* src/tasks/task-file-type.scm: added
-
-	* test/Arcfile: added more tests
-
-2002-07-18  Gregor Klinke  <gck@eyestep.org>
-
-	* src/system.scm: added file-directory?
-
-	* src/arc.scm: added traverse require
-
-	* src/logical.scm: added; used by file stats
-
-	* src/traverse.scm: added for generic directory traversal
-
-	* doc/tasks: updated
-
-	* NEWS: added
-
-	* README: rewritten
-
-	* INSTALL, doc/texinfo.tex: NEWS
-
-2002-07-17  Gregor Klinke  <gck@eyestep.org>
-
-	* src/system.scm: added some more basics
-
-	* src/misc.scm:
-	added new type; removed "missing value error msg"
-
-	* src/deps.scm: changed dependency list format to list
-
-	* src/bt-tasks.scm: cleanup
-
-	* src/tasks/task-mkdir.scm, src/tasks/task-gzip.scm, src/tasks/task-gunzip.scm, src/tasks/task-fileset.scm, src/tasks/task-delete.scm, src/tasks/task-c-deps.scm, src/tasks/task-c-compile.scm, src/tasks/task-archive.scm:
-	added returnvalues; implemented lazy-c-dependecy handling
-
-	* test/Arcfile: changed test dependencies
-
-	* src/tasks/task-java-compile.scm:
-	changed for new filesets; added return values
-
-2002-07-17  Gregor Klinke  <gck@eyestep.org>
-
-	* Ok. The name is now "arc".
-
-	* setup the real first package structure.  Even if I'm not going
-	to use the GNU tool chain autoconf and automake, I'll follow the
-	GNU standards for package.
+2003-04-12 16:44  eyestep
+
+	* doc/arc.texinfo.in: extended
+
+2003-04-12 16:44  eyestep
+
+	* boot/bootstrap.scm: support for arc.config files; exec-prefix bug
+	  fixed
+
+2003-04-12 16:43  eyestep
+
+	* asc/: asc-init.scm, build-beos.sh, build-cygwin.sh,
+	  build-mingw.bat, build-mingw.sh, build-sun.sh, build-unix.sh,
+	  scm.c: better support for hardcoded arcdir (when no ARC_HOME env
+	  var is set)
+
+2003-04-12 16:42  eyestep
+
+	* configure: improvements; exec-prefix bug fixed
+
+2003-04-12 16:42  eyestep
+
+	* Arcfile: bumped up version; prop handling from arc.config; added
+	  missing files/dirs to install, distclean, clean
+
+2003-04-12 16:41  eyestep
+
+	* arc.config.in: added for configuration purposes
+
+2003-04-12 16:40  eyestep
+
+	* .cvsignore: updated
+
+2003-04-11 17:50  eyestep
+
+	* src/.cvsignore: added config.scm
+
+2003-04-11 17:49  eyestep
+
+	* .cvsignore, asc/.cvsignore: initial
+
+2003-04-11 17:39  eyestep
+
+	* AUTHORS, Arcfile, COPYING, ChangeLog, INSTALL, NEWS, README,
+	  TODO, configure, asc/asc-init.scm, asc/build-beos.sh,
+	  asc/build-cygwin.sh, asc/build-mingw.bat, asc/build-mingw.sh,
+	  asc/build-sun.sh, asc/build-unix.sh, asc/continue.c,
+	  asc/continue.h, asc/debug.c, asc/eval.c, asc/findexec.c,
+	  asc/init.scm, asc/ioext.c, asc/repl.c, asc/rope.c, asc/scl.c,
+	  asc/scm.c, asc/scm.h, asc/scmfig.h, asc/scmmain.c, asc/script.c,
+	  asc/setjump.h, asc/subr.c, asc/sys.c, asc/time.c, asc/unif.c,
+	  asc/version.h, boot/.cvsignore, boot/bootstrap-asc.scm,
+	  boot/bootstrap-guile.scm, boot/bootstrap-ksi.scm,
+	  boot/bootstrap-scm.scm, boot/bootstrap.scm, boot/bstr-beos.scm,
+	  boot/bstr-unix.scm, boot/bstr-win32.scm, boot/build-asc.scm,
+	  boot/installer.scm, doc/.cvsignore, doc/arc.1.in,
+	  doc/arc.texinfo.in, doc/copyright.scm, doc/footer.scm,
+	  doc/gpl.texinfo, doc/tasks, doc/texinfo.tex, src/.cvsignore,
+	  src/arc-asc.scm, src/arc-guile.scm, src/arc-ksi.scm,
+	  src/arc-scm.scm, src/arc.scm, src/attrval.scm, src/bt-tasks.scm,
+	  src/config.scm, src/config.scm.in, src/ctx.scm, src/deps.scm,
+	  src/eval.scm, src/filter.scm, src/fnmatch.scm, src/getopt.scm,
+	  src/handler-factory.scm, src/implicit.scm, src/logical.scm,
+	  src/meta.scm, src/misc.scm, src/oop.scm, src/path.scm,
+	  src/pregexp.scm, src/require.scm, src/show.scm, src/strings.scm,
+	  src/sys-guile.scm, src/sys-ksi.scm, src/sys-scm.scm,
+	  src/sysnm.scm, src/task-util.scm, src/traverse.scm,
+	  src/version.scm, src/version.scm.in, src/meta-inf/linux.decl,
+	  src/tasks/.cvsignore, src/tasks/task-c-compile.scm,
+	  src/tasks/task-c-deps.scm, src/tasks/task-clean.scm,
+	  src/tasks/task-copy.scm, src/tasks/task-delete.scm,
+	  src/tasks/task-dist.scm, src/tasks/task-file-type.scm,
+	  src/tasks/task-fileset.scm, src/tasks/task-filter.scm,
+	  src/tasks/task-gunzip.scm, src/tasks/task-gzip.scm,
+	  src/tasks/task-install.scm, src/tasks/task-java-compile.scm,
+	  src/tasks/task-lib.scm, src/tasks/task-link.scm,
+	  src/tasks/task-mkdir.scm, src/tasks/task-objc-compile.scm,
+	  src/tasks/task-tar.scm, src/tasks/task-texinfo.scm,
+	  src/tasks/task-touch.scm, src/tasks/task-untar.scm,
+	  src/tasks/linux/.cvsignore,
+	  src/tasks/linux/task-c-compile-linux.scm,
+	  src/tasks/linux/task-lib-linux.scm, test/Arcfile,
+	  test/HelloWorld.java, test/Test.h, test/Test.m,
+	  test/hello-world.c, test/io.c, test/shared.h: initial
 
