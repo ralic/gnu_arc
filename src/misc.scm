@@ -174,6 +174,23 @@
         (loop (append res (list (list (car v) (cadr v))))
               (cddr v)))))
 
+(define (arc:make-counter start step)
+  (let* ((counter-value start))
+    (lambda ()
+      (let ((t counter-value))
+        (set! counter-value (+ counter-value step))
+        t)) ))
+
+
+(define (hea:read-string-from-file file-name)
+  (let* ((port (open-input-file file-name)))
+    (let loop ((retv (list))
+               (c (read-char port)))
+      (if (eof-object? c)
+          (list->string (reverse retv))
+          (loop (cons c retv)
+                (read-char port))) )))
+
 ;;Keep this comment at the end of the file 
 ;;Local variables:
 ;;mode: scheme

@@ -114,7 +114,14 @@
      (homedir
       ,(lambda (self)
          (getenv "HOME")) )
-     
+
+     (tempdir
+      ,(lambda (self)
+         (let ((tmp (getenv "TMPDIR")))
+           (if tmp
+               tmp
+               "/tmp"))))
+
      (system
       ,(lambda (self cmd)
          (system cmd)) )
@@ -260,7 +267,15 @@
            (arc:throw 'internal 
                       "chmod: expected symbol or integer as mod")))) )
      
-     
+     (getpid
+      ,(lambda ()
+         (case %arc:scheme-impl%
+           ((guile) (arc:throw 'internal "unclear whether guile has a getpid command"))
+           ((ksi)   (arc:throw 'internal "unclear whether ksi has a getpid command"))
+           ((scm asc) (getpid))
+           (else
+            (arc:throw 'internal "unknown scheme implementation")))) )
+
      )))
 
 

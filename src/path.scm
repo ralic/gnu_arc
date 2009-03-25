@@ -178,6 +178,20 @@
       path
       (arc:path-append (arc:path-cwd) path)))
 
+
+(define *arc:file-counter* (arc:make-counter 0 1))
+
+(define (arc:temp-path)
+  (arc:string->path (arc:sys 'tempdir)))
+
+(define (arc:temp-file-name name)
+  (arc:path->string
+   (arc:path-append (arc:temp-path)
+                    (string-append "arc-" (number->string (arc:sys 'getpid)) "-"
+                                   name "-"
+                                   (number->string (*arc:file-counter*))))))
+
+
 ;;Keep this comment at the end of the file 
 ;;Local variables:
 ;;mode: scheme
