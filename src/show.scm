@@ -84,8 +84,8 @@
                         ( (list? os) (arc:string-list->string*
                                       (map (lambda (s) (symbol->string s)))
                                       " ") )
-                        ( (symbol? os) (symbol->string os)) )
-                       (else (arc:throw 'assert "Bad OS"))
+                        ( (symbol? os) (symbol->string os))
+                        (else (arc:throw 'assert "Bad OS")))
                         "]" )
         "")))
     

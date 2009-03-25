@@ -213,6 +213,7 @@
                dest: (-> bindir)))
       
 (stmt install
+      info: "Installs arc to the place specified with ./configure"
       depends: '(all install-exe)
       
       (install src: (fileset pattern: "src/*.scm")
@@ -229,6 +230,8 @@
                dest: (path-append (-> arc-tasks-dir) "linux"))
       (install src: (fileset pattern: "src/tasks/beos/*.scm")
                dest: (path-append (-> arc-tasks-dir) "beos"))
+      (install src: (fileset pattern: "src/tasks/darwin/*.scm")
+               dest: (path-append (-> arc-tasks-dir) "darwin"))
 
       (install src: (fileset pattern: "src/meta-inf/*.decl")
                dest: (-> arc-meta-inf-dir))

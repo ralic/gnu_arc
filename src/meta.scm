@@ -361,7 +361,7 @@
       ((path-ext)
        (arc:path-ext (arc:string->path (arc:eval-arc (cadr expr)))))
 
-      ((path-cwd) (arc 'sys.getcwd))
+      ((path-cwd) (arc:sys 'getcwd))
       ((path-homedir) (arc:sys 'homedir))
       ((path-absolute?) 
        (arc:path-absolute? (arc:string->path (arc:eval-arc (cadr expr)))))
