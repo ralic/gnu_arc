@@ -74,8 +74,16 @@
        (list? deps)))
 
 ;; creates a new dependency object for the target file ofile
-(define (arc:make-deps ofile)
-  (list ofile '()))
+(define (arc:make-deps ofile . deps)
+  (let* ((retv (list ofile '())))
+    (if (not (null? deps))
+        (let loop ((d (car deps)))
+          (if (null? d)
+              retv
+              (begin
+                (arc:deps-set-deps! retv (car d))
+                (loop (cdr d)))))
+        retv)))
 
 ;; sets a dependency for file dfile to a dependency object.  Returns the
 ;; updated deps object
@@ -147,6 +155,14 @@
             (cadr deps))
   deps)
 
+(define (arc:deps-update-mtimes deps)
+  (arc:deps-determine-mtime deps)
+  (arc:deps-set-dirty-handler))
+
+
+;; Indicates whether the mtime (modification time) flag of any dependency
+;; for //ofile// has changed as passed in as //deps//.  The mtime slots in
+;; //deps// are updated to the real mtime values from the file system.
 (define (arc:mtime-file-changed? deps ofile)
   (let ((retv (let ((mtime (arc:sys 'mtime ofile))
                     (dps (arc:deps-determine-mtime deps)))
@@ -158,7 +174,16 @@
     (arc:log 'debug "mtime changed of " ofile " -> " retv)
     retv))
       
-
+;; return the mtime for a dependency file //dfile// from the dependency
+;; list //deps//.  Returns #f if the file is not in the list
+(define (arc:deps-mtime deps dfile)
+  (let loop ((fc (cadr deps)))
+    (if (null? fc)
+        #f
+        (if (equal? (caar fc) dfile)
+            (cdar fc)
+            (loop (cdr fc))) )))
+            
 
 ;; ----------------------------------------------------------------------
 ;; find and update the dependency
@@ -206,24 +231,21 @@
       (begin
         (set! %arc:deps-database% (or (arc:load-deps-file dbn)
                                       (make-hash-table %arc:deps-database-size%)))
-        (set! arc:deps-db-associator (hash-associator string=?))
-        (set! arc:deps-db-inquirer (hash-inquirer string=?)))))
+        (set! arc:deps-db-associator (hash-associator equal?))
+        (set! arc:deps-db-inquirer (hash-inquirer equal?)))))
+
+(define (arc:deps-set-dirty-handler)
+  (set! %arc:deps-database-dirty-handler%
+        (lambda ()
+          (arc:save-deps-file (arc:deps-db-file-name) %arc:deps-database%))))
   
-(define (arc:deps-db-set-deps deps)
+(define (arc:deps-db-set-deps! deps)
   (let ((dbn (arc:deps-db-file-name)))
     (arc:deps-db-load-db dbn)
  
     (let* ((key (arc:deps-target deps)))
       (arc:deps-db-associator %arc:deps-database% key deps)
-;    (let* ((key (arc:deps-target deps))
-;           (aslot (assoc key %arc:deps-database%)))
-;      (if aslot
-;          (set-cdr! aslot (cdr deps))
-;          (set! %arc:deps-database% 
-;                (append %arc:deps-database% (list deps))))
-      (set! %arc:deps-database-dirty-handler%
-            (lambda ()
-              (arc:save-deps-file dbn %arc:deps-database%))))))
+      (arc:deps-set-dirty-handler))))
             
 
 (define (arc:deps-db-get-deps key)
@@ -231,10 +253,6 @@
     (arc:deps-db-load-db dbn)
     (arc:deps-db-inquirer %arc:deps-database% key)
     ))
-;    (let* ((aslot (assoc key %arc:deps-database%)))
-;      (if aslot
-;          aslot
-;          #f))))
 
 
 (define (arc:deps-get-deps-database sfile ofile proc)
@@ -243,7 +261,7 @@
         (let* ((deps (apply proc (list sfile ofile))))
           (if (and deps
                    (arc:deps? deps))
-              (arc:deps-db-set-deps deps))
+              (arc:deps-db-set-deps! deps))
           deps)
         df)))
 

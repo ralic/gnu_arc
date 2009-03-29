@@ -43,6 +43,11 @@
 ;; indicates whether the tools output should be captured an returned as
 ;; string.  By default the output is send to stdout/stderr as normally.
 ;;
+;; :uptodate? STRING-LiST
+;; the arguments are explicit file dependencies on this task.  It will only
+;; run if any of the given file names has changed since the last run.  If 
+;; not given the task will be run always.
+;;
 ;; RETURNS
 ;; an attrval with the default value being the return status of the
 ;; command.  This depends on the nature of the command but normally 0
@@ -52,7 +57,8 @@
 (define arc:run-keywords '((cmd string required)
                            (args strlist optional)
                            (indir string optional)
-                           (capture? boolean optional)) )
+                           (capture? boolean optional)
+                           (uptodate? strlist optional) ))
 
 (define (arc:-run-run cmd cmd-line capture?)
   (let* ((av (arc:attrval))
@@ -90,20 +96,75 @@
          (args (arc:aval 'args props (list)))
          (indir (arc:aval 'indir props #f))
          (capture? (arc:aval 'capture? props #f))
+         (uptodate? (arc:aval 'uptodate? props #f))
 
          (full-cmd-line (string-append cmd " " 
                                        (arc:string-list->string* args " "))) )
 
     (arc:log 'debug "run '" full-cmd-line "'")
-    
-    (if (string? indir)
-        (let ((cwd (path:cwd))
-              (retv (arc:attrval)))
-          (arc:sys 'chdir indir)
-          (set! retv (arc:-run-run cmd full-cmd-line capture?))
-          (arc:sys 'chdir cwd)
-          retv)
-        (arc:-run-run cmd full-cmd-line capture?)) ))
+
+    (if (and uptodate?
+             (not (arc:deps-run-needs-rerun? full-cmd-line uptodate?)))
+        (let* ((av (arc:attrval)))
+          (arc:attrval-default-id! av 'return-value)
+          (arc:attrval-default! av 0)
+          av)
+
+        (if (string? indir)
+            (let ((cwd (path:cwd))
+                  (retv (arc:attrval)))
+              (arc:sys 'chdir indir)
+              (set! retv (arc:-run-run cmd full-cmd-line capture?))
+              (arc:sys 'chdir cwd)
+              retv)
+            (arc:-run-run cmd full-cmd-line capture?)) )) )
+
+(define (arc:deps-run-needs-rerun? key sfiles)
+  (let* ((depkey (arc:run-command->symbol key))
+         (deps0 (arc:make-deps depkey))
+         (deps (arc:deps-get-deps depkey depkey
+                                  (lambda (src dest)
+                                    (for-each (lambda (sf)
+                                                (arc:deps-set-deps! deps0 sf))
+                                              sfiles)
+                                    deps0)))
+         (retv #f))
+    (arc:log 'debug "use key '" depkey "'")
+
+    (set! retv (if (not (list? deps))
+                   #t
+                   (let loop ((sf sfiles))
+                     (if (null? sf)
+                         #f
+                         (let* ((dep (car sf))
+                                (sf-mtime (arc:sys 'mtime dep))
+                                (dep-mtime (arc:deps-mtime deps dep)))
+                           (or (not dep-mtime)
+                               (< dep-mtime sf-mtime)
+                               (loop (cdr sf)))) ))) )
+    (arc:deps-update-mtimes deps)
+    retv))
+
+
+(define (arc:run-command->symbol key)
+  (arc:string-list->string 
+   (map (lambda (c)
+          (case c
+            ((#\space) "%20")
+            ((#\/)     "%2f")
+            ((#\\)     "%5c")
+            ((#\nl)    "%0a")
+            ((#\cr)    "%0d")
+            ((#\")     "%22")
+            ((#\()     "%28")
+            ((#\))     "%29")
+            ((#\{)     "%7b")
+            ((#\})     "%7d")
+            ((#\[)     "%5b")
+            ((#\])     "%5d")
+            ((#\|)     "%5c")
+            (else (string c))))
+        (string->list key))))
 
 (arc:register-task 'run arc:run arc:run-keywords)
 
