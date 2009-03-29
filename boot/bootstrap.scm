@@ -22,6 +22,7 @@
 (define %arc:debug% (let ((ff (getenv "ARC_DEBUG")))
                       (if (and ff (equal? ff "yes")) #t #f)))
 
+(load "../src/misc.scm")
 (load "../src/path.scm")
 (load "../src/strings.scm")
 (load "../src/misc.scm")

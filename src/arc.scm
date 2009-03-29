@@ -88,6 +88,7 @@
 (define %arc:include-list%
   '("require.scm"
     "getopt.scm"
+    "misc.scm"
     "path.scm"
     "hash.scm"
     "eval.scm"
