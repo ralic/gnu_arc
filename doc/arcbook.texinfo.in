@@ -6,6 +6,9 @@
 @setchapternewpage odd
 @comment %**end of header
 
+@comment Version: v0.00 on 03/31/2009.
+@comment Note: arc-specific build commands for texinfo to be added in v0.01.
+
 @ifinfo
 This is arcBook -- An in-depth textbook on scripting with arc.
 
