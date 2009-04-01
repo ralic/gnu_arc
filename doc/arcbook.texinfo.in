@@ -1,0 +1,136 @@
+\input texinfo @c -*-texinfo-*-
+@comment %**start of header
+@setfilename arcbook.info
+@settitle arcBook -- An in-depth textbook on scripting with arc.
+@finalout
+@setchapternewpage odd
+@comment %**end of header
+
+@ifinfo
+This is arcBook -- An in-depth textbook on scripting with arc.
+
+Copyright @copyright{} 2009 Chris Bryant (@email{chris.bryant@@kofc13555.org}).
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
+@end quotation
+
+@ignore
+Permission is granted to process this file through TeX and print the
+results, provided the printed document carries a copying permission
+notice identical to this one except for the removal of this paragraph
+(this paragraph not being relevant to the printed manual).
+@end ignore
+
+@quotation
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for example copying, provided that the entire
+resulting derived work is distributed under the terms of a permission
+notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by the Foundation.
+@end quotation
+@end ifinfo
+
+@titlepage
+@title arcBook
+@subtitle An in-depth textbook on scripting with arc.
+@author by Chris Bryant (@email{chris.bryant@@kofc13555.org})
+@page
+@vskip 0pt plus 1filll
+Copyright @copyright 2009 Chris Bryant (@email{chris.bryant@@kofc13555.org}).
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover
+Texts.  A copy of the license is included in the section entitled ``GNU
+Free Documentation License''.
+@end titlepage
+
+@shortcontents
+@contents
+
+@ifnottex
+@node Top, Introduction, (dir), (dir)
+@top arcBook
+
+An in-depth textbook on scripting with arc.
+@end ifnottex
+
+@menu
+* Introduction::                
+* Getting started::             
+* Filesystem tasks::            
+* Compiler tasks::              
+* Archiving tasks::             
+* Version control tasks::       
+* Documentation tasks::         
+* Distribution tasks::          
+* Installation tasks::          
+* Task dictionary::             
+* Function dictionary::         
+* Index::                       
+@end menu
+
+@node Introduction, Getting started, Top, Top
+@chapter Introduction
+@menu
+* Who this is for::
+* What arc is::
+* What arc is not::
+* Arc and Scheme::
+@end menu
+
+@node Getting started, Filesystem tasks, Introduction, Top
+@chapter Getting started
+@menu
+* Obtaining arc::
+* Building and installing arc::
+* Configuring the arc environment::
+* Creating an Arcfile::
+@end menu
+
+@node Filesystem tasks, Compiler tasks, Getting started, Top
+@chapter Filesystem tasks
+
+@node Compiler tasks, Archiving tasks, Filesystem tasks, Top
+@chapter Compiler tasks
+
+@node Archiving tasks, Version control tasks, Compiler tasks, Top
+@chapter Archiving tasks
+
+@node Version control tasks, Documentation tasks, Archiving tasks, Top
+@chapter Version control tasks
+
+@node Documentation tasks, Distribution tasks, Version control tasks, Top
+@chapter Documentation tasks
+
+@node Distribution tasks, Installation tasks, Documentation tasks, Top
+@chapter Distribution tasks
+
+@node Installation tasks, Task dictionary, Distribution tasks, Top
+@chapter Installation tasks
+
+@node Task dictionary, Function dictionary, Installation tasks, Top
+@appendix Task dictionary
+
+@node Function dictionary, GNU Free Documentation License, Task dictionary, Top
+@appendix Function dictionary
+
+@node Index,  , GNU Free Documentation License, Top
+@unnumbered Index
+
+@printindex cp
+
+@include fdl.texinfo
+
+@bye
