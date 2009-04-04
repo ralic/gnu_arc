@@ -79,6 +79,7 @@ An in-depth textbook on scripting with arc.
 * Documentation tasks::         
 * Distribution tasks::          
 * Installation tasks::          
+* Automation tasks::
 * Task dictionary::             
 * Function dictionary::         
 * Index::                       
@@ -120,16 +121,19 @@ An in-depth textbook on scripting with arc.
 @node Distribution tasks, Installation tasks, Documentation tasks, Top
 @chapter Distribution tasks
 
-@node Installation tasks, Task dictionary, Distribution tasks, Top
+@node Installation tasks, Automation tasks, Distribution tasks, Top
 @chapter Installation tasks
 
-@node Task dictionary, Function dictionary, Installation tasks, Top
+@node Automation tasks, Task dictionary, Installation tasks, Top
+@chapter Automation tasks
+
+@node Task dictionary, Function dictionary, Automation tasks, Top
 @appendix Task dictionary
 
-@node Function dictionary, GNU Free Documentation License, Task dictionary, Top
+@node Function dictionary, Index, Task dictionary, Top
 @appendix Function dictionary
 
-@node Index,  , GNU Free Documentation License, Top
+@node Index,  , Function dictionary, Top
 @unnumbered Index
 
 @printindex cp
