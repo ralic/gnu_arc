@@ -12,7 +12,7 @@
 @set PROGNAME @command{arc}
 
 @ifinfo
-This file documents the @value{PROGNAME} command which is a build tool
+This file documents the @command{arc} command which is a build tool
 
 Copyright (C)  2002, 2003  Gregor Klinke.
 
@@ -64,9 +64,9 @@ Free Documentation License''.
 @node Top, Introduction, (dir), (dir)
 
 @ifinfo
-This manual documents how to install and run @value{PROGNAME} version
+This manual documents how to install and run @command{arc} version
 @value{VERSION}, a portable, extensible and scriptable build tool.
-@value{PROGNAME} is completely written in the algorithmic and
+@command{arc} is completely written in the algorithmic and
 functional language Scheme and build scripts, as scriptlets, are using
 a subset of Scheme, too.  Therefore this manual assumes a certain
 knowledge of this Scheme programming language.  However in normal
@@ -77,16 +77,16 @@ the "declarative" statements.
 @c All the menus can be updated with the EMACS command
 @c texinfo-all-menus-update, which is normally bound to C-c C-u C-a.
 @menu
-* Introduction::                Introduction. 
-* Tasks::                       Tasks.
-* Arc scheme::                  The arc scheme dialect.
-* Invoking arc::                How to run @value{PROGNAME}.
-* Extending::                   Extending @value{PROGNAME}.
-* Install::                     Installing @value{PROGNAME}.
-* Problems::                    Reporting bugs.
+* Introduction::                Introduction
+* Tasks::                       Tasks
+* Arc scheme::                  The arc scheme dialect
+* Invoking arc::                How to run @command{arc}
+* Extending::                   Extending @command{arc}
+* Install::                     Installing @command{arc}
+* Problems::                    Reporting bugs
 * Copying::                     Copyleft
-* Function Index::              Index of functions.
-* Concept Index::               Index of concepts.
+* Function Index::              Index of functions
+* Concept Index::               Index of concepts
 @end menu
 
 
@@ -2644,7 +2644,7 @@ stdout, and break to the next line by printing @samp{#\nl}.
 
 @c ====================================================================
 @node Invoking arc, Extending, Arc scheme, Top
-@chapter Invoking @value{PROGNAME}
+@chapter Invoking @command{arc}
 @cindex invoking
 @cindex version
 @cindex options
@@ -2652,13 +2652,13 @@ stdout, and break to the next line by printing @samp{#\nl}.
 @cindex help
 @cindex getting help
 
-The format for running the @value{PROGNAME} program is:
+The format for running the @command{arc} program is:
 
 @example
-@value{PROGNAME} @var{options} @var{statement}
+@command{arc} [@var{options}] @var{statement}
 @end example
 
-@value{PROGNAME} supports the following options:
+@command{arc} supports the following options:
 
 @table @samp
 @item -C @var{dir}
