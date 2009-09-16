@@ -2765,11 +2765,9 @@ etc.  Some linux distributions have SCM pre-packaged.@refill
 @item guile
 The GNU implementation of Scheme, originally based on SCM, but in the
 current version notably different.  Guile comes with an embeddable
-library and a standalone Scheme interpreter.  Both versions 1.3 and 1.4
-are tested (see @w{@url{http://www.gnu.org/software/guile}}).  Most GNU
-systems should have guile available nowadays, but also for non obvious
-systems, like BeOS, there are ports available (see
-@w{@url{http://www.bebits.com}}).@refill
+library and a standalone Scheme interpreter.  Currently only version
+1.8.x is tested (see
+@w{@url{http://www.gnu.org/software/guile}}).@refill
 
 @item ksi
 Another embeddable Scheme implementation from Russia, which comes with a
