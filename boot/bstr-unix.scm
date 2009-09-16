@@ -55,7 +55,7 @@
                   #\nl
                   "ARC_HOME=" %arc:src-dir% #\nl
                   "export ARC_HOME" #\nl
-                  "exec app/arc $*" #\nl)
+                  "exec `dirname $0`/app/arc $*" #\nl)
     (close-output-port port)
     (arc:sys 'chmod "../arc" #o755)) )
 
