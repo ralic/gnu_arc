@@ -9,8 +9,8 @@ Required:
 
       - scm (see: http://swissnet.ai.mit.edu/~jaffer/SCM.html)
 
-      - guile (see: http://www.gnu.org/software/guile); both versions 1.3
-        and 1.4 are tested
+      - guile (see: http://www.gnu.org/software/guile); only version >=
+        1.8.5 are tested currently
 
       - ksi (see: http://www.sourceforge.net/projects/ksi)
 
@@ -22,12 +22,14 @@ Required:
 
       i386/Linux Debian 2.2
       i386/Linux Debian 3.0
+      i386/Linux Debian 5.0
       i386/Windows 2000 with Cygwin
       i386/Windows 2000 with Mingw 2.1
       sparc/SunOS 5.8 with gcc
       alpha/Linux Debian 3.0
       BeOS 5.0/x86
       FreeBSD 5.0/x86
+      Mac OS X 10.5
 
 Installation:
 
@@ -66,17 +68,18 @@ Installation:
 Compatibility chart:
 
 The following chart gives the supported platforms.  Strictly this is only,
-what I've tested so far.  Development goes (moslty) parallel on Debian
-Linux, BeOS R5, FreeBSD, and Cygwin 5.  Please report any other successfull
-runs on different platforms.
+what I've tested so far.  Development goes (moslty) parallel on Max OS X
+and Linux.  Please report any other successfull runs on different
+platforms.
 
 x  = tested successfully
 () = untested/unknown
 N  = failed
 
-                        guile-1.3.4 guile-1.4  guile-1.6     asc     ksi
-GNU/Linux (Debian x86)                 x                      x       x
-FreeBSD (5.0 x86)                      x                      x       
-BeOS R5                                                       x
-Cygwin 5/Win2000                                 N            x
-SunOS 5.8 (Sparc)            x                                x
+                        guile-1.8.5   asc     ksi
+GNU/Linux (Debian x86)    x            x       x
+Max OS X (10.5)           x            x
+FreeBSD (5.0 x86)                      x       x       
+BeOS R5                                x
+Cygwin 5/Win2000                               x
+SunOS 5.8 (Sparc)                              x
