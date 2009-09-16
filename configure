@@ -431,7 +431,7 @@ case "$build" in
     asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF
-(cd asc; /bin/sh build-unix.sh)
+(cd asc; /bin/sh build-unix.sh $build)
 _ACEOF
     ;;
   Cygwin* | CYGWIN* )
