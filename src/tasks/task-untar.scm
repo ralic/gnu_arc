@@ -25,7 +25,7 @@
 
 ;; extract a (file) tar archive (using the gnu tar tool).  Returns a list
 ;; of all files extracted; if no file could be extracted returns the empty
-;; list ()
+;; list '()
 ;;
 ;; Keywords:
 ;; :tarfile STRING
@@ -52,12 +52,12 @@
 ;; a list of all extracted files and directories, if the extraction
 ;; succeeded.  The list is empty if the task failed. (STIRNG-LIST)
 
-(define arc:untar '((tarfile         string  required)
-                    (absolute-paths? boolean optional)
-                    (force?          boolean optional)
-                    (preserve-perm?  boolean optional)
-                    (outdir          string  optional)
-                    (zip-mode        symbol  optional)) )
+(define arc:untar-keywords '((tarfile         string  required)
+			     (absolute-paths? boolean optional)
+			     (force?          boolean optional)
+			     (preserve-perm?  boolean optional)
+			     (outdir          string  optional)
+			     (zip-mode        symbol  optional)) )
 
 (define (arc:untar props body)
   (let* ((tfn* (arc:aval 'tarfile props ""))
@@ -71,7 +71,7 @@
          (tfn (if outdir
                   (arc:path->string (arc:path-append (arc:string->path olddir) tfn*))
                   tfn*))
-         (retv ()) )
+         (retv '()) )
     
     (if (= (string-length tfn) 0)
 	(arc:log 'fatal "invalid tar-file name"))
@@ -121,14 +121,14 @@
                     (arc:sys 'chdir olddir)) ))))
     retv))
 
-(arc:register-task 'untar arc:tar arc:tar-keywords)
+(arc:register-task 'untar arc:untar arc:untar-keywords)
 
 
 
 (define (arc:-tar-read-list-of-extracted-files fn)
   (let* ((port (open-input-file fn))
          (cwd (arc:path-cwd))
-         (retv ()))
+         (retv '()))
     (do ((ln (arc:readline port) (arc:readline port)))
         ((eof-object? ln) #t)
       (set! retv (append retv 
