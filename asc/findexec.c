@@ -43,6 +43,7 @@ Wed Feb 21 23:06:35 1996  Aubrey Jaffer  <jaffer@jacal.bertronics>
 #  include <sys/param.h>
 # endif
 # ifdef linux
+#  include <string.h>
 #  include <stdlib.h>
 #  include <sys/stat.h>
 #  include <unistd.h>     /* for X_OK define */

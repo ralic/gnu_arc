@@ -41,8 +41,6 @@
 
 #ifndef _asc_scmfig_h
 #define _asc_scmfig_h
-#define SHORT_INT
-#define CDR_DOUBLES
 
 /* "scmfig.h" system-dependent configuration.
    Author: Aubrey Jaffer */
