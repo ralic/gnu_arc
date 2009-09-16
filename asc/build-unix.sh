@@ -8,9 +8,22 @@ echo "#define ARC_HOME \"$ASC_HOME\"" > scmenv.h
 echo "#define IMPLINIT \"$ASC_HOME/asc-init.scm\"" >> scmenv.h
 echo "#define INIT_FILE_NAME \"asc-init.scm\"" >> scmenv.h
 
+case "$1" in
+    Linux)
+	CFLAGS=-Dlinux
+	;;
+    FreeBSD)
+	CFLAGS=-D__FreeBSD__
+	;;
+    Darwin)
+	;;
+    *)
+esac
+
+
 # Compile C source files
 echo "Compiling asc source files ..."
-cc -O -c ioext.c continue.c scm.c scmmain.c findexec.c script.c time.c repl.c scl.c eval.c sys.c subr.c debug.c unif.c rope.c
+cc $CFLAGS -O -c ioext.c continue.c scm.c scmmain.c findexec.c script.c time.c repl.c scl.c eval.c sys.c subr.c debug.c unif.c rope.c
 
 # Link C object files
 echo "Linking asc ..."
