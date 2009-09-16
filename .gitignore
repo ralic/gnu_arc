@@ -1,0 +1,15 @@
+/app/
+/asc/asc
+/asc/*.o
+/asc/scmenv.h
+/bootstrap.sh
+/doc/arc.1
+/doc/arc.texinfo
+/doc/arc.txt
+/doc/arc.info
+/doc/*~
+/arc.config
+/arc
+/src/config.scm
+/src/version.scm
+/.arc
