@@ -70,7 +70,7 @@
                              (arc:log 'info "filter: no destination file given")
                              #f)))))
          (force (arc:aval 'force? props #t))
-         (values (arc:aval 'values props ())) 
+         (values (arc:aval 'values props '())) 
          (really-do #f)
          (retv #f))
     

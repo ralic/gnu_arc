@@ -91,7 +91,8 @@
   (let* ((outdir (arc:aval 'outdir props #f))
          (<backend> ((arc:handler-factory %arc:sysnm% 'task-c-compile) 'alloc))
          (cflags (string-append 
-                  "" (arc:string-list->string* (arc:aval 'flags props ())
+                  "" (arc:string-list->string*
+                      (arc:aval 'flags props '())
                                                " ")
                   " "
                   (if (arc:aval 'debug? props #f) 
@@ -104,7 +105,8 @@
                   " "                  
                   (<backend> 'warn-level-flag 
                              (arc:aval 'warn-level props #f))))
-         (sources (arc:-prepare-c-source-list (arc:aval 'sources props ())))
+         (sources (arc:-prepare-c-source-list
+                   (arc:aval 'sources props '())))
          (depends (arc:aval 'depends props #f)) 
          (av (arc:attrval)) )
     
@@ -116,7 +118,8 @@
                (lambda (av-slot av-slot2 objext cfl)
                  (let* ((on (<backend> 'make-objfile-name fn outdir objext))
                         (cincls (arc:string-list->string* 
-                                 (arc:aval 'includes props ()) " -I")))
+                                 (arc:aval 'includes props '())
+                                 " -I")))
                    
                    (let ((vv (arc:attrval-ref av av-slot) ))
                      (if vv
@@ -131,8 +134,8 @@
                    
                    (if (arc:deps-c-needs-recompile? depends
                                                     fn on 
-                                                    (arc:aval 'includes props ())
-                                                    (arc:aval 'flags props ())
+                                                    (arc:aval 'includes props '())
+                                                    (arc:aval 'flags props '())
                                                     objext
                                                     outdir)
                        (begin
@@ -171,7 +174,9 @@
                   (arc:call-task 'c-deps
                                  (list 'sources (list sfile)
                                        'objext objext
-                                       'outdir (if outdir outdir ())
+                                       'outdir (if outdir 
+                                                   outdir
+                                                   '())
                                        'includes incl
                                        'flags flags)
                                  #f) )))
@@ -209,9 +214,9 @@
       (if (and x
                (list? x))
           x
-          ())))
+          '())))
    (else
-    ())))
+    '())))
 
 (arc:register-task 'c-compile arc:c-compile arc:c-compile-keywords)
 

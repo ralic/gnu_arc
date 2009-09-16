@@ -62,7 +62,7 @@
                    (list 'dir dist-dir)
                    #f)
     (arc:call-task 'copy
-                   (list 'files (arc:aval 'files props ())
+                   (list 'files (arc:aval 'files props '())
                          'todir dist-dir
                          'force? #t)
                    #f)
@@ -78,7 +78,7 @@
                    #f)
 ;;; @old
 ;    (arc:mkdir ':dir dist-dir)
-;    (arc:copy ':files (arc:aval ':files props ())
+;    (arc:copy ':files (arc:aval ':files props '())
 ;              ':todir dist-dir
 ;              ':force? #t)
     

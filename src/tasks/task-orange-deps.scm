@@ -31,8 +31,10 @@
   (let* ((cext "c")
          (outdir (arc:aval 'outdir props "."))
          (catalog (arc:aval 'catalog props #f))
-         (flags (arc:string-list->string* (arc:aval 'flags props ()) " "))
-         (sources (arc:aval 'sources props ())) )
+         (flags (arc:string-list->string* (arc:aval 'flags 
+						    props '())
+					  " "))
+         (sources (arc:aval 'sources props '())) )
     (map
      (lambda (src)
        (let ((target (arc:make-orange-cfile src outdir cext)))

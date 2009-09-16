@@ -73,7 +73,7 @@
   (let ((ll (length path)))
     (if (> ll 0)
         (arc:sublist path 0 (- (length path) 1))
-        ())))
+        '())))
 
 (define (arc:path-append path comp)
   (if (list? comp)
@@ -86,7 +86,7 @@
         (append (arc:sublist path 0 (- ll 1))
                 (list (string-append (car (list-tail path (- ll 1)) )
                                      (string %arc:ext-sep%) ext)))
-        ())))
+        '())))
 
 (define (arc:path-replace-last-ext path ext)
   (arc:path-append-ext (arc:path-without-last-ext path) ext))
@@ -95,7 +95,7 @@
   (let ((ll (length path)))
     (if (> ll 0)
         (list-tail path (- ll 1))
-        ())))
+        '())))
 
 (define (arc:path-ext path)
   (let ((ll (length path)))
@@ -155,7 +155,7 @@
 
 ;; normalizes a path by removing and resolving all ".." and "." parts.
 (define (arc:path-normalize path)
-  (let loop ((res ())
+  (let loop ((res '())
              (pc path))
     (if (null? pc)
         res

@@ -16,7 +16,7 @@
 
 ;;  Make a attrval
 (define (arc:attrval)
-  (vector ':attrval #f ()))
+  (vector ':attrval #f '()))
 
 (define (arc:attrval? av)
   (and (vector? av)

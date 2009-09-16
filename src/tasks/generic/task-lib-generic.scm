@@ -145,7 +145,7 @@
      ;; #4: a list of library to look into for 
      ;;     dependency libs
      ;; #5: a list of libraries the shared library depends 
-     ;;     on (or () if not needed)
+     ;;     on (or '() if not needed)
      ;; #6: rpath
      (make-shared-lib ,arc:<lib-generic>-make-share-lib)
      )))

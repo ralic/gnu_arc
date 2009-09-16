@@ -33,7 +33,7 @@
         (loop (cons init answer) (- n 1)))))
 
 (define (arc:sublist x b e)
-  (let loop ((res ())
+  (let loop ((res '())
              (xx x)
              (cc 0))
     (if (or (null? xx) (>= cc e))
@@ -132,7 +132,7 @@
       #f))
 
 (define (arc:aval->mlist alist)
-  (let loop ((res ())
+  (let loop ((res '())
              (x alist))
     (if (null? x)
         res
@@ -148,7 +148,7 @@
 
 ;; reads a complete line from a port
 (define (arc:readline port)
-  (let* ((res ())
+  (let* ((res '())
          (cc (read-char port)))
     (if (eof-object? cc)
         cc
@@ -166,7 +166,7 @@
 
 
 (define (arc:list->alist . vals)
-  (let loop ((res ())
+  (let loop ((res '())
              (v vals))
     (if (or (null? v)
             (null? (cdr v)))

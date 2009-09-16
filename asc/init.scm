@@ -263,7 +263,7 @@
                     ((asc:string-prefix? (car arg) "-") cadr)
                     (else #f))) )
         (set! *asc:optind* (+ *asc:optind* 1))
-        (set! *asc:optarg* ())
+        (set! *asc:optarg* '())
         (set! *asc:optopt* (car arg))
         (if cmpf
             (let loop ((t table))

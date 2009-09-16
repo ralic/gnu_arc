@@ -25,7 +25,7 @@
 
 ;; this list contains pairs of paths and methods to be removed on a clean
 ;; run (see next description)
-(define %arc:build-resources% ())
+(define %arc:build-resources% '())
 
 ;; registers a new path on the list of cleanable elements.  Method
 ;; describes how to interpret the path information.  It could be on of the
@@ -67,7 +67,7 @@
                  
 (define (arc:-clean-recursive-clean root path)
   (let* ((rp (arc:string->path path))
-         (dl ()) )
+         (dl '()) )
     (arc:traverse-dir 
      root
      (lambda (kind fn)

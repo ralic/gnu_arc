@@ -47,7 +47,7 @@
             (arc:string->path 
              (if (arc:context-script-home (arc:context-current))
                  (arc:context-script-home (arc:context-current))
-                 ()))
+                 '()))
             ".arc")))
     (if (arc:sys 'file-exists? (arc:path->string p))
         p
@@ -61,7 +61,7 @@
             (arc:string->path 
              (if (arc:context-script-home (arc:context-current))
                  (arc:context-script-home (arc:context-current))
-                 ()))
+                 '()))
             (arc:string->path %arc:deps-directory%))))
     (if (arc:sys 'file-exists? (arc:path->string p))
         p
@@ -289,7 +289,7 @@
 (define (arc:parse-make-deps-file fn)
   (let* ((port (open-input-file fn))
          (state 'pre-ws)
-         (buf ())
+         (buf '())
          (deps (arc:make-deps ""))
          )
     (do ((c (read-char port) (read-char port)))
@@ -305,7 +305,7 @@
                            (set! state 'targ-ws)
                            (arc:deps-set-target! deps 
                                                  (list->string (reverse buf)))
-                           (set! buf ())))
+                           (set! buf '())))
                   (else (set! buf (cons c buf)))))
         ((targ-ws) (case c
                      ((#\space #\nl #\tab #\cr) 'ignore)
@@ -317,7 +317,7 @@
                   (begin
                     (set! state 'ws)
                     (arc:deps-set-deps! deps (list->string (reverse buf)))
-                    (set! buf ())))
+                    (set! buf '())))
                  (else (set! buf (cons c buf)))))
         ((ws) (case c
                 ((#\space #\nl #\tab #\cr) 'ignore)

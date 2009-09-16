@@ -63,7 +63,7 @@
       (arc:stmt-value (arc:find-stmt stmt-id))
       ;; otherwise evaluate it and return it's value
       (let ((stmt (arc:find-stmt stmt-id %arc:eval-os%))
-	    (retval ()))
+	    (retval '()))
         (if (not stmt)
             (begin
               (arc:log 'error 
@@ -146,7 +146,7 @@
 ;; the (stmt) dependency machinery
 ;; ----------------------------------------------------------------------
 ;; this is a member list of all stmt ids yet evaluated
-(define %arc:stmts-yet-evaluated% ())
+(define %arc:stmts-yet-evaluated% '())
 
 (define (arc:stmt-evaluated-yet? id)
   (if (member id %arc:stmts-yet-evaluated%) #t #f))

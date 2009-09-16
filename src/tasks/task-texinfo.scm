@@ -77,7 +77,7 @@
          (destnm (case format
                    ((html) (arc:aval 'dest props #f))
                    (else #f)))
-         (retv ()))
+         (retv '()))
     
     (arc:log 'debug "texinfo (" format ")... " srcnm)
     
@@ -125,7 +125,7 @@
 ;; find all xxx.info files in the current working directory
 (define (arc:-texi-format-info-find-info-files dirnp pattern)
   (let ((dp (arc:sys 'opendir "."))
-        (retv ()))
+        (retv '()))
     (do ((fn (arc:sys 'readdir dp) (arc:sys 'readdir dp)))
         ((not fn) 'done)
       (if (arc:string-prefix? fn pattern)

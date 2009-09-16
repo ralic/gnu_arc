@@ -16,7 +16,7 @@
 
 ;; splits a string into its tokens divided by a separator
 (define (arc:split-string str sep)
-  (let* ((res ())
+  (let* ((res '())
          (strl (string-length str)))
     (let loop ((lp 0) (cp 0))
       (if (>= cp strl)

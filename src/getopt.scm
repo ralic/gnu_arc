@@ -43,7 +43,7 @@
                     ((arc:string-prefix? (car arg) "-") cadr)
                     (else #f))) )
         (set! *arc:optind* (+ *arc:optind* 1))
-        (set! *arc:optarg* ())
+        (set! *arc:optarg* '())
         (set! *arc:optopt* (car arg))
         (if cmpf
             (let loop ((t table))

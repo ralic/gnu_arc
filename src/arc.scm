@@ -25,7 +25,7 @@
 (define arc:config-name #f)
 (define arc:current-stmt #f)
 (define %arc:find-script-rec% #f)
-(define %arc:start-dir% ())
+(define %arc:start-dir% '())
 (define %arc:keep-going-on-errors% #f)
 (define %arc:show-infos-only% #f)
 

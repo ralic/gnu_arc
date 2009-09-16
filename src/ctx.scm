@@ -30,7 +30,7 @@
 ;;            <id>)
 ;; ----------------------------------------------------------------------
 ;; the current context root; create the default context
-(define %arc:contexts% ())
+(define %arc:contexts% '())
 
 (define %ARC:STMT-SLOT% 1)
 (define %ARC:META-SLOT% 2)
@@ -45,10 +45,10 @@
 ;; creating and stacking contexts
 ;; ----------------------------------------------------------------------
 (define (arc:make-context id)
-  (let ((ctx (make-vector 4 ())))
+  (let ((ctx (make-vector 4 '())))
     (vector-set! ctx 0 ':context)
-    (vector-set! ctx %ARC:STMT-SLOT% ()) ; the properties (alist of property)
-    (vector-set! ctx %ARC:META-SLOT% ()) ; meta info
+    (vector-set! ctx %ARC:STMT-SLOT% '()); the properties (alist of property)
+    (vector-set! ctx %ARC:META-SLOT% '()); meta info
     (vector-set! ctx %ARC:ID-SLOT% id)   ; the id
     ctx))
 
@@ -223,9 +223,9 @@
 
 (define (arc:make-stmt id)
   (let ((s (cons id (make-vector 4))))
-    (vector-set! (cdr s) %ARC:STMT-DEPS-SLOT% ())
-    (vector-set! (cdr s) %ARC:STMT-VAL-SLOT% ())
-    (vector-set! (cdr s) %ARC:STMT-META-SLOT% ())
+    (vector-set! (cdr s) %ARC:STMT-DEPS-SLOT% '())
+    (vector-set! (cdr s) %ARC:STMT-VAL-SLOT% '())
+    (vector-set! (cdr s) %ARC:STMT-META-SLOT% '())
     (vector-set! (cdr s) %ARC:STMT-BODY-SLOT% #f)
     s))
 
@@ -348,7 +348,7 @@
 ;; situation (statements from sub-loaded scripts override statements
 ;; from parent scripts)
 (define (arc:context-all-stmt ctx)
-  (let loop ((res ())
+  (let loop ((res '())
              (mq %arc:contexts%))
     (if (null? mq)
         res

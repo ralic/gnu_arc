@@ -30,11 +30,14 @@
   (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-c-deps) 'alloc))
          (objext (arc:aval 'objext props (<backend> 'objfile-ext)))
          (outdir (arc:aval 'outdir props "."))
-         (cincs (arc:string-list->string* (arc:aval 'includes props ()) 
+         (cincs (arc:string-list->string*
+                 (arc:aval 'includes props '()) 
                                           " -I"))
-         (cflags (arc:string-list->string* (arc:aval 'flags props ())
+         (cflags (arc:string-list->string*
+                  (arc:aval 'flags props '())
                                            " "))
-         (sources (arc:-prepare-c-source-list (arc:aval 'sources props ()))))
+         (sources (arc:-prepare-c-source-list 
+                   (arc:aval 'sources props '()))))
     (map
      (lambda (src)
        (let ((target (<backend> 'make-objfile-name src outdir objext)))

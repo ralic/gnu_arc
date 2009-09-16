@@ -91,7 +91,7 @@
 (define (arc:link props body)
   (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-link) 'alloc))
          (shared (arc:aval 'shared? props #t))
-         (files* (arc:aval 'files props ()))
+         (files* (arc:aval 'files props '()))
          (files (if (arc:attrval? files*)
                     (if shared
                         (arc:attrval-ref files* 'shared-objs)
@@ -103,12 +103,12 @@
          (autolibdirs (if (arc:attrval? files*)
                           (arc:attrval-ref files* 'dep-lib-dirs)
                           #f))
-         (libs (arc:aval 'libs props ())) 
+         (libs (arc:aval 'libs props '())) 
          (appext (arc:aval 'appext props (<backend> 'app-ext)))
          (appnm (arc:aval 'appnm props ""))
          (outdir (arc:aval 'outdir props #f))
          (nostdlib (arc:aval 'nostdlib? props #f))
-         (libdirs (arc:aval 'libdirs props ())) 
+         (libdirs (arc:aval 'libdirs props '())) 
          (rpath (arc:aval 'rpath props #f))
 
          (local-exec-outdir (if shared

@@ -42,7 +42,7 @@
       (arc:throw 'internal "arc:keyword->symbol: not-a-keyword (" keyw ")")))
 
 (define (arc:get-keywords expr)
-  (let loop ((res ())
+  (let loop ((res '())
              (k expr))
     (if (null? k)
         res
@@ -52,13 +52,13 @@
                   
                   (if (not (null? (cdr k) ))
                       (cddr k)
-                      ()))
+                      '()))
             res))))
 
 ;; returns the keywords of a argument list seperated from the body in a
 ;; cons.  The car of the pair is the paramterlist, the cdr the body
 (define (arc:get-keywords-and-body expr)
-  (let loop ((res ())
+  (let loop ((res '())
              (k expr))
     (if (null? k)
         (cons res k)
@@ -68,7 +68,7 @@
                   
                   (if (not (null? (cdr k) ))
                       (cddr k)
-                      ()))
+                      '()))
             (cons res k)))))
 
 ;; ----------------------------------------------------------------------
@@ -115,7 +115,7 @@
 ;;  (:pattern string (opt-xor :set)))
 
 (define (arc:compile-key-list table keys task-name)
-  (let ((rx (let loop ((res ())
+  (let ((rx (let loop ((res '())
                        (key keys))
               (if (null? key)
                   res
@@ -134,7 +134,7 @@
                                                       nextval)))
                               (if (not (null? (cdr key) ))
                                   (cddr key) 
-                                  ())))))) ))
+                                  '())))))) ))
     (if (not rx)
         #f
         (let loop2 ((retv rx)

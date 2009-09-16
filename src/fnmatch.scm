@@ -17,7 +17,7 @@
 (define (arc:scan-dir-with-pattern root-path pattern)
   (let* ((cwd (arc:sys 'getcwd))
          (p1 (arc:string->path pattern))
-         (retv ()))
+         (retv '()))
     (arc:traverse-dir (arc:path->string root-path)
                       (lambda (kind fn)
                         (let ((e (arc:path-abbreviate fn)))

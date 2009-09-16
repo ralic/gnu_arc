@@ -109,25 +109,25 @@
                               #f))
 
 ;;; @old                                         
-;               (arc:c-compile ':sources (arc:aval ':sources props ())
+;               (arc:c-compile ':sources (arc:aval ':sources props '())
 ;                              ':debug? (arc:aval ':debug? props #f)
 ;                              ':ansi? (arc:aval ':ansi? props #f)
 ;                              ':signed-char? (arc:aval ':signed-char? props #f)
 ;                              ':warn-level (arc:aval ':warn-level props 'high)
 ;                              ':opt-level (arc:aval ':opt-level props 'medium)
-;                              ':flags (arc:aval ':flags props ())
-;                              ':includes (arc:aval ':includes props ())
+;                              ':flags (arc:aval ':flags props '())
+;                              ':includes (arc:aval ':includes props '())
 ;                              ':outdir (arc:aval ':outdir props #f)
 ;                              ':objext (arc:aval ':objext props "o")
 ;                              ':sobjext (arc:aval ':sobjext props "lo")
 ;                              ':shared? (arc:aval ':shared? props #f)
 ;                              ':static? (arc:aval ':static? props #t)
-;                              ':depends (arc:aval ':depends props ())))
+;                              ':depends (arc:aval ':depends props '())))
          (arc:attrval-set! av 'dep-libs %arc:objc-gcc-libs%)
          av))
       (else (begin
               (arc:log 'error "unknown objective C compiler")
-              () ))) ))
+              '() ))) ))
 
 (arc:register-task 'objc-compile arc:objc-compile arc:objc-compile-keywords)
 

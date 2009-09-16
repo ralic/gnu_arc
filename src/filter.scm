@@ -28,14 +28,14 @@
   (let* ((port (open-input-file in-file))
          (out (open-output-file out-file))
          (state 'copy-pass) 
-         (key ()))
+         (key '()))
     (do ((c (read-char port) (read-char port)))
         ((eof-object? c) 'done)
       (case state
         ((copy-pass) (if (eq? c sepc)
                          (begin
                            (set! state 'parse-key)
-                           (set! key ()))
+                           (set! key '()))
                          (write-char c out)))
         ((parse-key) (if (eq? c sepc)
                          (let* ((k (list->string (reverse key)))

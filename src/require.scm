@@ -17,7 +17,7 @@
 ;; ----------------------------------------------------------------------
 ;; require/provide
 ;; ----------------------------------------------------------------------
-(define arc:provide-list ())
+(define arc:provide-list '())
 
 (define (arc:load script)
   (let ((p (arc:string->path script)))

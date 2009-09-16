@@ -82,7 +82,7 @@
                            (libdirs      strlist           optional)
                            (addlibs      strlist           optional)) )
 (define (arc:lib props body)
-  (let* ((files* (arc:aval 'files props ()))
+  (let* ((files* (arc:aval 'files props '()))
          (libnm (arc:aval 'libnm props ""))
          (outdir (arc:aval 'outdir props #f))
          (av (arc:attrval)) 
@@ -137,8 +137,8 @@
                 
                   (<backend> 'make-shared-lib 
                              realnm int-soname files
-                             (arc:aval 'libdirs props ())
-                             (arc:aval 'addlibs props ())
+                             (arc:aval 'libdirs props '())
+                             (arc:aval 'addlibs props '())
                              (arc:aval 'rpath props #f))
 
                   ;; create additional links for this library (i.e. the

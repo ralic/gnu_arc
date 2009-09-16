@@ -14,7 +14,7 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(define arc:handlers ())
+(define arc:handlers '())
 
 ;; this function returns an handler class for a given task specialized for
 ;; a system.  Class handlers have to register themselves by registering
@@ -40,7 +40,7 @@
           <arc:object>))))
 
 (define (arc:load-handler-class proc)
-  (apply proc ()))
+  (apply proc '()))
 
 (define (arc:register-handler system task handler-class)
   (let ((aval (assoc task arc:handlers)))

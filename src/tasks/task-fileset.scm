@@ -77,7 +77,7 @@
                                      (arc:path-cwd))
                                  pattern))
      ((list? pattern)
-      (let loop ((retv ())
+      (let loop ((retv '())
                  (p pattern))
         (if (null? p)
             retv
@@ -93,7 +93,7 @@
      
      ((list? files) files)
      ((string? files) (list files))
-     (else ()))))
+     (else '()))))
 
 
 (arc:register-task 'fileset arc:fileset arc:fileset-keywords)

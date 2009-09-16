@@ -68,7 +68,7 @@
        (let* ( (pn (arc:string->path fn))
 	       (jflags (string-append 
 			"" (arc:string-list->string* (arc:aval 'flags 
-                                                               props ())
+                                                               props '())
                                                      " ")
 			" "
 			(if (arc:aval 'deprecation? props #f)
@@ -83,7 +83,7 @@
 
 	 (arc:-compile-java-file fn
 				 (arc:-build-java-classpath
-				  (arc:aval 'classpath props ()))
+				  (arc:aval 'classpath props '()))
 				 jflags)
 
          ;; TODO: this doesn't work as this simple.  Javac puts it class
@@ -100,7 +100,7 @@
                                 pn) "class"))
              (arc:path->string (arc:path-replace-last-ext pn "class"))))
        )
-     (arc:aval 'sources props ())) ))
+     (arc:aval 'sources props '())) ))
 
 (arc:register-task 'java-compile arc:java-compile arc:java-compile-keywords)
 

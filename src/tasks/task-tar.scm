@@ -56,7 +56,7 @@
                            (zip-mode        symbol  optional)) )
 (define (arc:tar props body)
   (let* ((tfn (arc:aval 'tarfile props ""))
-	 (files (arc:aval 'files props ()))
+	 (files (arc:aval 'files props '()))
          (force (arc:aval 'force? props #t))
 	 (deref (arc:aval 'deref-symlinks? props #f))
          (absp (arc:aval 'absolute-paths? props #f))

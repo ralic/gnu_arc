@@ -39,7 +39,7 @@
                              (res strlist required)) )
 
 (define (arc:clean props body)
-  (let* ((res (arc:aval 'res props ())) 
+  (let* ((res (arc:aval 'res props '())) 
          (dir (arc:aval 'dir props 
                         (arc:context-basedir (arc:context-current)))) )
     

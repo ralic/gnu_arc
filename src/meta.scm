@@ -174,7 +174,7 @@
                                          (depends (symbol list) optional))
                                        (car keys-body)
                                        (symbol->string id)))
-         (deps ())
+         (deps '())
          (bad #f)
          (scope (if props*
                     (case (arc:aval 'scope props* 'public)
@@ -187,7 +187,7 @@
                                        "statement '" id "'")
                               'public)))
                     'local))
-         (props ()))
+         (props '()))
 
     (if props*
         (begin
@@ -219,9 +219,9 @@
 ;; --------------------------------------------------------------------
 ;; evaluation of the meta scheme
 ;; --------------------------------------------------------------------
-(define %arc:frames% ())
+(define %arc:frames% '())
 (define (arc:make-frame)
-  (cons ':frame ()))
+  (cons ':frame '()))
 
 (define (arc:bind-var-to-frame frame name value)
   (set-cdr! frame (append (cdr frame) (list (cons name value)))))
@@ -249,7 +249,7 @@
 ;; -- and last but not least limit and prescribe the available functions
 (define (arc:eval-arc expr)
   (cond 
-   ((null? expr) ())
+   ((null? expr) '())
    ((list? expr) 
     (case (car expr)
       ((quote) (cadr expr))
@@ -516,7 +516,7 @@
                                   (arc:eval-arc (car x)))))) )
          ;; make argument list
          (args (let arg-loop ((a (car expr))
-                              (retv ()))
+                              (retv '()))
                  (if (null? a)
                      retv
                      (arg-loop (cdr a)
@@ -573,7 +573,7 @@
 ;; ----------------------------------------------------------------------
 ;; task registry
 ;; ----------------------------------------------------------------------
-(define arc:tasks ())
+(define arc:tasks '())
 
 (define (arc:register-task task-name proc keyword-table)
   (let ((aval (assoc task-name arc:tasks)))

@@ -41,12 +41,12 @@
   (let* ((outdir (arc:aval 'outdir props #f))
          (catalog (arc:aval 'catalog props #f))
          (oflags (string-append 
-                  (arc:string-list->string* (arc:aval 'flags props ()) " ")
+                  (arc:string-list->string* (arc:aval 'flags props '()) " ")
                   " "
                   (if catalog
                       (string-append "-C" catalog " ")
                       "")))
-         (sources (arc:aval 'sources props ()))
+         (sources (arc:aval 'sources props '()))
          (depends (arc:aval 'depends props #f)) 
          (av (arc:attrval)) )
     
@@ -56,7 +56,7 @@
      (lambda (fn)
        (let* ((cn (arc:make-orange-cfile fn outdir "c"))
               (cincls (arc:string-list->string* 
-                       (arc:aval 'includes props ()) " -I")))
+                       (arc:aval 'includes props '()) " -I")))
          
          (let ((vv (arc:attrval-ref av 'c-source) ))
            (if vv
@@ -88,7 +88,9 @@
                     (if va (list va) #f))
                   (arc:call-task 'orange-deps
                                  (list 'sources (list sfile)
-                                       'outdir (if outdir outdir ())
+                                       'outdir (if outdir 
+                                                   outdir
+                                                   '())
                                        'catalog catalog )
                                  #f) )))
     (if (not (list? deps))

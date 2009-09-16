@@ -63,7 +63,7 @@
                             (self 'app-ext)))
                 (od (if outdir 
                         (arc:string->path outdir) 
-                        ()))
+                        '()))
                 (ap (if (and appext
                              (> (string-length appext) 0))
                         (arc:path-replace-last-ext (arc:string->path appnm) 

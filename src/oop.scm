@@ -29,7 +29,7 @@
                                     vars)
                                (if (not (null? super-class))
                                    (super-class 'slots)
-                                   ())))
+                                   '())))
            (methods the-methods)
            (self (lambda (msg . prms)
                    (case msg
@@ -82,7 +82,7 @@
                                    (display msg) (newline)
                                    #f)
                                  (let* ((methl (cls 'methods))
-                                        (m (assoc msg (or methl ()))))
+                                        (m (assoc msg (or methl '()))))
                                    (if (and m
                                             (procedure? (cadr m)))
                                        (apply (cadr m) (cons self prms))
@@ -91,7 +91,7 @@
 
 (define <arc:object>
   (arc:make-class '<arc:object>
-                  ()          ; super class
+                  '()         ; super class
                   '()         ; slots
                   `((isa? ,(lambda (self a-class)
                              (and (arc:class? a-class)
