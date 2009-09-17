@@ -1958,12 +1958,11 @@ would be possible.
 @deffn {Task} fileset args
 
 This task is used to build lists of file(names).  To achieve this, one
-gives any number of directory and file patterns, which are matches
-against a given working directory.  The list so returned can be used
-in all places where lists of files or directories are requested by
-other tasks.
+gives any number of directory and file patterns, which are matched
+against a given working directory.  The list returned can be used in all
+places where lists of files or directories are requested by other tasks.
 
-Pattern use the following syntax:
+The pattern use the following syntax:
 
 @enumerate 
 @item
@@ -1982,11 +1981,11 @@ filenames can be matched either by @samp{*} (which matches any
 filename), by @samp{*SUFFIX}, which matches any files ending in
 @code{SUFFIX}, or by @samp{(REGEXP)}, a regular expression.  Note that
 regular expressions must be included in parenthesis.  Regular
-expressions are much slower than the suffix matching, which is enough
-in most cases.
+expressions are much slower than the suffix matching, however.
 @end enumerate
 
 Therefore the following patterns are valid patterns:
+
 @example
 de/mycomp/myproject/*.java
 *.c
@@ -2010,18 +2009,27 @@ directory.
 @item pattern: @var{string} | @var{string-list}
 Gives a simple pattern or a list of pattern to match against file
 names.  For the allowed patterns see above.
+
+@item exclude: @var{string} | @var{string-list}
+Gives a simple file name or a list of file names which should not be
+part of the resulting file list.
+
+@item files: @var{string} | @var{string-list}
+Explicitely gives a list of files names.
 @end table
 
 This task returns a list of all matched files.  If no file matches the
 returned list is empty.
 
-Example:
+Examples:
 @example
 (fileset pattern: '("asc/*.o"
                     "asc/asc"
                     "test/_build"
                     "*.tar.gz"))
 (fileset pattern: "src/**/*.scm")
+(fileset pattern: "src/*.h"
+         exclude: "src/version.h")
 @end example
 
 @end deffn
