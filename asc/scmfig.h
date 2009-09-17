@@ -344,6 +344,11 @@ rgx.c	init_rgx();	regcomp and regexec. */
 # define LACK_SBRK
 #endif
 
+#ifdef WordSize_64
+#define SHORT_INT
+#define CDR_DOUBLES
+#endif
+
 /* PROMPT is the prompt string printed at top level */
 
 #ifndef PROMPT

@@ -20,10 +20,25 @@ case "$1" in
     *)
 esac
 
-
+case "$2" in
+    i386)
+	ARCH="-DWordSize_32 -DByteOrder_LE"
+	;;
+    x86_64)
+	ARCH="-DWordSize_64 -DByteOrder_LE"
+	;;
+    ppc)
+	ARCH="-DWordSize_32 -DByteOrder_BE"
+	;;
+    ppc64)
+	ARCH="-DWordSize_64 -DByteOrder_BE"
+	;;
+    *)
+esac
+    
 # Compile C source files
-echo "Compiling asc source files ..."
-cc $CFLAGS -O -c ioext.c continue.c scm.c scmmain.c findexec.c script.c time.c repl.c scl.c eval.c sys.c subr.c debug.c unif.c rope.c
+echo "Compiling asc source files ... ($CFLAGS $ARCH)"
+cc $CFLAGS $ARCH -O -c ioext.c continue.c scm.c scmmain.c findexec.c script.c time.c repl.c scl.c eval.c sys.c subr.c debug.c unif.c rope.c
 
 # Link C object files
 echo "Linking asc ..."

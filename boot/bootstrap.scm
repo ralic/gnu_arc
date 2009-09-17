@@ -33,12 +33,14 @@
 (load "../src/logical.scm")
 
 (define %arc:system% "")
+(define %arc:arch% "")
 (define %arc:path% "")
 (define %arc:prefix% "/usr")
 (define %arc:exec% "")
 (define %arc:impl% "")
 
 (define arc:opts '((sys "-s" "--sys" #t "the system name")
+		   (arch "-a" "--arch" #t "the system architecture")
                    (pfx "-P" "--prefix" #t "the installation prefix")
                    (path "-p" "--path" #t "the arc home path (e.g. /usr/local/share/arc)")
                    (impl "-i" "--impl" #t "the scheme implementation")
@@ -50,6 +52,7 @@
       (begin
         (case opt
           ((sys) (set! %arc:system% *arc:optarg*))
+	  ((arch) (set! %arc:arch% *arc:optarg*))
           ((path) (set! %arc:path% *arc:optarg*))
           ((pfx) (set! %arc:prefix% *arc:optarg*))
           ((exec) (set! %arc:exec% *arc:optarg*))
@@ -64,7 +67,7 @@
                   (arc:msg "unknown option: " opt))))
         (loop (arc:getopt %arc:argv% arc:opts)))))
 
-(define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f #f #f ))
+(define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f %arc:arch% #f ))
 
 (define %arc:home% "../src")
 (load "../src/oop.scm")

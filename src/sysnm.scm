@@ -15,19 +15,21 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (define arc:uname-s-matrix
-  '((("linux") linux)
+  '((("linux")                  linux)
     (("bsd" "freebsd" "ultrix") bsd)
-    (("win32") win32)
-    (("osx" "darwin") darwin)
-    (("beos") beos)
-    (("sunos" "solaris") sunos)
+    (("win32")                  win32)
+    (("osx" "darwin")           darwin)
+    (("beos")                   beos)
+    (("sunos" "solaris")        sunos)
     (("CYGWIN_NT-5.0" "cygwin") cygwin)))
 (define arc:uname-m-matrix
   '((("i386" "i486" "i586" "i686") ix86)
-    (("ppc") ppc)
-    (("alpha" "21064") alpha)
-    (("mk68k" "amiga") m68k)
-    (("sparc" "usparc") sparc)))
+    (("x86_64")                    x86_64)
+    (("ppc")                       ppc)
+    (("ppc64")                     ppc64)
+    (("alpha" "21064")             alpha)
+    (("mk68k" "amiga")             m68k)
+    (("sparc" "usparc")            sparc)))
 
 (define (arc:find-in-uname-matrix matrix key)
   (let loop ((mtx matrix))
@@ -43,9 +45,9 @@
 
 
 (define (arc:canonical-sysnm os maker cpu version)
-  (let ((os* (if os os "unknown"))
-        (maker* (if maker maker "unknown"))
-        (cpu* (if cpu cpu "unknown"))
+  (let ((os*      (if os os "unknown"))
+        (maker*   (if maker maker "unknown"))
+        (cpu*     (if cpu cpu "unknown"))
         (version* (if version version "unknown")))
     (list 
      (arc:find-in-uname-matrix arc:uname-s-matrix os*)
