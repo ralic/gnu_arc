@@ -1,3 +1,11 @@
+- put an "exclude:" argument to task-fileset to manual, like this:
+
+(fileset pattern: "src/*.h"
+         exclude: "src/version.h")
+
+  i.e. include all .h-files in src except for "version.h"
+
+
 - c-compile: extend.  Add more compiler-flag abstractions.  Add support for
   more c compilers (llvm)
 
@@ -11,7 +19,7 @@
 
 - scan the tasks and apply the new arc:try/arc:throw mechanism to them.
   Make sure that tasks don't continue, when prerequisites (missing params,
-  etc) aren't met.  throw an exceptions...!
+  etc) aren't met.  throw a exceptions...!
 
 - remove the orange tasks
 
@@ -37,15 +45,6 @@
 
 
 - implement the cond, case, begin expressions in meta.scm.
-
-
-- add an "exclude:" argument to task-fileset, like:
-
-(fileset pattern: "src/*.h"
-         exclude: "src/version.h")
-
-  i.e. include all .h-files in src except for "version.h"
-
 
 
 - think about an companion system 'arcconfig'.  this takes an Arcreq file

@@ -25,3 +25,6 @@
 /src/config.scm
 /src/version.scm
 /.arc
+/test/.arc/
+/test/_build/
+/test/version.h

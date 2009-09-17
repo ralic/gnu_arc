@@ -18,7 +18,8 @@
 
 (stmt c-sources
       info: "Determine all C source files"
-      (fileset pattern: "*.c"))
+      (fileset pattern: "*.c"
+               exclude: '("broken.c")))
 
 (stmt objc-sources
       info "Determine all objective C source files"

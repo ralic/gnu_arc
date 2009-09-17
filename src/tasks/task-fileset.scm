@@ -50,6 +50,9 @@
 ;; src/*.h              all .h files in subdir src/
 ;; src/**/*.h           all .h files recursive from subdir src/
 ;;
+;; :exclude STRING-LIST | STRING
+;; specifies a list of path which are excluded from the result list.
+;;
 ;; :files STRING-LIST
 ;; a list of files included in this fileset.  required exclusive with 
 ;; :pattern
@@ -60,27 +63,35 @@
                                (pattern '(string
                                           strlist) (req-xor files))
                                (files '(strlist
-                                        string) (req-xor pattern))) )
+                                        string) (req-xor pattern))
+                               (exclude '(string strlist) optional)) )
 
 (define (arc:fileset props body)
   (let* ((dir* (arc:aval 'dir props #f))
          (dir (if dir* (arc:string->path dir*) #f))
          (pattern (arc:aval 'pattern props #f))
-         (files (arc:aval 'files props #f)) )
+         (files (arc:aval 'files props #f))
+         (exclude (let ((v (arc:aval 'exclude props #f)))
+                    (cond
+                     ((list? v) v)
+                     ((string? v) (list v))
+                     (else '()))) ) )
     
     (cond 
      ((string? pattern)
-      (arc:scan-dir-with-pattern (if dir
+      (arc:substract-files-list (arc:scan-dir-with-pattern 
+                                 (if dir
                                      (if (arc:path-absolute? dir)
                                          dir
                                          (arc:path-append (arc:path-cwd) dir))
                                      (arc:path-cwd))
-                                 pattern))
+                                 pattern)
+                                exclude))
      ((list? pattern)
       (let loop ((retv '())
                  (p pattern))
         (if (null? p)
-            retv
+            (arc:substract-files-list retv exclude)
             (loop (append retv (arc:scan-dir-with-pattern 
                                 (if dir
                                     (if (arc:path-absolute? dir)
@@ -91,8 +102,12 @@
                                 (car p)))
                   (cdr p)))))
      
-     ((list? files) files)
-     ((string? files) (list files))
+     ((list? files) 
+      (arc:substract-files-list files exclude))
+
+     ((string? files) 
+      (arc:substract-files-list (list files) exclude))
+
      (else '()))))
 
 

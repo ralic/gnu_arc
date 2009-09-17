@@ -84,6 +84,15 @@
             (loop (- lp 1))))))
 
 
+(define (arc:substract-files-list file-list exclude-list)
+  (arc:reduce (lambda (elt lst)
+                (if (member elt exclude-list)
+                    lst
+                    (cons elt lst)))
+              '()
+              file-list)
+  )
+
 ;;Keep this comment at the end of the file 
 ;;Local variables:
 ;;mode: scheme
