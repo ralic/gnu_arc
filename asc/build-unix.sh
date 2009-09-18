@@ -21,7 +21,7 @@ case "$1" in
 esac
 
 case "$2" in
-    i386)
+    i386 | i486 | i586 | i686)
 	ARCH="-DWordSize_32 -DByteOrder_LE"
 	;;
     x86_64)
