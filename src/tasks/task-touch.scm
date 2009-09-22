@@ -39,9 +39,9 @@
     
     (arc:log 'debug "touch ... " fn)
     
-    (if (arc:sys 'file-exists? fn)
-        (let ((ct (arc:sys 'current-time)))
-          (arc:sys 'utime fn ct ct))
+    (if (sys:file-exists? fn)
+        (let ((ct (sys:current-time)))
+          (sys:utime fn ct ct))
         (let ((port (open-output-file fn)))
           (close-output-port port)) )
     

@@ -30,10 +30,10 @@
    
    ;; methods
    `((link-cmd ,(lambda (self) "gcc"))
-     (outfile-flag ,(lambda (self) "-o"))
-     (shared-flag ,(lambda (self) ""))
-     (static-flag ,(lambda (self) "-static"))
-     (nostdlib-flag ,(lambda (self) "-nostdlib"))
+     (outfile-flag ,(lambda (self) '("-o")))
+     (shared-flag ,(lambda (self) '()))
+     (static-flag ,(lambda (self) '("-static")))
+     (nostdlib-flag ,(lambda (self) '("-nostdlib")))
      
      ;; the default application extension (on windows: .exe)
      (app-ext ,(lambda (self) ".exe"))
@@ -46,15 +46,14 @@
                                         (arc:path-absolutize
                                          (arc:string->path rpath)))))
                        ((list? rpath)
-                        (arc:string-list->string*
-                         (arc:reduce (lambda (x lst)
-                                       (cons (arc:path->string
-                                              (arc:path-absolutize
-                                               (arc:string->path x)))
-                                             lst))
+                        (arc:reduce (lambda (x lst)
+                                      (cons (string-append "-Wl,-rpath," 
+                                                           (arc:path->string
+                                                            (arc:path-absolutize
+                                                             (arc:string->path x))))
+                                            lst))
                                      '()
-                                     rpath)
-                         " -Wl,-rpath,"))
+                                     rpath))
                        (else "")) ))
 
      ;; link a set of object files
@@ -63,49 +62,40 @@
                      libdirs autolibdirs shared nostdlib files autolibs libs
                      rpath)
          (let* ((fullnm (self 'make-app-name outdir appnm appext))
-                (linkcmd (string-append 
-                          "gcc "
-                          (if libdirs
-                              (string-append (arc:string-list->string* libdirs
-                                                                       " -L")
-                                             " ")
-                              "")
-                          (if autolibdirs
-                              (string-append (arc:string-list->string* 
-                                              autolibdirs " -L")
-                                             " ")
-                              "")
-;                          (if shared
-;                              (string-append (self 'shared-flag) " ")
-;                              (string-append (self 'static-flag) " "))
-;                          (if (and shared
-;                                   rpath)
-;                              (string-append (self 'rpath-option rpath) " ")
-;                              "")
-                          (if nostdlib
-                              (string-append (self 'nostdlib-flag) " ")
-                              "")
-                          (self 'outfile-flag) " " fullnm " "
-                          (if files
-                              (string-append (arc:string-list->string* files
-                                                                       " ")
-                                             " ")
-                              "")
-                          (if autolibs
-                              (string-append (arc:string-list->string* autolibs
-                                                                       " -l")
-                                             " ")
-                              "")
-                          (if libs
-                              (string-append (arc:string-list->string* 
-                                              libs " -l")
-                                             " ")
-                              "") )))
+                (link-cmd "gcc")
+                (link-args (hea:list-appends 
+                            (if libdirs
+                                (arc:annotate-list libdirs "-L")
+                                '())
+                            (if autolibdirs
+                                (arc:annotate-list autolibdirs "-L")
+                                '())
+;;;                          (if shared
+;;;                              (self 'shared-flag)
+;;;                              (self 'static-flag))
+;;;                          (if (and shared rpath)
+;;;                              (self 'rpath-option rpath)
+;;;                              '())
+                            (if nostdlib
+                                (list (self 'nostdlib-flag))
+                                '())
+                            (self 'outfile-flag) fullnm
+                            (if files
+                                files
+                                '())
+                            (if autolibs
+                                (arc:annotate-list autolibs "-l")
+                                '())
+                            (if libs
+                                (arc:annotate-list libs "-l")
+                                '())
+                            )) )
            (arc:log 'debug "linking " fullnm " ...")
            
-           (arc:display linkcmd #\nl)
+           (arc:display link-cmd " "
+                        (arc:string-list->string* link-args " ") #\nl)
            
-           (if (not (= (arc:sys 'system linkcmd) 0))
+           (if (not (= (sys:execute link-cmd link-args) 0))
                (arc:log 'info "linking '" fullnm "' failed"))
            
            fullnm)) )

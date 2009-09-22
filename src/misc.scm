@@ -191,6 +191,28 @@
           (loop (cons c retv)
                 (read-char port))) )))
 
+(define (arc:list-appends . args)
+  (let loop ((res '())
+             (v args))
+    (if (null? v)
+        res
+        (loop (append res (if (list? (car v))
+                              (car v)
+                              (list (car v))) )
+              (cdr v))) ))
+
+;; with desc = "-L" does ("abc" "def" "xyz") => ("-Labc" "-Ldef" "-Lxyz")
+(define (arc:annotate-list lst desc)
+  (arc:reduce (lambda (v nl)
+                (cons (string-append desc v) nl))
+              '()
+              lst))
+
+
+(define (arc:display-command cmd args)
+  (arc:display cmd " " (arc:string-list->string* args " ") #\nl))
+
+
 ;;Keep this comment at the end of the file 
 ;;Local variables:
 ;;mode: scheme

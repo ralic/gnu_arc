@@ -53,8 +53,8 @@
           'done
           (begin
             (cond
-             ((arc:sys 'file-directory? (car r)) (arc:sys 'remove-dir (car r)))
-             ((arc:sys 'file-exists? (car r)) (arc:sys 'remove-file (car r)))
+             ((sys:file-directory? (car r)) (sys:remove-dir (car r)))
+             ((sys:file-exists? (car r)) (sys:remove-file (car r)))
              (else 'ignore))
             (loop (cdr r)))))
     ;; do something more?

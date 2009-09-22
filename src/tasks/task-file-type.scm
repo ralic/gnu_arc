@@ -39,10 +39,10 @@
     
     (arc:log 'debug "file-type ... " fn)
     
-    (if (arc:sys 'file-directory? fn)
+    (if (sys:file-directory? fn)
         (set! retv 'dir)
-        (if (arc:sys 'file-exists? fn)
-            (if (arc:sys 'file-executable? fn)
+        (if (sys:file-exists? fn)
+            (if (sys:file-executable? fn)
                 (set! retv 'executable)
                 (set! retv 'file) )
             (set! retv 'unknown)))

@@ -52,11 +52,11 @@
 
     (arc:log 'debug "dist ... " dist-file)
     
-    (if (arc:sys 'file-exists? dist-file)
-        (arc:sys 'remove-file dist-file))
+    (if (sys:file-exists? dist-file)
+        (sys:remove-file dist-file))
     
-    (if (arc:sys 'file-exists? dist-dir)
-        (arc:sys 'remove-dir dist-dir))
+    (if (sys:file-exists? dist-dir)
+        (sys:remove-dir dist-dir))
 
     (arc:call-task 'mkdir 
                    (list 'dir dist-dir)

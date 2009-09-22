@@ -21,8 +21,8 @@
 
 ;; settings for the standard javac compiler
 (define %arc:java-compiler% "javac")
-(define %arc:java-defs% "")
-(define %arc:java-def-flags% "")
+(define %arc:java-defs% '())
+(define %arc:java-def-flags% '())
 
 (define %arc:java-debug-flag% "-g")
 (define %arc:java-depr-flag% "-deprecation")
@@ -66,26 +66,26 @@
     (map 
      (lambda (fn)
        (let* ( (pn (arc:string->path fn))
-	       (jflags (string-append 
-			"" (arc:string-list->string* (arc:aval 'flags 
-                                                               props '())
-                                                     " ")
-			" "
-			(if (arc:aval 'deprecation? props #f)
-			    (string-append %arc:java-depr-flag% " ") "")
-			(if outdir
-			    (string-append "-d " outdir " ")
-			    "")
-			(if (arc:aval 'debug? props #f) 
-			    (string-append %arc:java-debug-flag% " ") ""))) )
-
+               (jflags (arc:list-appends
+                        (arc:aval 'flags props '())
+                        (if (arc:aval 'deprecation? props #f)
+                            %arc:java-depr-flag%
+                            '())
+                        (if outdir
+                            (list "-d" outdir)
+                            '())
+                        (if (arc:aval 'debug? props #f)
+                            %arc:java-debug-flag%
+                            '()))) )
+         
          (arc:log 'verbose "compile '" fn "'")
-
-	 (arc:-compile-java-file fn
-				 (arc:-build-java-classpath
-				  (arc:aval 'classpath props '()))
-				 jflags)
-
+         
+         (arc:-compile-java-file fn
+                                 (arc:-build-java-classpath (arc:aval 'classpath
+                                                                      props
+                                                                      '()))
+                                 jflags)
+         
          ;; TODO: this doesn't work as this simple.  Javac puts it class
          ;; files somewhere in a complex directory structure.  Should we
          ;; rebuild it?, how do we determine the package structure?
@@ -96,8 +96,7 @@
          (if outdir
              (arc:path->string
               (arc:path-replace-last-ext 
-               (arc:path-append (arc:string->path outdir)
-                                pn) "class"))
+               (arc:path-append (arc:string->path outdir) pn) "class"))
              (arc:path->string (arc:path-replace-last-ext pn "class"))))
        )
      (arc:aval 'sources props '())) ))
@@ -106,30 +105,31 @@
 
 
 (define (arc:-compile-java-file sfile classpath jflags)
-  (let ((cmd-str (string-append %arc:java-compiler% " "
-                                %arc:java-defs% " "
-				(if (> (string-length classpath) 0)
-				    (string-append %arc:java-cp-flag% 
-						   " " classpath " ")
-				    "")
-                                %arc:java-def-flags% " "  ; default flags
-                                jflags " "                ; custom cflags
+  (let ((cmd-cmd %arc:java-compiler%)
+        (cmd-args (list-appends %arc:java-defs%
+                                
+                                (if (> (string-length classpath) 0)
+                                    (list %arc:java-cp-flag% classpath)
+                                    '())
+                                %arc:java-def-flags%      ; default flags
+                                jflags                    ; custom cflags
                                 sfile                     ; the source file
                                 )))
-    (arc:display cmd-str #\nl)
-    (if (not (equal? (arc:sys 'system cmd-str) 0))
+    (arc:display cmd-str " " (arc:string-list->string* cmd-args " ") #\nl)
+    (if (not (equal? (sys:execute cmd-str cmd-args) 0))
         (if (not %arc:keep-going-on-errors%)
             (quit)))))
 
+
 (define (arc:-build-java-classpath strlist)
   (let loop ((t "")
-	     (lx strlist))
+             (lx strlist))
     (if (null? lx)
-	t
-	(loop (string-append t (car lx) (if (null? (cdr lx)) 
-					    "" 
-					    (arc:pathlist-sep)))
-	      (cdr lx)))))
+        t
+        (loop (string-append t (car lx) (if (null? (cdr lx)) 
+                                            "" 
+                                            (arc:pathlist-sep)))
+              (cdr lx)))))
 
 
 

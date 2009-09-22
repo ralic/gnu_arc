@@ -231,7 +231,7 @@
 ;; --------------------------------------------------------------------
 (define %arc:scheme-impl% 'asc)
 
-(define %arc:home% (or (getenv "ARC_HOME")
+(define %arc:home% (or (sys:getenv "ARC_HOME")
                        (arc-home)))
 (define (arc:home)
   (if (not %arc:home%)
@@ -254,9 +254,6 @@
 
 (load (string-append (arc:home) "/strings.scm"))
 (load (string-append (arc:home) "/logical.scm"))
-
-;; load system specific code
-(load (string-append (arc:home) "/sys-scm.scm"))
 
 ;; eval the loader
 (load (string-append (arc:home) "/arc.scm"))

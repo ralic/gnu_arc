@@ -29,6 +29,8 @@
     (do ((expr (read *in*) (read *in*)))
         ((eof-object? expr) #t)
       (arc:eval-arc-defines expr))
+
+    ;;(arc:display %arc:contexts% #\nl)
     (close-input-port *in*)
     #t))
          
@@ -361,8 +363,8 @@
       ((path-ext)
        (arc:path-ext (arc:string->path (arc:eval-arc (cadr expr)))))
 
-      ((path-cwd) (arc:sys 'getcwd))
-      ((path-homedir) (arc:sys 'homedir))
+      ((path-cwd) (sys:getcwd))
+      ((path-homedir) (sys:homedir))
       ((path-absolute?) 
        (arc:path-absolute? (arc:string->path (arc:eval-arc (cadr expr)))))
       ((path-begins-with?)

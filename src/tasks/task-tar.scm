@@ -65,9 +65,9 @@
     (if (= (string-length tfn) 0)
 	(arc:log 'fatal "invalid tar-file name"))
     
-    (if (arc:sys 'file-exists? tfn)
+    (if (sys:file-exists? tfn)
         (if force
-            (arc:sys 'remove-file tfn)
+            (sys:remove-file tfn)
             (begin
               (arc:log 'info "don't create '" tfn "', older version exists")
               (set! really-work #f))))

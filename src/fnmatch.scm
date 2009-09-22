@@ -15,7 +15,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (define (arc:scan-dir-with-pattern root-path pattern)
-  (let* ((cwd (arc:sys 'getcwd))
+  (let* ((cwd (sys:getcwd))
          (p1 (arc:string->path pattern))
          (retv '()))
     (arc:traverse-dir (arc:path->string root-path)

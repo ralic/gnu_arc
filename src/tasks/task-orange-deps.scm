@@ -46,27 +46,31 @@
                                                     catalog)))))
      sources)))
 
+
 (define (arc:make-orange-deps sfile cfile flags catalog)
   (let* ((bn (arc:path-last-comp (arc:string->path sfile)))
          (tdf (arc:path->string
                (arc:path-append (arc:arc-tmp-directory)
                                 (arc:path-replace-last-ext bn "dep"))))
-         (dcmd (string-append (arc:orange-o2cdep) " -A "
-                              (if catalog
-                                  (string-append " -C " catalog " ")
-                                  "")
-                              " -d " (arc:path->string (arc:arc-tmp-directory))
-                              " "
-                              flags " "
-                              " -O " cfile " "
-                              sfile)))
-    (arc:display dcmd #\nl)
-    (if (equal? (arc:sys 'system dcmd) 0)
+         (deps-cmd (arc:orange-o2cdep))
+         (deps-args (arc:list-appends "-A"
+                                      (if catalog
+                                          (list "-C" catalog)
+                                          '())
+                                      "-d" (arc:path->string (arc:arc-tmp-directory))
+                                      flags
+                                      "-O" cfile
+                                      sfile)))
+
+    (arc:display deps-cmd " " (arc:string-list->string* deps-args " ") #\nl)
+
+    (if (equal? (sys:execute deps-cmd deps-args) 0)
         (let ((deps (arc:load-deps-file tdf)))
           (arc:deps-set-target! deps cfile)
-          (arc:sys 'remove-file tdf)
+          (sys:remove-file tdf)
           deps)
         #f)))
+
 
 (define (arc:orange-o2cdep)
   (let ((cmd (arc:env-get 'o2cdep-command)))

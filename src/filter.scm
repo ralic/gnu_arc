@@ -29,24 +29,27 @@
          (out (open-output-file out-file))
          (state 'copy-pass) 
          (key '()))
-    (do ((c (read-char port) (read-char port)))
-        ((eof-object? c) 'done)
-      (case state
-        ((copy-pass) (if (eq? c sepc)
-                         (begin
-                           (set! state 'parse-key)
-                           (set! key '()))
-                         (write-char c out)))
-        ((parse-key) (if (eq? c sepc)
-                         (let* ((k (list->string (reverse key)))
-                                (a (assoc k table)))
-                           (if (= (string-length k) 0)
-                               (write-char sepc out)
-                               (if a
-                                   (display (cadr a) out)
-                                   (arc:msg "key '" k "' not known")))
-                           (set! state 'copy-pass))
-                         (set! key (cons c key))))))
+    (let loop ((c (read-char port)))
+      (if (eof-object? c)
+          'done
+          (begin
+            (case state
+              ((copy-pass) (if (eqv? c sepc)
+                               (begin
+                                 (set! state 'parse-key)
+                                 (set! key '()))
+                               (write-char c out)))
+              ((parse-key) (if (eqv? c sepc)
+                               (let* ((k (list->string (reverse key)))
+                                      (a (assoc k table)))
+                                 (if (= (string-length k) 0)
+                                     (write-char sepc out)
+                                     (if a
+                                         (display (cadr a) out)
+                                         (arc:msg "key '" k "' not known")))
+                                 (set! state 'copy-pass))
+                               (set! key (cons c key)))))
+            (loop (read-char port)) )))
     (close-input-port port)
     (close-output-port out)))
 

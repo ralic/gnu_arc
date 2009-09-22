@@ -20,7 +20,7 @@
 
 (define (arc:attrval? av)
   (and (vector? av)
-       (eq? (vector-ref av 0) ':attrval)))
+       (equal? (vector-ref av 0) ':attrval)))
 
 ;; Set the default slot id.
 (define (arc:attrval-default-id! av id)

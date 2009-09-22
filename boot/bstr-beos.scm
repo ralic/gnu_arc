@@ -17,14 +17,8 @@
 ;; bootstraping code for the beos system
 
 (define (prepare-script)
-  (arc:sys 'mkdirs "../app")
-  (let ((port (open-output-file "../app/arc"))
-        (scheme-cmd (cond 
-                     ((string-ci=? %arc:impl% "scm") 'scm)
-                     ((string-ci=? %arc:impl% "asc") 'asc)
-                     ((string-ci=? %arc:impl% "guile") 'guile)
-                     ((string-ci=? %arc:impl% "ksi") 'ksi)
-                     (else 'asc))) )
+  (sys:mkdirs "../app")
+  (let ((port (open-output-file "../app/arc")))
     (arc:pdisplay port 
                   "#!/bin/sh" #\nl
                   #\nl
@@ -32,36 +26,26 @@
                   "  export ARC_HOME=" %arc:path% #\nl
                   "fi" #\nl
                   #\nl
-                  (case scheme-cmd
-                    ((scm) "scm $ARC_HOME/arc-scm.scm $*" )
-                    ((guile) "guile -l $ARC_HOME/arc-guile.scm -- $*")
-                    ((asc) "asc -s $ARC_HOME/arc-asc.scm -- $*")
-                    ((ksi) "ksi -s $ARC_HOME/arc-ksi.scm -- $*"))
+                  "asc -s $ARC_HOME/arc.scm -- $*"
                   #\nl)
     (close-output-port port)
-    (arc:sys 'chmod "../app/arc" #o755)) )
+    (sys:chmod "../app/arc" 'exec)) )
 
 (define (bootstrap-script)
-  (let ((port (open-output-file "../arc"))
-        (scheme-cmd (cond 
-                     ((string-ci=? %arc:impl% "scm") 'scm)
-                     ((string-ci=? %arc:impl% "asc") 'asc)
-                     ((string-ci=? %arc:impl% "guile") 'guile)
-                     ((string-ci=? %arc:impl% "ksi") 'ksi)
-                     (else 'asc))) )
+  (let ((port (open-output-file "../arc")))
     (arc:pdisplay port 
                   "#!/bin/sh" #\nl
                   #\nl
                   "export ARC_HOME=" %arc:src-dir% #\nl
                   "exec app/arc $*" #\nl)
     (close-output-port port)
-    (arc:sys 'chmod "../arc" #o755)) )
+    (sys:chmod "../arc" 'exec)) )
 
 (define (include-path)
   (string-append %arc:path% ":"
 		 (string-append %arc:path% "/site" ":"
-                 "/boot/home/config/arc" ":"
-                 "/boot/home/config/arc/site")))
+                    "/boot/home/config/arc" ":"
+                    "/boot/home/config/arc/site")))
 
 
 ;;Keep this comment at the end of the file 

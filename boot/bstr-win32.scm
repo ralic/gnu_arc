@@ -17,30 +17,17 @@
 ;; bootstrapping code for win32 platforms
 
 (define (prepare-script)
-  (arc:sys 'mkdirs "../app/arc")
-  (let ((port (open-output-file "../app/arc.bat"))
-        (scheme-cmd (cond 
-                     ((string-ci=? %arc:impl% "scm") 'scm)
-                     ((string-ci=? %arc:impl% "asc") 'asc)
-                     ((string-ci=? %arc:impl% "guile") 'guile)
-                     ((string-ci=? %arc:impl% "ksi") 'ksi)
-                     (else 'asc))) )
+  (sys:mkdirs "../app/arc")
+  (let ((port (open-output-file "../app/arc.bat")))
     (arc:pdisplay port 
                   "@echo off" #\nl
                   "if not \"%ARC_HOME%\"==\"\" goto START_ARC" #\nl
                   "set ARC_HOME=" %arc:path% #\nl
                   #\nl
                   ":START_ARC" #\nl
-                  (case scheme-cmd 
-                    ((scm) (string-append "scm " %arc:path% "\\arc-scm.scm "
-                                          "$1 $2 $3 $4 $5 $6 $7 $8 $9"))
-                    ((asc) (string-append "asc -s " %arc:path% "\\arc-asc.scm "
-                                          "-- $1 $2 $3 $4 $5 $6 $7 $8 $9"))
-                    ((guile) (string-append "guile -l " %arc:path% "\\arc-guile.scm "
-                                            "-- $1 $2 $3 $4 $5 $6 $7 $8 $9"))
-                    ((ksi) (string-append "ksi -s " %arc:path% "\\arc-ksi.scm "
-                                          "-- $1 $2 $3 $4 $5 $6 $7 $8 $9"))
-                    ) #\nl)
+                  (string-append "asc -s " %arc:path% "\\arc.scm "
+                                 "-- $1 $2 $3 $4 $5 $6 $7 $8 $9")
+                  #\nl)
     (close-output-port port)) )
 
 (define (bootstrap-script)

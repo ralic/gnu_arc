@@ -3,21 +3,20 @@
   (set! installer
         (cond
          ;; the gnu installer
-         ((= (system "install --help > /dev/null 2>&1") 0) 'ginstall)
+         ((= (sys:execute* "install" #("--help" ">" "/dev/null" "2>&1")) 0) 'ginstall)
          ;; some other installer
-         ((= (system "install -h > /dev/null 2>&1") 0) 'install)
+         ((= (sys:execute* "install" #("-h" ">" "/dev/null" "2>&1")) 0) 'install)
          ;; nothing known
          (else 'unknown)))
 
   ;; install
   (case installer
     ((ginstall) (begin
-                  (system (string-append "install -d -v arc " %arc:exec%))
+                  (sys:execute "install" #("-d" "-v" "arc" %arc:exec%))
                   ;; install the 
-                  (system (string-append "install -d -v ../src/*.scm "
-                                         %arc:path%))
-                  (system (string-append "install -d -v ../src/tasks/*.scm "
-                                         %arc:path% "/tasks/")) ))
+                  (sys:execute "install" #("-d" "-v" "../src/*.scm" %arc:path%))
+                  (sys:execute "install" #("-d" "-v" "../src/tasks/*.scm" 
+                                           (string-append %arc:path% "/tasks/"))) ))
     ((install) (begin
                  (display "to be done") (newline)))
     

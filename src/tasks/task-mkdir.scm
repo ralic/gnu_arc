@@ -40,7 +40,7 @@
     (arc:log 'debug "mkdir ... " dirnm)
 
     (if dirnm
-        (arc:sys 'mkdirs dirnm))
+        (sys:mkdirs dirnm))
     dirnm))
 
 (arc:register-task 'mkdir arc:mkdir arc:mkdir-keywords)

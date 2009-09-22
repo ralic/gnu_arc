@@ -95,13 +95,13 @@
                   '()         ; slots
                   `((isa? ,(lambda (self a-class)
                              (and (arc:class? a-class)
-                                  (eq? (self 'class) a-class))))
+                                  (equal? (self 'class) a-class))))
                     (kind-of? ,(lambda (self a-class)
                                  (and (arc:class? a-class)
                                       (let loop ((cls (self 'class)))
                                         (if (null? cls)
                                             #f
-                                            (or (eq? cls a-class)
+                                            (or (equal? cls a-class)
                                                 (loop (cls 'super))))))))
                     )))
 

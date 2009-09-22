@@ -126,7 +126,7 @@
          (cond
           ((string? x) x)
           ((and (pair? x) 
-                (eq? (car x) ':count))
+                (equal? (car x) ':count))
            (cons ':count (arc:-version-file-inc-count (cdr x)
                                                       step 
                                                       left-fill-to-length
@@ -166,7 +166,7 @@
                 (cond
                   ((string? x) (display x *out*))
                   ((and (pair? x)
-                        (eq? (car x) ':count))
+                        (equal? (car x) ':count))
                    (begin
                      (if boundary
                          (display (string boundary) *out*))

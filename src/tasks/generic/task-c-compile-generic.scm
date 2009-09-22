@@ -35,51 +35,51 @@
      (makedeps-cmd ,(lambda (self) "gcc"))
 
      ;; default definitions
-     (default-defs ,(lambda (self) ""))
+     (default-defs ,(lambda (self) '()))
      
      ;; default includes
-     (default-incls ,(lambda (self) ""))
+     (default-incls ,(lambda (self) '()))
      
      ;; default flags
-     (default-flags ,(lambda (self) ""))
+     (default-flags ,(lambda (self) '()))
      
      ;; flag for compiling dependencies
-     (deps-flag ,(lambda (self) "-M"))
+     (deps-flag ,(lambda (self) '("-M")))
      
      ;; returns the compiler flag for optimization
      (opt-level-flag ,(lambda (self level)
                         (case level
-                          ((high) "-O3")
-                          ((medium) "-O2")
-                          ((low) "")
-                          (else ""))))
-     (ansi-flag ,(lambda (self) "-ansi"))
-     (debug-flag ,(lambda (self) "-g"))
-     (signed-char-flag ,(lambda (self) "-signed-char"))
-     (unsigned-char-flag ,(lambda (self) "-unsigned-char"))
+                          ((high) '("-O3"))
+                          ((medium) '("-O2"))
+                          ((low) '())
+                          (else '()))))
+     (ansi-flag ,(lambda (self) '("-ansi")))
+     (debug-flag ,(lambda (self) '("-g")))
+     (signed-char-flag ,(lambda (self) '("-signed-char")))
+     (unsigned-char-flag ,(lambda (self) '("-unsigned-char")))
 
      ;; does this platform needs a separate compilation for shared objects?
      (need-shared-build ,(lambda (self) #t))
      ;; if so, use the following extra flags for compilation
-     (shared-obj-flag ,(lambda (self) "-fpic -DPIC"))
+     (shared-obj-flag ,(lambda (self) '("-fpic" "-DPIC")))
      
      (warn-level-flag 
       ,(lambda (self level)
          (case level
-           ((high) "-Wall")
-           ((medium) (string-append "-Wqual "
-                                    "-Wmissing-prototypes "
-                                    "-Wimplicit "
-                                    "-Winline "
-                                    "-Wredundant-decls "
-                                    "-Wformat "
-                                    "-Wenum-clash "
-                                    "-Wuninitialized"))
-           ((low) "-Wcast-qual -Wmissing-prototypes")
-           (else ""))))
+           ((high) '("-Wall"))
+           ((medium) (list "-Wqual"
+                           "-Wmissing-prototypes"
+                           "-Wimplicit"
+                           "-Winline"
+                           "-Wredundant-decls"
+                           "-Wformat"
+                           "-Wenum-clash"
+                           "-Wuninitialized"))
+           ((low) (list "-Wcast-qual" "-Wmissing-prototypes"))
+           (else '()))))
      
-     (outfile-flag ,(lambda (self) "-o"))
-     (compile-only-flag ,(lambda (self) "-c"))
+     (outfile-flag ,(lambda (self) '("-o")))
+     (compile-only-flag ,(lambda (self) '("-c")))
      
      (objfile-ext ,(lambda (self) "o"))
      (shared-objfile-ext ,(lambda (self) "lo"))
@@ -102,20 +102,21 @@
      (compile-file 
       ,(lambda (self sfile ofile cincs cflags)
          (arc:log 'debug "compile file " sfile " to " ofile)
-         (let ((cmd-str (string-append 
-                         (self 'compiler-cmd) " "
-                         (self 'default-defs) " "
-                         (self 'default-incls) " "
-                         cincs " "                      ; custom includes
-                         (self 'default-flags) " "
-                         cflags " "                     ; custom cflags
-                         (self 'compile-only-flag) " "  ; compile only
-                         (self 'outfile-flag) " " 
-                         ofile " "                      ; obj file
-                         sfile     ; the source file
-                         )))
-           (arc:display cmd-str #\nl)
-           (if (not (equal? (arc:sys 'system cmd-str) 0))
+         (let ((cmd-cmd (self 'compiler-cmd))
+               (cmd-args (arc:list-appends 
+                          (self 'default-defs)
+                          (self 'default-incls)
+                          cincs                          ; custom includes
+                          (self 'default-flags)
+                          cflags                         ; custom cflags
+                          (self 'compile-only-flag)      ; compile only
+                          (self 'outfile-flag)  
+                          ofile                          ; obj file
+                          sfile                          ; the source file
+                          )))
+           (arc:display cmd-str " "
+                        (arc:string-list->string* cmd-args " ") #\nl)
+           (if (not (equal? (sys:execute cmd-str cmd-args) 0))
                (if (not %arc:keep-going-on-errors%)
                    (quit))))))
      
@@ -126,18 +127,20 @@
                 (tdf (arc:path->string
                       (arc:path-append (arc:deps-directory)
                                        (arc:path-replace-last-ext bn "d"))))
-                (dcmd (string-append (self 'makedeps-cmd) " "
-                                     (self 'deps-flag) " "
-                                     cflags " "
-                                     cincs " "
-                                     sfile " "
-                                     "> " tdf)) )
-           (arc:display dcmd #\nl)
-           (if (equal? (arc:sys 'system dcmd) 0)
+                (md-cmd (self 'makedeps-cmd))
+                (md-args (arc:list-appends
+                          (self 'deps-flag)
+                          cflags
+                          cincs
+                          sfile
+                          ">" tdf)) )
+           (arc:display dcmd " "
+                        (arc:string-list->string* md-args " ") #\nl)
+           (if (equal? (sys:execute md-cmd md-args) 0)
                (let* ((deps (arc:parse-make-deps-file tdf)))
                  ;; set the correct object target
                  (arc:deps-set-target! deps ofile)
-                 (arc:sys 'remove-file tdf)
+                 (sys:remove-file tdf)
                  deps)
                #f))))
      )))

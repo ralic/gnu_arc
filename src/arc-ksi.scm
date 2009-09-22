@@ -14,7 +14,7 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(define %arc:home% (or (getenv "ARC_HOME")
+(define %arc:home% (or (sys:getenv "ARC_HOME")
                        "/usr/share/arc"))
 
 (define %arc:scheme-impl% 'ksi)

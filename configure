@@ -46,7 +46,6 @@ esac
 prefix=$arc_default_prefix
 
 arc_init_help=
-arc_scheme_impl=
 
 ## check options, to be a little more configure compliant
 arc_prev=
@@ -143,11 +142,6 @@ do
   -q | -quiet | --quiet | --quie | --qui | --qu | --q \
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
-
-  -scheme | --scheme | --schem | --sche | --sch)
-    arc_prev=scheme ;;
-  -scheme=* | --scheme=* | --schem=* | --sche=* | --sch=*)
-    arc_scheme_impl=$arc_optarg ;;
 
   -srcdir | --srcdir | --srcdi | --srcd | --src | --sr)
     arc_prev=srcdir ;;
@@ -364,65 +358,8 @@ _ACEOF
 fi
 
 
-if test -z "${arc_scheme_impl}"; then
-  if (`(scm -b) 2>/dev/null` || test $? = "0"); then
-    arc_scheme_impl="scm"
-  elif (`(ksi -c '(define arc:x 0)') 2>/dev/null` || test $? = "0"); then
-    arc_scheme_impl="guile"
-  elif (`(guile -c '(define arc:x 0)') 2>/dev/null` || test $? = "0"); then
-    arc_scheme_impl="guile"
-  else
-    arc_scheme_impl="asc"
-  fi
-# add more tests
-fi
-
-if test -z "$arc_scheme_impl" ; then
-  echo "$as_me: ERROR: no scheme interpreter found.  Use --scheme to set one"
-  exit 1
-else
-  echo "$as_me: checking for scheme interpreter ... $arc_scheme_impl"
-fi
-
-
-
-case "$arc_scheme_impl" in
-  scm)
-    cat > ./bootstrap.sh <<_ACEOF
 #!/bin/sh
-(cd boot; scm bootstrap-scm.scm -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
-./arc configure
-_ACEOF
-    chmod +x ./bootstrap.sh
-    ;;
-
-
-
-  ksi)
-    cat > ./bootstrap.sh <<_ACEOF
-#!/bin/sh
-(cd boot; ksi -s ./bootstrap-ksi.scm -- -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
-./arc configure
-_ACEOF
-    chmod +x ./bootstrap.sh
-    ;;
-
-
-
-  guile)
-    cat > ./bootstrap.sh <<_ACEOF
-#!/bin/sh
-(cd boot; guile -l bootstrap-guile.scm -- -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
-./arc configure
-_ACEOF
-    chmod +x ./bootstrap.sh
-    ;;
-
-
-
-  asc)
-    cat > ./bootstrap.sh <<_ACEOF
-#!/bin/sh
+cat > ./bootstrap.sh <<_ACEOF
 ASC_HOME="$arcdir"
 export ASC_HOME
 _ACEOF
@@ -432,7 +369,7 @@ case "$build" in
     asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF
-(cd asc; /bin/sh build-unix.sh $build $arch)
+(cd tinyscheme; /bin/sh build-unix.sh $build $arch)
 _ACEOF
     ;;
   Cygwin* | CYGWIN* )
@@ -467,24 +404,21 @@ cat >> ./bootstrap.sh <<_ACEOF
 if [ ! -d "./app" ]; then
   mkdir ./app
 fi
-cp asc/asc-init.scm ./app/asc-init.scm
-cp asc/$asccmd ./app/$arccmd
+cp tinyscheme/asc-init.scm ./app/asc-init.scm
+cp tinyscheme/init.scm ./app/init.scm
+cp tinyscheme/$asccmd ./app/$arccmd
 
-ASC_INIT_FILE="`pwd`/asc/init.scm"
-export ASC_INIT_FILE
-(cd boot; ../app/arc -s bootstrap-asc.scm -- -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir" -i $arc_scheme_impl)
-unset ASC_INIT_FILE
+ARC_HOME="`pwd`/src"
+export ARC_HOME
+ASC_INIT_DIR=`pwd`/app
+export ASC_INIT_DIR
+(cd boot; ../app/arc -s -1 bootstrap.scm -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir")
+unset ASC_INIT_DIR
+unset ARC_HOME
 
 ./arc configure
 _ACEOF
-    chmod +x ./bootstrap.sh
-    ;;
+chmod +x ./bootstrap.sh
+ 
 
-
-
-  *)
-    echo "$as_me: ERROR: unknown scheme implementation"
-    exit 1
-    ;;
-esac
 

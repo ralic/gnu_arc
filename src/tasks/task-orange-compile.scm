@@ -38,14 +38,12 @@
                                       (depends dependencies optional)))
 
 (define (arc:orange-compile props body)
-  (let* ((outdir (arc:aval 'outdir props #f))
+  (let* ((outdir  (arc:aval 'outdir props #f))
          (catalog (arc:aval 'catalog props #f))
-         (oflags (string-append 
-                  (arc:string-list->string* (arc:aval 'flags props '()) " ")
-                  " "
-                  (if catalog
-                      (string-append "-C" catalog " ")
-                      "")))
+         (oflags  (arc:list-appends (arc:aval 'flags props '())
+                                    (if catalog
+                                        (list "-C" catalog)
+                                        '())))
          (sources (arc:aval 'sources props '()))
          (depends (arc:aval 'depends props #f)) 
          (av (arc:attrval)) )
@@ -55,8 +53,7 @@
     (for-each
      (lambda (fn)
        (let* ((cn (arc:make-orange-cfile fn outdir "c"))
-              (cincls (arc:string-list->string* 
-                       (arc:aval 'includes props '()) " -I")))
+              (cincls (arc:annotate-list (arc:aval 'includes props '()) "-I")))
          
          (let ((vv (arc:attrval-ref av 'c-source) ))
            (if vv
@@ -70,13 +67,12 @@
                                                outdir)
              (begin
                (arc:log 'verbose "compile '" fn "' into '" cn "'")
-               (arc:orange-compile-file
-                fn                      ; source
-                cn                      ; cfile
-                cincls                  ; cincls
-                oflags                  ; orange flags
-                outdir                  ; out directory
-                ))))
+               (arc:orange-compile-file fn      ; source
+                                        cn      ; cfile
+                                        cincls  ; cincls
+                                        oflags  ; orange flags
+                                        outdir  ; out directory
+                                        ))))
        )
      sources)
     av))
@@ -104,16 +100,16 @@
 
 (define (arc:orange-compile-file sfile cfile incls
                                  orange-flags outdir)
-  (let* ((orange-cmd (string-append
-                      (arc:orange-command) " -x "
-                      orange-flags " "
-                      (if outdir
-                          (string-append "-d " outdir " ")
-                          "")
-                      incls " "
-                      sfile)))
-    (arc:display orange-cmd #\nl)
-    (if (not (equal? (arc:sys 'system orange-cmd) 0))
+  (let* ((orange-cmd  (arc:orange-command))
+         (orange-args (arc:list-appends
+                       "-x" orange-flags
+                       (if outdir
+                           (list "-d" outdir)
+                           '())
+                       incls 
+                       sfile)))
+    (arc:display orange-cmd " " (arc:string-list->string* orange-args " ") #\nl)
+    (if (not (equal? (sys:execute orange-cmd orange-args) 0))
         (if (not %arc:keep-going-on-errors%)
             (quit)))
     ))
@@ -123,11 +119,10 @@
   (let* ((pn (arc:string->path filename))
          (on* (arc:path-replace-last-ext 
                pn cext )))
-    (arc:path->string
-     (if (and outdir (not (null? outdir)))
-         (arc:path-append (arc:string->path outdir)
-                          (arc:path-last-comp on*))
-         on*))))
+    (arc:path->string (if (and outdir (not (null? outdir)))
+                          (arc:path-append (arc:string->path outdir)
+                                           (arc:path-last-comp on*))
+                          on*))))
 
 
 (define (arc:orange-command)

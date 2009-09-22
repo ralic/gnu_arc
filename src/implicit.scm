@@ -46,24 +46,24 @@
 
 ;; starts a clean run with "root" as root directory
 (define (arc:clean-implicit root)
-  (let* ((olddir (arc:sys 'getcwd)))
-    (arc:sys 'chdir root)
+  (let* ((olddir (sys:getcwd)))
+    (sys:change-dir root)
     (let loop ((ce %arc:build-resources%))
       (if (null? ce)
           #t
           (begin
             (cond 
              ((and (symbol? (cdar ce))
-                   (eq? (cdar ce) 'recursive))
+                   (equal? (cdar ce) 'recursive))
               (arc:-clean-recursive-clean root (caar ce)) )
              ((and (symbol? (cdar ce))
-                   (eq? (cdar ce) 'in-place))
+                   (equal? (cdar ce) 'in-place))
               (arc:-clean-inplace-clean root (caar ce)))
              ((procedure? (cdar ce))
               (arc:-clean-apply-clean root (caar ce) (cdar ce)))
              (else #t))
             (loop (cdr ce)))))
-    (arc:sys 'chdir root)))
+    (sys:change-dir root)))
                  
 (define (arc:-clean-recursive-clean root path)
   (let* ((rp (arc:string->path path))
@@ -84,17 +84,17 @@
     (arc:-clean-recursive-clean-res path)))
 
 (define (arc:-clean-recursive-clean-res path)
-  (if (arc:sys 'file-directory? path)
-      (arc:sys 'remove-dir path)
-      (if (arc:sys 'file-exists? path)
-          (arc:sys 'remove-file path))))
+  (if (sys:file-directory? path)
+      (sys:remove-dir path)
+      (if (sys:file-exists? path)
+          (sys:remove-file path))))
   
 
 (define (arc:-clean-inplace-clean root path)
-  (if (arc:sys 'file-directory? path)
-      (arc:sys 'remove-dir path)
-      (if (arc:sys 'file-exists? path)
-          (arc:sys 'remove-file path))))
+  (if (sys:file-directory? path)
+      (sys:remove-dir path)
+      (if (sys:file-exists? path)
+          (sys:remove-file path))))
 
 (define (arc:-clean-apply-clean root path method)
   (apply method (list path root)))

@@ -29,24 +29,24 @@
 
 ;; compile a static library
 (define (arc:<lib-cygwin>-make-static-lib self libnm objs)
-  (if (arc:sys 'file-exists? libnm)
-      (arc:sys 'remove-file libnm))
+  (if (sys:file-exists? libnm)
+      (sys:remove-file libnm))
   
-  (let ((arcmd (string-append (self 'ar-cmd) " "
-                              (self 'replace-create-flag) " "
-                              libnm " "
-                              (arc:string-list->string* objs " ")))
-        (ranlibcmd (string-append (self 'ranlib-cmd) " " libnm)) )
+  (let ((ar-cmd (self 'ar-cmd))
+        (ar-args (append (list (self 'replace-create-flag) libnm) objs))
+        (ranlib-cmd (self 'ranlib-cmd))
+        (ranlib-args (list libnm)) )
     
-    (arc:display arcmd #\nl)
+    (arc:display ar-cmd " " (arc:string-list->string* ar-args " ") #\nl)
     
-    (if (not (equal? (arc:sys 'system arcmd) 0))
+    (if (not (equal? (sys:execute ar-cmd ar-args) 0))
         (arc:msg "failed to create library " libnm #\nl)
 
         (if (self 'ranlib-needed?)
             (begin
-              (arc:display ranlibcmd #\nl)
-              (if (not (equal? (arc:sys 'system arcmd) 0))
+              (arc:display ranlib-cmd " " 
+                           (arc:string-list->string* ranlib-args " ") #\nl)
+              (if (not (equal? (sys:execute ranlib-cmd ranlib-args) 0))
                   (arc:msg "failed to run ranlib on " libnm #\nl)))))
     libnm))
 
@@ -58,8 +58,8 @@
 (define (arc:<lib-cygwin>-make-share-lib self libnm soname 
                                           objs libdirs deplibs
                                           rpath)
-  (if (arc:sys 'file-exists? libnm)
-      (arc:sys 'remove-file libnm))
+  (if (sys:file-exists? libnm)
+      (sys:remove-file libnm))
 
   (let* ((libnmp (arc:string->path libnm))
          (def (arc:path->string
@@ -82,37 +82,36 @@
 ;                               (arc:path-last-comp libnmp)))
 ;                             "_loader"))
 ;                           "a")))
-         (dll1 (string-append 
-                "dlltool --export-all "
-                "--output-def " def
-                " "
-                (arc:string-list->string* objs " ")))
-         (dll2 (string-append
-                "dllwrap -o " libnm " "
-                "--dllname " dllname " "
-                "--def " def " "
-                (arc:string-list->string* objs " ") " "
-                (arc:string-list->string* deplibs " ")))
-         (dll3 (string-append
-                "dlltool --def " def " "
-                "--dllname " dllname " "
-                "--output-lib " import-libname))
+         (dll1-cmd "dlltool")
+         (dll1-args (append (list "--export-all" "--output-def" def) objs))
+         (dll2-cmd "dllwrap")
+         (dll2-args (append (append (list "-o " libnm
+                                          "--dllname" dllname
+                                          "--def" def)
+                                    objs)
+                            deplibs))
+         (dll3-cmd "dlltool")
+         (dll3-args (list "--def" def
+                          "--dllname" dllname
+                          "--output-lib" import-libname))
          )
-    (arc:display dll1 #\nl)
+    (arc:display dll1-cmd " " (arc:string-list->string* dll1-args " ") #\nl)
     
-    (if (not (equal? (arc:sys 'system dll1) 0))
+    (if (not (equal? (sys:execute dll1-cmd dll1-args) 0))
         (arc:throw 'exec 
                    (string-append "failed to create library " libnm
                                   " (dlltool)"))
         (begin
-          (arc:display dll2 #\nl)
-          (if (not (equal? (arc:sys 'system dll2) 0))
+          (arc:display dll2-cmd " "
+                       (arc:string-list->string* dll2-args " ") #\nl)
+          (if (not (equal? (sys:execute dll2-cmd dll2-args) 0))
               (arc:throw 'exec 
                          (string-append "failed to create library " libnm
                                         " (dllwrap)"))
               (begin
-                (arc:display dll3 #\nl)
-                (if (not (equal? (arc:sys 'system dll3) 0))
+                (arc:display dll3 " " 
+                             (arc:string-list->string* dll3-args " ") #\nl)
+                (if (not (equal? (sys:execute dll3-cmd dll3-args) 0))
                     (arc:throw 'exec 
                                (string-append "failed to create library " libnm
                                               " (loader)"))

@@ -34,7 +34,7 @@
 (define (arc:keyword? key)
   (and (symbol? key)
        (let ((ks (symbol->string key)))
-         (eq? (string-ref ks (- (string-length ks) 1)) #\:))))
+         (equal? (string-ref ks (- (string-length ks) 1)) #\:))))
 (define (arc:keyword->symbol keyw)
   (if (symbol? keyw)
       (let ((ks (symbol->string keyw)))
@@ -124,7 +124,7 @@
                                       #f))
                          (keycheck (arc:keytable-valid-keypair? 
                                     table key nextval)))
-                    (if (not (eq? keycheck ':ok))
+                    (if (not (equal? keycheck ':ok))
                         (begin
                           (arc:log 'error 
                                    keycheck " (task: " task-name ", value: "
@@ -142,8 +142,8 @@
           (if (null? ta)
               retv
               (loop2 (cond 
-                      ((eq? (caddar ta) 'optional) retv)
-                      ((eq? (caddar ta) 'required) 
+                      ((equal? (caddar ta) 'optional) retv)
+                      ((equal? (caddar ta) 'required) 
                        (if (assoc (caar ta) rx)
                            retv
                            ;; the required value has not been defined!

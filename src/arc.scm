@@ -14,8 +14,25 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(define %arc:home% (or (sys:getenv "ARC_HOME")
+                       "/usr/share/arc"))
+
+(define %arc:scheme-impl% 'asc)
+
+;; setup the program arguments
+(define %arc:argv% *args*)
+
+;;(load (string-append %arc:home% "/strings.scm"))
+;;(load (string-append %arc:home% "/logical.scm"))
+
+;; load system specific code
+;;(load (string-append %arc:home% "/oop.scm"))
+;;(load (string-append %arc:home% "/sys.scm"))
+;;(load (string-append %arc:home% "/sys-scm.scm"))
+
+
 ;; setup the require/provide system
-(define %arc:debug% (let ((ff (getenv "ARC_DEBUG")))
+(define %arc:debug% (let ((ff (sys:getenv "ARC_DEBUG")))
                       (if (and ff (equal? ff "yes")) #t #f)))
 
 ;; define global variables and flags
@@ -54,7 +71,7 @@
 
 
 
-(if (arc:sys 'file-exists? (string-append %arc:home% "/version.scm"))
+(if (sys:file-exists? (string-append %arc:home% "/version.scm"))
     (load (string-append %arc:home% "/version.scm"))
     (define %arc:version% "?"))
 
@@ -67,7 +84,7 @@
 ;; set up the include path
 ;; ----------------------------------------------------------------------
 (define %arc:arc-incl-path% 
-  (let ((ip (or (getenv "ARC_INCL_PATH")
+  (let ((ip (or (sys:getenv "ARC_INCL_PATH")
                 (arc:include-path))))
     (if ip
         (append (append (arc:split-string ip (arc:pathlist-sep))
@@ -85,34 +102,27 @@
                  "system name:        " %arc:sysnm% #\nl
                  "arc home:           " %arc:home% #\nl))
 
-(define %arc:include-list%
-  '("require.scm"
-    "getopt.scm"
-    "misc.scm"
-    "path.scm"
-    "hash.scm"
-    "eval.scm"
-    "arcconf.scm"
-    "show.scm"
-    "implicit.scm"
-    "ctx.scm"
-    "meta.scm"
-    "deps.scm"
-    "task-util.scm"
-    "traverse.scm"
-    "attrval.scm"
-    "filter.scm"
-    "pregexp.scm"
-    "fnmatch.scm"
-    "handler-factory.scm"
-    "bt-tasks.scm"))
+(load (string-append %arc:home% "/require.scm"))
+(load (string-append %arc:home% "/getopt.scm"))
+(load (string-append %arc:home% "/misc.scm"))
+(load (string-append %arc:home% "/path.scm"))
+(load (string-append %arc:home% "/hash.scm"))
+(load (string-append %arc:home% "/eval.scm"))
+(load (string-append %arc:home% "/arcconf.scm"))
+(load (string-append %arc:home% "/show.scm"))
+(load (string-append %arc:home% "/implicit.scm"))
+(load (string-append %arc:home% "/ctx.scm"))
+(load (string-append %arc:home% "/meta.scm"))
+(load (string-append %arc:home% "/deps.scm"))
+(load (string-append %arc:home% "/task-util.scm"))
+(load (string-append %arc:home% "/traverse.scm"))
+(load (string-append %arc:home% "/attrval.scm"))
+(load (string-append %arc:home% "/filter.scm"))
+(load (string-append %arc:home% "/pregexp.scm"))
+(load (string-append %arc:home% "/fnmatch.scm"))
+(load (string-append %arc:home% "/handler-factory.scm"))
+(load (string-append %arc:home% "/bt-tasks.scm"))
   
-(let loop ((fn %arc:include-list%))
-  (if (null? fn)
-      #t
-      (begin
-        (load (string-append %arc:home% "/" (car fn)))
-        (loop (cdr fn)))))
 
 
 ;; display a help text
@@ -180,7 +190,7 @@
                       ;; store the current directory
                       (set! %arc:start-dir% (arc:path-cwd))
                       ;; change to new working directory
-                      (arc:sys 'chdir *arc:optarg*)))
+                      (sys:change-dir *arc:optarg*)))
           ((help) (begin
                     (arc:display-help)
                     (quit)))

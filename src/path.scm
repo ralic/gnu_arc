@@ -114,10 +114,10 @@
         "")))
 
 (define (arc:path-cwd)
-  (arc:string->path (arc:sys 'getcwd)))
+  (arc:string->path (sys:getcwd)))
 
 (define (arc:home-dir)
-  (arc:string->path (arc:sys 'homedir)))
+  (arc:string->path (sys:homedir)))
 
 (define (arc:path-absolute? path)
   (and (list? path)
@@ -182,12 +182,12 @@
 (define *arc:file-counter* (arc:make-counter 0 1))
 
 (define (arc:temp-path)
-  (arc:string->path (arc:sys 'tempdir)))
+  (arc:string->path (sys:tempdir)))
 
 (define (arc:temp-file-name name)
   (arc:path->string
    (arc:path-append (arc:temp-path)
-                    (string-append "arc-" (number->string (arc:sys 'getpid)) "-"
+                    (string-append "arc-" (number->string (sys:getpid)) "-"
                                    name "-"
                                    (number->string (*arc:file-counter*))))))
 

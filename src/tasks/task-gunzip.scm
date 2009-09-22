@@ -52,15 +52,15 @@
 	    (= (string-length dest) 0))
 	(arc:log 'fatal "invalid file names in gunzip"))
 
-    (if (arc:sys 'file-exists? fn)
+    (if (sys:file-exists? fn)
 	(begin
-	  (if (arc:sys 'file-exists? dest)
+	  (if (sys:file-exists? dest)
 	      (if force?
 		  (begin
-		    (arc:sys 'remove-file dest)
+		    (sys:remove-file dest)
 		    (set! really-do #t))
-		  (let ((mt-fn (arc:sys 'get-mtime fn))
-			(mt-dest (arc:sys 'get-mtime dest)))
+		  (let ((mt-fn (sys:mtime fn))
+			(mt-dest (sys:mtime dest)))
 		    (set! really-do (> mt-fn mt-dest))) ))
 	  
 	  (if really-do

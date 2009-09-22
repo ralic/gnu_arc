@@ -18,30 +18,30 @@
 (for-each 
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "meta-inf"))
-          (dir (if (arc:sys 'file-exists? (arc:path->string pth))
-                   (arc:sys 'opendir (arc:path->string pth))
+          (dir (if (sys:file-exists? (arc:path->string pth))
+                   (sys:opendir (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (arc:sys 'readdir dir) (arc:sys 'readdir dir)))
+           (do ((fn (sys:readdir dir) (sys:readdir dir)))
                ((not fn) #t)
              (if (arc:string-suffix? fn ".decl")
                  (begin
                    (arc:log 'verbose "load '" (arc:path-append pth fn) "'")
                    (arc:load (arc:path->string (arc:path-append pth fn))))))
-           (arc:sys 'closedir dir)))))
+           (sys:closedir dir)))))
  %arc:arc-incl-path%)
 
 ;; load all tasks in the subdirectory "tasks"
 (for-each 
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "tasks"))
-          (dir (if (arc:sys 'file-exists? (arc:path->string pth))
-                   (arc:sys 'opendir (arc:path->string pth))
+          (dir (if (sys:file-exists? (arc:path->string pth))
+                   (sys:opendir (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (arc:sys 'readdir dir) (arc:sys 'readdir dir)))
+           (do ((fn (sys:readdir dir) (sys:readdir dir)))
                ((not fn) #t)
              (if (and (arc:string-prefix? fn "task-")
                       (arc:string-suffix? fn ".scm"))
@@ -50,7 +50,7 @@
                                 (arc:path-without-last-ext 
                                  (arc:string->path fn))))
                               (arc:path->string (arc:path-append pth fn)))))
-           (arc:sys 'closedir dir)))))
+           (sys:closedir dir)))))
  %arc:arc-incl-path%)
 
 

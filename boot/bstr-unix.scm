@@ -17,14 +17,8 @@
 ;; bootstrapping code for unix/bsd-alike systems: linux, bsds, sunos
 
 (define (prepare-script)
-  (arc:sys 'mkdirs "../app")
-  (let ((port (open-output-file "../app/arc"))
-        (scheme-cmd (cond 
-                     ((string-ci=? %arc:impl% "scm") 'scm)
-                     ((string-ci=? %arc:impl% "asc") 'asc)
-                     ((string-ci=? %arc:impl% "guile") 'guile)
-                     ((string-ci=? %arc:impl% "ksi") 'ksi)
-                     (else 'asc))) )
+  (sys:mkdirs "../app")
+  (let ((port (open-output-file "../app/arc")))
     (arc:pdisplay port 
                   "#!/bin/sh" #\nl
                   #\nl
@@ -33,39 +27,31 @@
                   "  export ARC_HOME" #\nl
                   "fi" #\nl
                   #\nl
-                  (case scheme-cmd
-                    ((scm) "scm $ARC_HOME/arc-scm.scm $*" )
-                    ((guile) "guile -l $ARC_HOME/arc-guile.scm -- $*")
-                    ((asc) "asc -s $ARC_HOME/arc-asc.scm -- $*")
-                    ((ksi) "ksi -s $ARC_HOME/arc-ksi.scm -- $*"))
+                  "asc -s $ARC_HOME/arc.scm -- $*"
                   #\nl)
     (close-output-port port)
-    (arc:sys 'chmod "../app/arc" #o755)) )
+    (sys:chmod "../app/arc" 'exec)) )
 
 (define (bootstrap-script)
-  (let ((port (open-output-file "../arc"))
-        (scheme-cmd (cond 
-                     ((string-ci=? %arc:impl% "scm") 'scm)
-                     ((string-ci=? %arc:impl% "asc") 'asc)
-                     ((string-ci=? %arc:impl% "guile") 'guile)
-                     ((string-ci=? %arc:impl% "ksi") 'ksi)
-                     (else 'asc))) )
+  (let ((port (open-output-file "../arc")))
     (arc:pdisplay port 
                   "#!/bin/sh" #\nl
                   #\nl
                   "ARC_HOME=" %arc:src-dir% #\nl
                   "export ARC_HOME" #\nl
+                  "ASC_INIT_DIR=" %arc:app-dir% #\nl
+                  "export ASC_INIT_DIR" #\nl
                   "exec `dirname $0`/app/arc $*" #\nl)
     (close-output-port port)
-    (arc:sys 'chmod "../arc" #o755)) )
+    (sys:chmod "../arc" 'exec)) )
 
 (define (include-path)
-  (string-append %arc:path% ":"
-                 "/usr/local/share/arc" ":"
-                 "/usr/share/arc" ":"
+  (string-append %arc:path%                  ":"
+                 "/usr/local/share/arc"      ":"
+                 "/usr/share/arc"            ":"
                  "/usr/local/share/arc/site" ":"
-                 "/usr/share/arc/site" ":" 
-                 "/usr/local/lib/arc" ":" 
+                 "/usr/share/arc/site"       ":" 
+                 "/usr/local/lib/arc"        ":" 
                  "/usr/lib/arc"))
 
 

@@ -49,10 +49,10 @@
                  (arc:context-script-home (arc:context-current))
                  '()))
             ".arc")))
-    (if (arc:sys 'file-exists? (arc:path->string p))
+    (if (sys:file-exists? (arc:path->string p))
         p
         (begin
-          (arc:sys 'mkdirs (arc:path->string p))
+          (sys:mkdirs (arc:path->string p))
           p))))
 
 ;; returns the dependency directory as a path object
@@ -63,10 +63,10 @@
                  (arc:context-script-home (arc:context-current))
                  '()))
             (arc:string->path %arc:deps-directory%))))
-    (if (arc:sys 'file-exists? (arc:path->string p))
+    (if (sys:file-exists? (arc:path->string p))
         p
         (begin
-          (arc:sys 'mkdirs (arc:path->string p))
+          (sys:mkdirs (arc:path->string p))
           p))))
 
 (define (arc:deps? deps)
@@ -124,7 +124,7 @@
     (arc:string-list->string x)))
 
 (define (arc:load-deps-file fn)
-  (if (arc:sys 'file-exists? fn)
+  (if (sys:file-exists? fn)
       (let* ((port (open-input-file fn))
              (deps (read port)))
         (close-input-port port)
@@ -132,7 +132,7 @@
       #f))
 
 (define (arc:save-deps-file fn deps)
-  (if (arc:sys 'file-exists? fn)
+  (if (sys:file-exists? fn)
       (delete-file fn))
   (let ((port (open-output-file fn)))
     ;; produce some informational stuff
@@ -151,7 +151,7 @@
 ;; in the modification times in the deps cons'
 (define (arc:deps-determine-mtime deps)
   (for-each (lambda (fc)
-              (set-cdr! fc (arc:sys 'mtime (car fc))) )
+              (set-cdr! fc (sys:mtime (car fc))) )
             (cadr deps))
   deps)
 
@@ -164,7 +164,7 @@
 ;; for //ofile// has changed as passed in as //deps//.  The mtime slots in
 ;; //deps// are updated to the real mtime values from the file system.
 (define (arc:mtime-file-changed? deps ofile)
-  (let ((retv (let ((mtime (arc:sys 'mtime ofile))
+  (let ((retv (let ((mtime (sys:mtime ofile))
                     (dps (arc:deps-determine-mtime deps)))
                 (let loop ((fc (cadr dps)))
                   (if (null? fc)
@@ -227,7 +227,7 @@
                                      "deps.db")))
 
 (define (arc:deps-db-load-db dbn)
-  (if (eq? %arc:deps-database% 'unloaded)
+  (if (equal? %arc:deps-database% 'unloaded)
       (begin
         (set! %arc:deps-database% (or (arc:load-deps-file dbn)
                                       (make-hash-table %arc:deps-database-size%)))

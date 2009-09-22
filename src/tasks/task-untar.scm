@@ -66,7 +66,7 @@
          (absp (arc:aval 'absolute-paths? props #f))
          (outdir (arc:aval 'outdir props #f))
          (olddir (if outdir
-                     (arc:sys 'getcwd) 
+                     (sys:getcwd) 
                      #f))
          (tfn (if outdir
                   (arc:path->string (arc:path-append (arc:string->path olddir) tfn*))
@@ -77,12 +77,12 @@
 	(arc:log 'fatal "invalid tar-file name"))
 
     (if (and outdir
-             (not (arc:sys 'file-directory? outdir)))
+             (not (sys:file-directory? outdir)))
         (arc:log 'info "out directory '" outdir "' not found")
 
         (begin
           (arc:log 'debug "extract tar '" tfn "'")
-          (if (not (arc:sys 'file-exists? tfn))
+          (if (not (sys:file-exists? tfn))
               (arc:log 'info "tar file '" tfn "' does not exist")
               (let ((tarcmd (string-append "tar xv"
                                            (if absp "P" "")
@@ -97,12 +97,11 @@
                                            tfn 
                                            " > " %arc:untar-tmp-list%)) )
                 (if outdir
-                    (arc:sys 'chdir outdir))
+                    (sys:change-dir outdir))
 
                 ;; create the base directory for the tmp directory
-                (arc:sys 'mkdirs 
-                 (arc:path->string (arc:path-without-last-comp 
-                                    (arc:string->path %arc:untar-tmp-list%))))
+                (sys:mkdirs (arc:path->string (arc:path-without-last-comp 
+                                               (arc:string->path %arc:untar-tmp-list%))))
                 
                 (arc:display tarcmd #\nl)
                 (if (not (= (system tarcmd) 0))
@@ -113,12 +112,12 @@
                         (arc:log 'info 
                                  "failed to extract tar file '" 
                                  tfn "'")))
-                (if (arc:sys 'file-exists? %arc:untar-tmp-list%)
+                (if (sys:file-exists? %arc:untar-tmp-list%)
                     (let ((lf (arc:-tar-read-list-of-extracted-files %arc:untar-tmp-list%)))
-                      (arc:sys 'remove-file %arc:untar-tmp-list%)
+                      (sys:remove-file %arc:untar-tmp-list%)
                       (set! retv lf)))
                 (if outdir
-                    (arc:sys 'chdir olddir)) ))))
+                    (sys:change-dir olddir)) ))))
     retv))
 
 (arc:register-task 'untar arc:untar arc:untar-keywords)

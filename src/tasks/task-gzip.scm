@@ -64,17 +64,17 @@
 	    (= (string-length zfn) 0))
 	(arc:log 'fatal "invalid file names in gzip"))
 
-    (if (arc:sys 'file-exists? fn)
-	(begin
-	  (if (arc:sys 'file-exists? zfn)
-	      (arc:sys 'remove-file zfn))
-	  
-	  (let ((gzipcmd (string-append "gzip -c " cl fn " > " zfn)))
-	    (arc:display gzipcmd #\nl)
-	    (if (not (equal? (system gzipcmd) 0))
-		(arc:log 'error "failed to gzip file '" fn "'")
-		#t)))
-	(arc:log 'info "gzip: file '" fn "' does not exist")) )
+    (if (sys:file-exists? fn)
+        (begin
+          (if (sys:file-exists? zfn)
+              (sys:remove-file zfn))
+          
+          (let ((gzipcmd (string-append "gzip -c " cl fn " > " zfn)))
+            (arc:display gzipcmd #\nl)
+            (if (not (equal? (system gzipcmd) 0))
+                (arc:log 'error "failed to gzip file '" fn "'")
+                #t)))
+        (arc:log 'info "gzip: file '" fn "' does not exist")) )
   '<unspecified>)
 
 (arc:register-task 'gzip arc:gzip arc:gzip-keywords)

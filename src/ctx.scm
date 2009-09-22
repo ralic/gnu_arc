@@ -37,7 +37,7 @@
 (define %ARC:ID-SLOT% 3)
 
 (define %ARC:STMT-DEPS-SLOT% 0)		; the dependency list
-(define %ARC:STMT-VAL-SLOT% 1)		; to take the return value
+(define %ARC:STMT-VAL-SLOT%  1)		; to take the return value
 (define %ARC:STMT-META-SLOT% 2)		; meta info slot
 (define %ARC:STMT-BODY-SLOT% 3)		; the body
 
@@ -66,7 +66,7 @@
   (if (not (null? %arc:contexts%))
       (let ((old-dir (arc:-ctx-meta-info (car %arc:contexts%) 'old-cwd)))
         (if old-dir
-            (arc:sys 'chdir old-dir))
+            (sys:change-dir old-dir))
         (set! %arc:contexts% (cdr  %arc:contexts%)))
       (begin 
         (arc:log 'error "no context to drop. bad stacking")
@@ -103,14 +103,14 @@
   (if (arc:context? ctx)
       (begin
         (if (not (arc:-ctx-meta-info ctx 'old-cwd))
-            (arc:-ctx-meta-info! ctx 'old-cwd (arc:sys 'getcwd)))
+            (arc:-ctx-meta-info! ctx 'old-cwd (sys:getcwd)))
         (let* ((bdp (arc:string->path bd))
                (tp (if (arc:path-absolute? bdp)
                        bdp
                        (arc:path-append (arc:path-cwd) bdp))) 
                (tps (arc:path->string (arc:path-normalize tp))))
           (arc:-ctx-meta-info! ctx 'basedir tps)
-          (if (not (arc:sys 'chdir tps))
+          (if (not (sys:change-dir tps))
               (begin
                 (arc:msg "failed to change to directory '" tps "'.  Aborted")
                 (quit)))))))
@@ -177,10 +177,10 @@
       (arc:-ctx-meta-info ctx 'script-home)))
 
 (define (arc:context-os-match stmt os)
-  (if stmt
+  (if (and stmt os)
       (let* ((oss (arc:stmt-os stmt)))
         (cond
-         ( (list? oss)   (list? (memq os oss)) )
+         ( (list? oss)   (list? (member os oss)) )
          ( (symbol? oss) (or (equal? oss 'all)
                              (equal? oss os)) )
          ( else #f )))
@@ -195,13 +195,13 @@
         (if (arc:context-stmt-redefined? val-assoc 
                                          (or (member 'os props) 'all))
             (arc:display "Statement '" name "' redefined.  Ignored" #\nl)
-	    (vector-set! ctx %ARC:STMT-SLOT%
-			 (append (vector-ref ctx %ARC:STMT-SLOT%)
-				 (list (let ((s (arc:make-stmt name)))
-					 (arc:stmt-dependencies! s deps)
-					 (arc:stmt-properties! s props)
-					 (arc:stmt-body! s cmd)
-					 s))) )))))
+            (vector-set! ctx %ARC:STMT-SLOT%
+                         (append (vector-ref ctx %ARC:STMT-SLOT%)
+                                 (list (let ((s (arc:make-stmt name)))
+                                         (arc:stmt-dependencies! s deps)
+                                         (arc:stmt-properties! s props)
+                                         (arc:stmt-body! s cmd)
+                                         s))) )))))
 
 ;; returns the complete statement assoc-frame
 (define (arc:context-stmt ctx name . os)
@@ -294,9 +294,9 @@
 (define (arc:-stmt-meta-info stmt key default)
   (if (pair? stmt)
       (let* ((mi (vector-ref (cdr stmt) %ARC:STMT-META-SLOT%))
-	     (d (if (list? mi)
-		    (member key mi)
-		    #f)))
+             (d (if (list? mi)
+                    (member key mi)
+                    #f)))
         (if d
             (cadr d)
             default))

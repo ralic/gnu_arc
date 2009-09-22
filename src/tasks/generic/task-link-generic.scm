@@ -77,49 +77,39 @@
                      libdirs autolibdirs shared nostdlib files autolibs libs
                      rpath)
          (let* ((fullnm (self 'make-app-name outdir appnm appext))
-                (linkcmd (string-append 
-                          (self 'link-cmd) " "
-                          (if libdirs
-                              (string-append (arc:string-list->string* libdirs
-                                                                       " -L")
-                                             " ")
-                              "")
-                          (if autolibdirs
-                              (string-append (arc:string-list->string* 
-                                              autolibdirs " -L")
-                                             " ")
-                              "")
-                          (if shared
-                              (string-append (self 'shared-flag) " ")
-                              (string-append (self 'static-flag) " "))
-                          (if (and shared
-                                   rpath)
-                              (string-append (self 'rpath-option rpath) " ")
-                              "")
-                          (if nostdlib
-                              (string-append (self 'nostdlib-flag) " ")
-                              "")
-                          (self 'outfile-flag) " " fullnm " "
-                          (if files
-                              (string-append (arc:string-list->string* files
-                                                                       " ")
-                                             " ")
-                              "")
-                          (if autolibs
-                              (string-append (arc:string-list->string* autolibs
-                                                                       " -l")
-                                             " ")
-                              "")
-                          (if libs
-                              (string-append (arc:string-list->string* 
-                                              libs " -l")
-                                             " ")
-                              "") )))
+                (link-cmd (self 'link-cmd))
+                (link-args (arc:list-appends
+                            (if libdirs
+                                (arc:annotate-list libdirs "-L")
+                                '())
+                            (if autolibdirs
+                                (arc:annotate-list autolibdirs "-L")
+                                '())
+                            (if shared
+                                (self 'shared-flag)
+                                (self 'static-flag))
+                            (if (and shared
+                                     rpath)
+                                (self 'rpath-option rpath)
+                                '())
+                            (if nostdlib
+                                (self 'nostdlib-flag)
+                                '())
+                            (self 'outfile-flag) fullnm
+                            (if files
+                                files
+                                '())
+                            (if autolibs
+                                (arc:annotate-list autolibs "-l")
+                                '())
+                            (if libs
+                                (arc:annotate-list libs "-l")
+                                '()) )))
            (arc:log 'debug "linking " fullnm " ...")
 
-           (arc:display linkcmd #\nl)
+           (arc:display link-cmd " " (arc:string-list->string* link-args " ") #\nl)
 
-           (if (not (= (arc:sys 'system linkcmd) 0))
+           (if (not (= (sys:execute link-cmd link-args) 0))
                (arc:log 'info "linking '" fullnm "' failed"))
       
            fullnm)) )

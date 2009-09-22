@@ -149,13 +149,13 @@
                   ;; unless the library is registered with the system
                   ;; e.g. calling ldconfig
                   (if (not (equal? linknm soname))
-                      (arc:sys 'symlink 
+                      (sys:make-symlink 
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path realnm)))
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path soname)))))
                   (if (not (equal? linknm realnm))
-                      (arc:sys 'symlink 
+                      (sys:make-symlink
                        (arc:path->string (arc:path-absolutize 
                                           (arc:string->path realnm)))
                        (arc:path->string (arc:path-absolutize 
@@ -170,13 +170,13 @@
 
 
 (define (arc:deps-lib-needs-rebuild? libnm objs)
-  (if (not (arc:sys 'file-exists? libnm))
+  (if (not (sys:file-exists? libnm))
       #t
-      (let ((libmt (arc:sys 'mtime libnm)))
+      (let ((libmt (sys:mtime libnm)))
         (let loop ((obj objs))
           (if (null? obj)
               #f
-              (or (< libmt (arc:sys 'mtime (car obj)))
+              (or (< libmt (sys:mtime (car obj)))
                   (loop (cdr obj))))))))
 
 

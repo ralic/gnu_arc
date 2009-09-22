@@ -104,34 +104,37 @@
          (pattern (arc:path->string (arc:path-replace-last-ext 
                                      (arc:path-last-comp sc)
                                      "info")))
-         (cwd (arc:sys 'getcwd))
-         (cmd (string-append "makeinfo " 
-                             srcp
-                             (if no-split
-                                 (string-append " --no-split") "")))
+         (cwd (sys:getcwd))
+         (mi-cmd "makeinfo")
+         (mi-args (arc:list-appends srcp
+                                    (if no-split
+                                        "--no-split"
+                                        '()) ))
          (retv #f))
-    (arc:sys 'chdir destdir)
-    (arc:display cmd #\nl)
-    (if (not (= (arc:sys 'system cmd) 0))
+    (sys:change-dir destdir)
+
+    (arc:display-command mi-cmd mi-args)
+
+    (if (not (= (sys:execute mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing info '" srcnm "' failed")
           (set! retv #f))
         ;; TODO: find all info files!
         (set! retv (arc:-texi-format-info-find-info-files destdirp pattern)))
     
-    (arc:sys 'chdir cwd)
+    (sys:change-dir cwd)
     retv))
 
 ;; find all xxx.info files in the current working directory
 (define (arc:-texi-format-info-find-info-files dirnp pattern)
-  (let ((dp (arc:sys 'opendir "."))
+  (let ((dp (sys:opendir "."))
         (retv '()))
-    (do ((fn (arc:sys 'readdir dp) (arc:sys 'readdir dp)))
+    (do ((fn (sys:readdir dp) (sys:readdir dp)))
         ((not fn) 'done)
       (if (arc:string-prefix? fn pattern)
           (set! retv (append retv (list (arc:path->string 
                                          (arc:path-append dirnp fn)))))))
-    (arc:sys 'closedir dp)
+    (sys:closedir dp)
     retv))
 
 
@@ -144,21 +147,22 @@
                                      (arc:path-last-comp sc)
                                      "txt")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys 'getcwd))
-         (cmd (string-append "makeinfo --no-headers " 
-                             srcp
-                             " > " destfnm))
+         (cwd (sys:getcwd))
+         (mi-cmd "makeinfo")
+         (mi-args (arc:list-appends "--no-headers"
+                                    srcp
+                                    ">" destfnm))
          (retv #f))
-    (arc:sys 'chdir destdir)
-    (arc:display cmd #\nl)
-    (if (not (= (arc:sys 'system cmd) 0))
+    (sys:change-dir destdir)
+    (arc:display-command mi-cmd mi-args)
+    (if (not (= (sys:execute* mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing plain '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys 'chdir cwd)
+    (sys:change-dir cwd)
     retv))
 
 ;; formating pdf text format from texinfo.
@@ -170,19 +174,20 @@
                                      (arc:path-last-comp sc)
                                      "pdf")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys 'getcwd))
-         (cmd (string-append "texi2pdf " srcp))
+         (cwd (sys:getcwd))
+         (mi-cmd "texi2pdf")
+         (mi-args (list srcp))
          (retv #f))
-    (arc:sys 'chdir destdir)
-    (arc:display cmd #\nl)
-    (if (not (= (arc:sys 'system cmd) 0))
+    (sys:change-dir destdir)
+    (arc:display-command mi-cmd mi-args)
+    (if (not (= (sys:execute mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing pdf '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys 'chdir cwd)
+    (sys:change-dir cwd)
     retv))
 
 ;; formating dvi text format from texinfo.
@@ -194,19 +199,20 @@
                                      (arc:path-last-comp sc)
                                      "dvi")))
          (srcp (arc:path->string (arc:path-last-comp sc)))
-         (cwd (arc:sys 'getcwd))
-         (cmd (string-append "texi2dvi " srcp))
+         (cwd (sys:getcwd))
+         (mi-cmd "texi2dvi")
+         (mi-args (list srcp))
          (retv #f))
-    (arc:sys 'chdir destdir)
-    (arc:display cmd #\nl)
-    (if (not (= (arc:sys 'system cmd) 0))
+    (sys:change-dir destdir)
+    (arc:display-command mi-cmd mi-args)
+    (if (not (= (sys:execute mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing dvi '" srcnm "' failed")
           (set! retv #f))
         (set! retv (list (arc:path->string (arc:path-append destdirp 
                                                             destfnm)))))
     
-    (arc:sys 'chdir cwd)
+    (sys:change-dir cwd)
     retv))
 
 
@@ -225,27 +231,28 @@
          
          (pattern (arc:path->string (arc:path-replace-last-ext sc
                                                                "html")))
-         (cwd (arc:sys 'getcwd))
-         (cmd (string-append "makeinfo --html " 
-                             (if no-split
-                                 (string-append " --no-split ")
-                                 (if destnm
-                                     (string-append " -o " destnm " ")
-                                     ""))
-                             srcp))
+         (cwd (sys:getcwd))
+         (mi-cmd "makeinfo")
+         (mi-args (arc:list-appends "--html" 
+                                    (if no-split
+                                        "--no-split"
+                                        (if destnm
+                                            (list "-o" destnm)
+                                            '()))
+                                    srcp))
          (basedir (arc:path->string destdirp))
          (retv #f))
     
-    (arc:sys 'chdir basedir)
-    (arc:display cmd #\nl)
+    (sys:change-dir basedir)
+    (arc:display-command mi-cmd mi-args)
 
-    (if (not (= (arc:sys 'system cmd) 0))
+    (if (not (= (sys:execute mi-cmd mi-args) 0))
         (begin
-          (arc:sys 'chdir cwd)
+          (sys:change-dir cwd)
           (arc:throw 'error 
                      (string-append "processing info '" srcnm "' failed"))))
 
-    (arc:sys 'chdir cwd)
+    (sys:change-dir cwd)
 
     ;; TODO: find all info files!
     (if no-split

@@ -78,10 +78,10 @@
     
     (if destnm
         (begin
-          (if (arc:sys 'file-exists? destnm)
+          (if (sys:file-exists? destnm)
               (if force
                   (begin
-                    (arc:sys 'remove-file destnm)
+                    (sys:remove-file destnm)
                     (set! really-do #t)))
               (set! really-do #t))
           

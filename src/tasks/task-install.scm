@@ -76,19 +76,19 @@
 (arc:register-task 'install arc:install arc:install-keywords)
 
 (define (arc:install-file src dest strip group owner mode)
-  (if (arc:sys 'file-exists? src)
+  (if (sys:file-exists? src)
       (let* ((srcp (arc:string->path src))
              (destp (arc:string->path dest))
              (ndest (arc:path->string (arc:path-append 
                                        destp (arc:path-last-comp srcp)))))
         (arc:display "install " src " to " ndest "(" (or mode 'exec) ")" #\nl)
-        (arc:sys 'mkdirs dest)
-        (arc:sys 'copy-file src ndest)
+        (sys:mkdirs dest)
+        (sys:copy-file src ndest)
         
         ;; TODO: change owner, group flags, strip binary date
         
         (if mode
-            (arc:sys 'chmod ndest mode))
+            (sys:chmod ndest mode))
         ndest)
       (begin
         (arc:log 'info "source file not found: " src)
@@ -122,9 +122,9 @@
                               (arc:string->path dest)
                               (arc:path-last-comp 
                                (arc:string->path shared-lib-soname))))))
-                (arc:sys 'symlink real-lib target)
+                (sys:make-symlink real-lib target)
                 (if mode
-                    (arc:sys 'chmod target mode))))
+                    (sys:chmod target mode))))
 
           (if (and (not (equal? shared-lib shared-lib-linkname))
                    (not (equal? shared-lib-soname shared-lib-linkname)))
@@ -133,9 +133,9 @@
                               (arc:string->path dest)
                               (arc:path-last-comp 
                                (arc:string->path shared-lib-linkname))))))
-                (arc:sys 'symlink real-lib target)
+                (sys:make-symlink real-lib target)
                 (if mode
-                    (arc:sys 'chmod target mode))))
+                    (sys:chmod target mode))))
           ))
     ))
         

@@ -23,7 +23,7 @@
       (if (<= (arc:path-length cp) 0)
           #f
           (let ((nm (arc:path->string (arc:path-append cp nm))))
-            (if (arc:sys 'file-exists? nm)
+            (if (sys:file-exists? nm)
                 nm
                 (if (not %arc:find-script-rec%)
                     #f

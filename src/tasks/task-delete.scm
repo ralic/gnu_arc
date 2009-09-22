@@ -45,11 +45,11 @@
                        (arc:log 'fatal "empty path")))))
     (arc:log 'debug "delete ... " pathnm)
     
-    (if (arc:sys 'file-exists? pathnm)
+    (if (sys:file-exists? pathnm)
         (if (arc:aval 'recursive? props #f)
-            (if (arc:sys 'remove-dir pathnm)
+            (if (sys:remove-dir pathnm)
                 (arc:log 'verbose "directory '" pathnm "' deleted"))
-            (if (arc:sys 'remove-file pathnm)
+            (if (sys:remove-file pathnm)
                 (arc:log 'verbose "file '" pathnm "' deleted")))
         (if (arc:aval 'ignore-missing? props #f)
             #f

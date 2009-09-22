@@ -29,24 +29,26 @@
 
 ;; compile a static library
 (define (arc:<lib-generic>-make-static-lib self libnm objs)
-  (if (arc:sys 'file-exists? libnm)
-      (arc:sys 'remove-file libnm))
+  (if (sys:file-exists? libnm)
+      (sys:remove-file libnm))
   
-  (let ((arcmd (string-append (self 'ar-cmd) " "
-                              (self 'replace-create-flag) " "
-                              libnm " "
-                              (arc:string-list->string* objs " ")))
-        (ranlibcmd (string-append (self 'ranlib-cmd) " " libnm)) )
+  (let ((ar-cmd (self 'ar-cmd))
+        (ar-args (arc:list-appends (self 'replace-create-flag)
+                                   libnm
+                                   objs))
+        (ranlib-cmd (self 'ranlib-cmd))
+        (ranlib-args (list libnm)) )
     
-    (arc:display arcmd #\nl)
+    (arc:display ar-cmd " " (arc:string-list->string* ar-args " ") #\nl)
     
-    (if (not (equal? (arc:sys 'system arcmd) 0))
+    (if (not (equal? (sys:execute ar-cmd ar-args) 0))
         (arc:msg "failed to create library " libnm #\nl)
 
         (if (self 'ranlib-needed?)
             (begin
-              (arc:display ranlibcmd #\nl)
-              (if (not (equal? (arc:sys 'system arcmd) 0))
+              (arc:display ranlib-cmd " " 
+                           (arc:string-list->string* ranlib-args " ") #\nl)
+              (if (not (equal? (sys:execute ranlib-cmd ranlib-args) 0))
                   (arc:msg "failed to run ranlib on " libnm #\nl)))))
     libnm))
 
@@ -56,33 +58,37 @@
 (define (arc:<lib-generic>-make-share-lib self libnm soname 
                                           objs libdirs deplibs
                                           rpath)
-  (if (arc:sys 'file-exists? libnm)
-      (arc:sys 'remove-file libnm))
+  (if (sys:file-exists? libnm)
+      (sys:remove-file libnm))
   
-  (let ((ldmd (string-append
-               (self 'ld-cmd) " "
-               (self 'ld-shared-flag) " "
-               (self 'ld-extra-flags) " "
-               (self 'ld-soname-flag soname) " "
-               (if rpath
-                   (string-append (self 'ld-rpath-option rpath) " ")
-                   "")
-               (if (and deplibs
-                        (not (null? deplibs)))
-                   (string-append (arc:string-list->string* libdirs " -L") " ")
-                   "")
-               ;; objects
-               (arc:string-list->string* objs " ") " "
-               ;; deplibs
-               (if (and deplibs
-                        (not (null? deplibs)))
-                   (string-append (arc:string-list->string* deplibs " -l") " ")
-                   "")
-               (self 'ld-outfile-flag) " " libnm)) )
+  (let ((ld-cmd (self 'ld-cmd))
+        (ld-args (arc:list-appends
+                  (self 'ld-cmd) 
+                  (self 'ld-shared-flag)
+                  (self 'ld-extra-flags)
+                  (self 'ld-soname-flag soname)
+                  (if rpath
+                      (self 'ld-rpath-option rpath)
+                      '())
+                  (if (and deplibs
+                           (not (null? deplibs)))
+                      (arc:annotate-list libdirs "-L")
+                      '())
 
-    (arc:display ldmd #\nl)
+                  ;; objects
+                  objs
+
+                  ;; deplibs
+                  (if (and deplibs
+                           (not (null? deplibs)))
+                      (arc:annotate-list deplibs "-l")
+                      '())
+                  (self 'ld-outfile-flag)
+                  libnm)) )
+
+    (arc:display ld-cmd " " (arc:string-list->string* ld-args " ") #\nl)
     
-    (if (not (equal? (arc:sys 'system ldmd) 0))
+    (if (not (equal? (sys:execute ld-cmd ld-args) 0))
         (begin
           (arc:msg "failed to create library " libnm #\nl)
           #f)
@@ -99,17 +105,17 @@
         
    ;; methods
    `((ar-cmd ,(lambda (self) "ar"))
-     (replace-create-flag ,(lambda (self) "rc"))
+     (replace-create-flag ,(lambda (self) '("rc")))
      (ranlib-cmd ,(lambda (self) "ranlib"))
      (ranlib-needed? ,(lambda (self) #t))
      (suffix-shared ,(lambda (self) "so"))
      (suffix-static ,(lambda (self) "a"))
 
      (ld-cmd ,(lambda (self) "gcc"))
-     (ld-shared-flag ,(lambda (self) "-shared"))
-     (ld-extra-flags ,(lambda (self) "-Wl,--export-dynamic"))
-     (ld-outfile-flag ,(lambda (self) "-o"))
-     (ld-soname-flag ,(lambda (self soname) ""))
+     (ld-shared-flag ,(lambda (self) '("-shared")))
+     (ld-extra-flags ,(lambda (self) '("-Wl,--export-dynamic")))
+     (ld-outfile-flag ,(lambda (self) '("-o")))
+     (ld-soname-flag ,(lambda (self soname) '()))
      (ld-rpath-option ,(lambda (self rpath)
                          (string-append "-Wl,-rpath=" 
                                         (arc:path->string

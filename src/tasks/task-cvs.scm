@@ -185,12 +185,12 @@
 (define (arc:cvs-handle-update compress-opt rev date dir files 
                                local? prune-dir? create-dir?)
   (let* ((cwd (if dir
-                  (arc:sys 'getcwd)
+                  (sys:getcwd)
                   #f)))
     (if cwd
         (begin
           (arc:log 'verbose "cvs/update: change to dir '" dir "'")
-          (arc:sys 'chdir dir)))
+          (sys:change-dir dir)))
     
     (let* ((tfn (arc:path->string (arc:path-append (arc:arc-tmp-directory)
                                                    "cvs-out")))
@@ -225,7 +225,7 @@
             (set! retv #f)))
       
       (if cwd 
-          (arc:sys 'chdir cwd))
+          (sys:change-dir cwd))
       
       ;; @todo write the output for the update command into a temporary file
       ;; and parse the output lines for the "U A R M C ?" characters.  This

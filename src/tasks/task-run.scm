@@ -84,11 +84,11 @@
     (if stdout-file
         (begin
           (arc:attrval-set! av 'stdout (hea:read-string-from-file stdout-file))
-          (arc:sys 'remove-file stdout-file)))
+          (sys:remove-file stdout-file)))
     (if stderr-file
         (begin
           (arc:attrval-set! av 'stderr (hea:read-string-from-file stderr-file))
-          (arc:sys 'remove-file stderr-file)))
+          (sys:remove-file stderr-file)))
     av))
   
 (define (arc:run props body)
@@ -113,9 +113,9 @@
         (if (string? indir)
             (let ((cwd (path:cwd))
                   (retv (arc:attrval)))
-              (arc:sys 'chdir indir)
+              (sys:change-dir indir)
               (set! retv (arc:-run-run cmd full-cmd-line capture?))
-              (arc:sys 'chdir cwd)
+              (sys:change-dir cwd)
               retv)
             (arc:-run-run cmd full-cmd-line capture?)) )) )
 
@@ -137,7 +137,7 @@
                      (if (null? sf)
                          #f
                          (let* ((dep (car sf))
-                                (sf-mtime (arc:sys 'mtime dep))
+                                (sf-mtime (sys:mtime dep))
                                 (dep-mtime (arc:deps-mtime deps dep)))
                            (or (not dep-mtime)
                                (< dep-mtime sf-mtime)
