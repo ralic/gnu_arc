@@ -151,9 +151,9 @@
 
 (stmt test-type
       (if (eq? (file-type src: "x") 'executable)
-          (echo "X: " (file-type src: "x") #\nl
-                "Y: " (file-type src: "y") #\nl
-                "Z: " (file-type src: "z") #\nl)))
+          (echo "X: " (file-type src: "x") #\newline
+                "Y: " (file-type src: "y") #\newline
+                "Z: " (file-type src: "z") #\newline)))
 
 
 
@@ -274,7 +274,13 @@
            prune-dir?: #t
            create-dir?: #t))
 
-      
+
+(stmt hello
+      info: "Calls a shell script"
+      (echo (run cmd: "./date-time.sh"
+                 args: '("hello" "world")
+                 capture?: #t)) )
+
 ;;Keep this comment at the end of the file 
 ;;Local variables:
 ;;mode: scheme
