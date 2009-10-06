@@ -1,7 +1,9 @@
+*~
 /app/
 /asc/asc
 /asc/*.o
 /asc/scmenv.h
+/boot/*~
 /bootstrap.sh
 /doc/arc.1
 /doc/arc.texinfo
@@ -19,6 +21,8 @@
 /doc/*.toc
 /doc/*.tp
 /doc/*.vr
+/doc/html/
+/doc/arc.dvi
 /doc/arc.pdf
 /arc.config
 /arc
