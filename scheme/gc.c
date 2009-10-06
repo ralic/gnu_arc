@@ -102,6 +102,11 @@ sexp sexp_sweep (sexp ctx, size_t *sum_freed_ptr) {
       size = sexp_heap_align(sexp_allocated_bytes(p));
       if ((! sexp_gc_mark(p)) && (! stack_references_pointer_p(ctx, p))) {
         sum_freed += size;
+        if (sexp_extobj_p(p)) {
+          sexp_extobj_isa_finalize_call(ctx, p);
+          sexp_extobj_obj(p) = NULL;
+        }
+
         if (((((char*)q)+(sexp_uint_t)sexp_car(q)) == (char*)p)
             && (q != h->free_list)) {
           /* merge q with p */

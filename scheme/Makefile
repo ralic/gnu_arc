@@ -44,6 +44,8 @@ XCPPFLAGS := $(CPPFLAGS) -Iinclude
 endif
 
 XLDFLAGS  := $(LDFLAGS) $(GCLDFLAGS) -lm
+#XCFLAGS   := -DDEBUG_VM -Wall -g $(CFLAGS)
+#XCFLAGS   :=  -Wall -g $(CFLAGS)
 XCFLAGS   := -Wall -O2 -g $(CFLAGS)
 
 INCLUDES = include/chibi/sexp.h include/chibi/config.h include/chibi/install.h
@@ -57,17 +59,26 @@ sexp.o: sexp.c gc.c $(INCLUDES) Makefile
 eval.o: eval.c debug.c opcodes.c include/chibi/eval.h $(INCLUDES) Makefile
 	$(CC) -c $(XCPPFLAGS) $(XCFLAGS) -o $@ $<
 
-main.o: main.c $(INCLUDES) Makefile
+main.o: main.c dirport.h fsys.h $(INCLUDES) Makefile
 	$(CC) -c $(XCPPFLAGS) $(XCFLAGS) -o $@ $<
 
-libchibi-scheme$(SO): eval.o sexp.o
+arc.o: arc.c dirport.h fsys.h $(INCLUDES) Makefile
+	$(CC) -c $(XCPPFLAGS) $(XCFLAGS) -o $@ $<
+
+libchibi-scheme$(SO): eval.o sexp.o dirport.o fsys.o
 	$(CC) $(CLIBFLAGS) -o $@ $^ $(XLDFLAGS)
 
-chibi-scheme$(EXE): main.o libchibi-scheme$(SO)
+chibi-scheme$(EXE): arc.o dirport.o fsys.o libchibi-scheme$(SO)
 	$(CC) $(XCPPFLAGS) $(XCFLAGS) -o $@ $< -L. -lchibi-scheme
 
-chibi-scheme-static$(EXE): main.o eval.o sexp.o
+chibi-scheme-static$(EXE): arc.o eval.o sexp.o dirport.o fsys.o
 	$(CC) $(XCFLAGS) $(STATICFLAGS) -o $@ $^ $(XLDFLAGS)
+
+dirport.o: dirport.c dirport.h include/chibi/eval.h $(INCLUDES) Makefile
+	$(CC) -c $(XCPPFLAGS) $(XCFLAGS) -o $@ $<
+
+fsys.o: fsys.c fsys.h include/chibi/eval.h $(INCLUDES) Makefile
+	$(CC) -c $(XCPPFLAGS) $(XCFLAGS) -o $@ $<
 
 clean:
 	rm -f *.o *.i *.s

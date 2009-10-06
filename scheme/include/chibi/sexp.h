@@ -80,12 +80,21 @@ enum sexp_types {
   SEXP_LIT,
   SEXP_STACK,
   SEXP_CONTEXT,
+  SEXP_EXTOBJ,
+  SEXP_FOREIGN
 };
 
 typedef unsigned long sexp_uint_t;
 typedef long sexp_sint_t;
 typedef unsigned char sexp_tag_t;
 typedef struct sexp_struct *sexp;
+typedef struct extobj_class extobj_class;
+
+typedef sexp (*foreign_call0)(sexp ctx);
+typedef sexp (*foreign_call1)(sexp ctx, sexp arg);
+typedef sexp (*foreign_call2)(sexp ctx, sexp arg1, sexp arg2);
+typedef sexp (*foreign_call3)(sexp ctx, sexp arg1, sexp arg2, sexp arg3);
+typedef sexp (*foreign_callX)(sexp ctx, sexp_uint_t num_args, sexp* args);
 
 struct sexp_gc_var_t {
   sexp *var;
@@ -196,8 +205,35 @@ struct sexp_struct {
       sexp_uint_t pos, depth, tailp, tracep;
       sexp bc, lambda, stack, env, fv, parent;
     } context;
+    struct {
+      const extobj_class* isa;
+      void* obj;
+    } extobj;
+    struct {
+      union {
+        foreign_call0 func0;
+        foreign_call1 func1;
+        foreign_call2 func2;
+        foreign_call3 func3;
+        foreign_callX funcX;
+      } calls;
+      const char*    name;
+      unsigned char  flags;
+      unsigned short num_args;
+    } foreign;
   } value;
 };
+
+typedef void (*extobj_free_func)(sexp ctx, void* obj);
+typedef void (*extobj_mark_func)(sexp ctx, sexp obj);
+typedef void (*extobj_display_func)(void* obj, sexp out);
+struct extobj_class {
+  extobj_free_func free_func;
+  extobj_mark_func mark_func;
+  extobj_display_func display_func;
+};
+
+
 
 #define SEXP_MAKE_IMMEDIATE(n)  ((sexp) ((n<<SEXP_EXTENDED_BITS) \
                                           + SEXP_EXTENDED_TAG))
@@ -322,6 +358,38 @@ sexp sexp_make_flonum(sexp ctx, double f);
 
 #define sexp_idp(x) \
   (sexp_symbolp(x) || (sexp_synclop(x) && sexp_symbolp(sexp_synclo_expr(x))))
+
+
+#define sexp_foreign_p(x)         (sexp_check_tag((x), SEXP_FOREIGN))
+#define sexp_foreign_call0(ctx, _f) ((_f)->value.foreign.calls.func0(ctx))
+#define sexp_foreign_call1(ctx, _f, arg1) \
+    ((_f)->value.foreign.calls.func1(ctx, arg1))
+#define sexp_foreign_call2(ctx, _f, arg1, arg2) \
+    ((_f)->value.foreign.calls.func2(ctx, arg1, arg2))
+#define sexp_foreign_call3(ctx, _f, arg1, arg2, arg3) \
+    ((_f)->value.foreign.calls.func3(ctx, arg1, arg2, arg3))
+#define sexp_foreign_call(ctx, _f, argc, args) \
+    ((_f)->value.foreign.calls.funcX(ctx, argc, args))
+#define sexp_foreign_func0(x)     (x->value.foreign.calls.func0)
+#define sexp_foreign_func1(x)     (x->value.foreign.calls.func1)
+#define sexp_foreign_func2(x)     (x->value.foreign.calls.func2)
+#define sexp_foreign_func3(x)     (x->value.foreign.calls.func3)
+#define sexp_foreign_func(x)     (x->value.foreign.calls.funcX)
+#define sexp_foreign_num_args(x) (x->value.foreign.num_args)
+#define sexp_foreign_flags(x) (x->value.foreign.flags)
+#define sexp_foreign_name(x)     ((x)->value.foreign.name)
+#define sexp_foreign_is_variadic_p(x) (sexp_foreign_flags(x) & 1)
+
+
+#define sexp_extobj_p(p)  (sexp_check_tag((p), SEXP_EXTOBJ))
+#define sexp_extobj_isa_finalize_call(ctx, p) \
+  ((p)->value.extobj.isa->free_func(ctx, (p)->value.extobj.obj))
+#define sexp_extobj_isa_display_call(p, out)                        \
+  ((p)->value.extobj.isa->display_func((p)->value.extobj.obj, out))
+
+#define sexp_extobj_isa(p) ((p)->value.extobj.isa)
+#define sexp_extobj_obj(p) ((p)->value.extobj.obj)
+
 
 /***************************** constructors ****************************/
 
@@ -516,6 +584,14 @@ sexp sexp_make_flonum(sexp ctx, double f);
 #define sexp_scanf(p, ...) (fscanf(sexp_port_stream(p), __VA_ARGS__))
 #define sexp_flush(p) (fflush(sexp_port_stream(p)))
 
+sexp sexp_make_foreign0(sexp ctx, const char* name, foreign_call0 func_ptr);
+sexp sexp_make_foreign1(sexp ctx, const char* name, foreign_call1 func_ptr);
+sexp sexp_make_foreign2(sexp ctx, const char* name, foreign_call2 func_ptr);
+sexp sexp_make_foreign3(sexp ctx, const char* name, foreign_call3 func_ptr);
+sexp sexp_make_foreign(sexp ctx, const char* name, foreign_callX func_ptr,
+                       sexp_uint_t num_args, int variadic);
+void env_define(sexp ctx, sexp e, sexp key, sexp value);
+
 sexp sexp_alloc_tagged(sexp ctx, size_t size, sexp_uint_t tag);
 sexp sexp_cons(sexp ctx, sexp head, sexp tail);
 sexp sexp_list2(sexp ctx, sexp a, sexp b);
@@ -553,6 +629,10 @@ sexp sexp_type_exception (sexp ctx, char *message, sexp obj);
 sexp sexp_range_exception (sexp ctx, sexp obj, sexp start, sexp end);
 sexp sexp_print_exception(sexp ctx, sexp exn, sexp out);
 void sexp_init();
+
+void debug_sexp(sexp ctx, sexp obj);
+
+sexp sexp_make_extobj(sexp ctx, extobj_class* isa, void* obj);
 
 #endif /* ! SEXP_H */
 

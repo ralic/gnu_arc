@@ -5,6 +5,9 @@
 #include <sys/stat.h>
 #include "chibi/eval.h"
 
+#include "dirport.h"
+#include "fsys.h"
+
 char *chibi_module_dir = NULL;
 
 sexp find_module_file (sexp ctx, char *file) {
@@ -68,6 +71,7 @@ void repl (sexp ctx) {
   sexp_gc_release(ctx, obj, s_obj);
 }
 
+
 void run_main (int argc, char **argv) {
   sexp env, out=NULL, res, ctx;
   sexp_uint_t i, quit=0, init_loaded=0;
@@ -75,8 +79,12 @@ void run_main (int argc, char **argv) {
 
   ctx = sexp_make_context(NULL, NULL, NULL);
   sexp_gc_preserve(ctx, str, s_str);
+
   env = sexp_context_env(ctx);
   out = sexp_eval_string(ctx, "(current-output-port)");
+
+  arc_dirport_init(ctx);
+  arc_fsys_init(ctx);
 
   /* parse options */
   for (i=1; i < argc && argv[i][0] == '-'; i++) {

@@ -89,6 +89,8 @@ static struct sexp_struct sexp_types[] = {
   _DEF_TYPE(SEXP_LIT, sexp_offsetof(lit, value), 1, 0, 0, sexp_sizeof(lit), 0, 0, "literal"),
   _DEF_TYPE(SEXP_STACK, sexp_offsetof(stack, data), 1, sexp_offsetof(stack, top), 1, sexp_sizeof(stack), offsetof(struct sexp_struct, value.stack.length), 4, "stack"),
   _DEF_TYPE(SEXP_CONTEXT, sexp_offsetof(context, bc), 6, 0, 0, sexp_sizeof(context), 0, 0, "context"),
+  _DEF_TYPE(SEXP_EXTOBJ, 0, 0, 0, 0, sexp_sizeof(extobj), 0, 0, "ext-object"),
+  _DEF_TYPE(SEXP_FOREIGN, 0, 0, 0, 0, sexp_sizeof(foreign), 0, 0, "foreign-function"),
 };
 
 #undef _DEF_TYPE
@@ -798,6 +800,12 @@ void sexp_write (sexp obj, sexp out) {
         sexp_write_char(str[0], out);
       }
       break;
+    case SEXP_EXTOBJ:
+      sexp_extobj_isa_display_call(obj, out);
+      break;
+    case SEXP_FOREIGN:
+      sexp_printf(out, "#<foreign: %s>", sexp_foreign_name(obj));
+      break;      
     }
   } else if (sexp_integerp(obj)) {
     sexp_printf(out, "%ld", sexp_unbox_integer(obj));
@@ -1006,20 +1014,24 @@ sexp sexp_read_raw (sexp ctx, sexp in) {
     goto scan_loop;
   case '\'':
     res = sexp_read(ctx, in);
-    res = sexp_list2(ctx, the_quote_symbol, res);
+    if (!sexp_exceptionp(res))
+      res = sexp_list2(ctx, the_quote_symbol, res);
     break;
   case '`':
     res = sexp_read(ctx, in);
-    res = sexp_list2(ctx, the_quasiquote_symbol, res);
+    if (!sexp_exceptionp(res))
+      res = sexp_list2(ctx, the_quasiquote_symbol, res);
     break;
   case ',':
     if ((c1 = sexp_read_char(in)) == '@') {
       res = sexp_read(ctx, in);
-      res = sexp_list2(ctx, the_unquote_splicing_symbol, res);
+      if (!sexp_exceptionp(res))
+        res = sexp_list2(ctx, the_unquote_splicing_symbol, res);
     } else {
       sexp_push_char(c1, in);
       res = sexp_read(ctx, in);
-      res = sexp_list2(ctx, the_unquote_symbol, res);
+      if (!sexp_exceptionp(res))
+        res = sexp_list2(ctx, the_unquote_symbol, res);
     }
     break;
   case '"':
@@ -1028,39 +1040,44 @@ sexp sexp_read_raw (sexp ctx, sexp in) {
   case '(':
     res = SEXP_NULL;
     tmp = sexp_read_raw(ctx, in);
-    while ((tmp != SEXP_EOF) && (tmp != SEXP_CLOSE) && (tmp != SEXP_RAWDOT)) {
-      res = sexp_cons(ctx, tmp, res);
-      tmp = sexp_read_raw(ctx, in);
-      if (sexp_exceptionp(tmp)) {
-        res = tmp;
-        break;
-      }
+    if (sexp_exceptionp(tmp)) {
+      res = tmp;
     }
-    if (! sexp_exceptionp(res)) {
-      if (tmp == SEXP_RAWDOT) { /* dotted list */
-        if (res == SEXP_NULL) {
-          res = sexp_read_error(ctx, "dot before any elements in list",
-                                SEXP_NULL, in);
-        } else {
-          tmp = sexp_read_raw(ctx, in);
-          if (sexp_exceptionp(tmp)) {
-            res = tmp;
-          } else if (tmp == SEXP_CLOSE) {
-            res = sexp_read_error(ctx, "no final element in list after dot",
-                                  SEXP_NULL, in);
-          } else if (sexp_read_raw(ctx, in) != SEXP_CLOSE) {
-            res = sexp_read_error(ctx, "multiple tokens in dotted tail",
+    else {
+      while ((tmp != SEXP_EOF) && (tmp != SEXP_CLOSE) && (tmp != SEXP_RAWDOT)) {
+        res = sexp_cons(ctx, tmp, res);
+        tmp = sexp_read_raw(ctx, in);
+        if (sexp_exceptionp(tmp)) {
+          res = tmp;
+          break;
+        }
+      }
+      if (! sexp_exceptionp(res)) {
+        if (tmp == SEXP_RAWDOT) { /* dotted list */
+          if (res == SEXP_NULL) {
+            res = sexp_read_error(ctx, "dot before any elements in list",
                                   SEXP_NULL, in);
           } else {
-            tmp2 = res;
-            res = sexp_nreverse(ctx, res);
-            sexp_cdr(tmp2) = tmp;
+            tmp = sexp_read_raw(ctx, in);
+            if (sexp_exceptionp(tmp)) {
+              res = tmp;
+            } else if (tmp == SEXP_CLOSE) {
+              res = sexp_read_error(ctx, "no final element in list after dot",
+                                    SEXP_NULL, in);
+            } else if (sexp_read_raw(ctx, in) != SEXP_CLOSE) {
+              res = sexp_read_error(ctx, "multiple tokens in dotted tail",
+                                    SEXP_NULL, in);
+          } else {
+              tmp2 = res;
+              res = sexp_nreverse(ctx, res);
+              sexp_cdr(tmp2) = tmp;
+            }
           }
+        } else if (tmp == SEXP_CLOSE) {
+          res = (sexp_pairp(res) ? sexp_nreverse(ctx, res) : res);
+        } else {
+          res = sexp_read_error(ctx, "missing trailing ')'", SEXP_NULL, in);
         }
-      } else if (tmp == SEXP_CLOSE) {
-        res = (sexp_pairp(res) ? sexp_nreverse(ctx, res) : res);
-      } else {
-        res = sexp_read_error(ctx, "missing trailing ')'", SEXP_NULL, in);
       }
     }
     break;
@@ -1106,6 +1123,7 @@ sexp sexp_read_raw (sexp ctx, sexp in) {
         res = tmp;
       else
         goto scan_loop;
+      break;
     case '\\':
       c1 = sexp_read_char(in);
       res = sexp_read_symbol(ctx, in, c1, 0);
@@ -1140,14 +1158,16 @@ sexp sexp_read_raw (sexp ctx, sexp in) {
     case '(':
       sexp_push_char(c1, in);
       res = sexp_read(ctx, in);
-      if (sexp_listp(ctx, res) == SEXP_FALSE) {
-        if (! sexp_exceptionp(res)) {
-          res = sexp_read_error(ctx, "dotted list not allowed in vector syntax",
-                                SEXP_NULL,
-                                in);
+      if (!sexp_exceptionp(res)) {
+        if (sexp_listp(ctx, res) == SEXP_FALSE) {
+          if (! sexp_exceptionp(res)) {
+            res = sexp_read_error(ctx, "dotted list not allowed in vector syntax",
+                                  SEXP_NULL,
+                                  in);
+          }
+        } else {
+          res = sexp_list_to_vector(ctx, res);
         }
-      } else {
-        res = sexp_list_to_vector(ctx, res);
       }
       break;
     default:

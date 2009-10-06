@@ -63,7 +63,7 @@ static sexp env_global_ref(sexp e, sexp key, sexp dflt) {
   return (cell ? sexp_cdr(cell) : dflt);
 }
 
-static void env_define(sexp ctx, sexp e, sexp key, sexp value) {
+void env_define(sexp ctx, sexp e, sexp key, sexp value) {
   sexp cell = sexp_assq(ctx, key, sexp_env_bindings(e));
   sexp_gc_var(ctx, tmp, s_tmp);
   sexp_gc_preserve(ctx, tmp, s_tmp);
@@ -204,6 +204,61 @@ static sexp sexp_make_synclo (sexp ctx, sexp env, sexp fv, sexp expr) {
   sexp_synclo_expr(res) = expr;
   return res;
 }
+
+sexp sexp_make_foreign0(sexp ctx, const char* name, foreign_call0 func_ptr) {
+  sexp func = sexp_alloc_type(ctx, foreign, SEXP_FOREIGN);
+  sexp_foreign_num_args(func) = 0;
+  sexp_foreign_func0(func) = func_ptr;
+  sexp_foreign_flags(func) = 0;
+  sexp_foreign_name(func) = name;
+  return func;
+}
+
+sexp sexp_make_foreign1(sexp ctx, const char* name, foreign_call1 func_ptr) {
+  sexp func = sexp_alloc_type(ctx, foreign, SEXP_FOREIGN);
+  sexp_foreign_num_args(func) = 1;
+  sexp_foreign_func1(func) = func_ptr;
+  sexp_foreign_flags(func) = 0;
+  sexp_foreign_name(func) = name;
+  return func;
+}
+
+sexp sexp_make_foreign2(sexp ctx, const char* name, foreign_call2 func_ptr) {
+  sexp func = sexp_alloc_type(ctx, foreign, SEXP_FOREIGN);
+  sexp_foreign_num_args(func) = 2;
+  sexp_foreign_func2(func) = func_ptr;
+  sexp_foreign_flags(func) = 0;
+  sexp_foreign_name(func) = name;
+  return func;
+}
+
+sexp sexp_make_foreign3(sexp ctx, const char* name, foreign_call3 func_ptr) {
+  sexp func = sexp_alloc_type(ctx, foreign, SEXP_FOREIGN);
+  sexp_foreign_num_args(func) = 3;
+  sexp_foreign_func3(func) = func_ptr;
+  sexp_foreign_flags(func) = 0;
+  sexp_foreign_name(func) = name;
+  return func;
+}
+
+sexp sexp_make_foreign(sexp ctx, const char* name, foreign_callX func_ptr, 
+                       sexp_uint_t num_args, int variadic) {
+  sexp func = sexp_alloc_type(ctx, foreign, SEXP_FOREIGN);
+  sexp_foreign_num_args(func) = (unsigned short) (sexp_uint_t) num_args;
+  sexp_foreign_func(func) = func_ptr;
+  sexp_foreign_flags(func) = variadic ? 1 : 0;
+  sexp_foreign_name(func) = name;
+  return func;
+}
+
+
+sexp sexp_make_extobj(sexp ctx, extobj_class* isa, void* obj) {
+  sexp eo = sexp_alloc_type(ctx, extobj, SEXP_EXTOBJ);
+  sexp_extobj_isa(eo) = isa;
+  sexp_extobj_obj(eo) = obj;
+  return eo;
+}
+
 
 /* internal AST */
 
@@ -1236,7 +1291,7 @@ sexp sexp_vm (sexp ctx, sexp proc) {
   if (sexp_context_tracep(ctx)) {
     sexp_print_stack(stack, top, fp,
                      env_global_ref(env, the_cur_err_symbol, SEXP_FALSE));
-    fprintf(stderr, "%s\n", (*ip<=71)?reverse_opcode_names[*ip]:"UNKNOWN");
+    fprintf(stderr, "%s\n", (*ip<=72)?reverse_opcode_names[*ip]:"UNKNOWN");
   }
 #endif
   switch (*ip++) {
@@ -1286,7 +1341,11 @@ sexp sexp_vm (sexp ctx, sexp proc) {
     tmp1 = _ARG1;
     tmp2 = _ARG2;
     i = sexp_unbox_integer(sexp_length(ctx, tmp2));
-    top += (i-2);
+    if (sexp_foreign_p(tmp1))
+      top += i;
+    else
+      top += (i-2);
+
     for ( ; sexp_pairp(tmp2); tmp2=sexp_cdr(tmp2), top--)
       _ARG1 = sexp_car(tmp2);
     top += i+1;
@@ -1294,7 +1353,11 @@ sexp sexp_vm (sexp ctx, sexp proc) {
     goto make_call;
   case OP_TAIL_CALL:
     i = sexp_unbox_integer(_WORD0);    /* number of params */
-    tmp1 = _ARG1;                              /* procedure to call */
+    tmp1 = _ARG1;                      /* procedure to call */
+
+    if (sexp_foreign_p(tmp1))          /* foreign functions can't be tail opt'ed */
+      goto make_call;
+
     /* save frame info */
     tmp2 = stack[fp+3];
     j = sexp_unbox_integer(stack[fp]);
@@ -1328,6 +1391,38 @@ sexp sexp_vm (sexp ctx, sexp proc) {
         goto call_error_handler;
       }
     }
+    else if (sexp_foreign_p(tmp1)) {
+      int arg_sel = sexp_foreign_num_args(tmp1);
+      int j = i - arg_sel;
+      int is_variadic = sexp_foreign_is_variadic_p(tmp1);
+
+      if (j < 0)
+        sexp_raise("not enough args",
+                   sexp_list2(ctx, tmp1, sexp_make_integer(i)));
+      if (j > 0 && !is_variadic) {
+        sexp_raise("too many args",
+                   sexp_list2(ctx, tmp1, sexp_make_integer(i)));
+      }
+      if (is_variadic)
+        arg_sel = -1;
+
+      sexp_context_top(ctx) = top;
+      switch (arg_sel) {
+      case 0:  tmp2 = sexp_foreign_call0(ctx, tmp1); break;
+      case 1:  tmp2 = sexp_foreign_call1(ctx, tmp1, _ARG2); break;
+      case 2:  tmp2 = sexp_foreign_call2(ctx, tmp1, _ARG2, _ARG3); break;
+      case 3:  tmp2 = sexp_foreign_call3(ctx, tmp1, _ARG2, _ARG3, _ARG4); break;
+      default: tmp2 = sexp_foreign_call (ctx, tmp1, i, &stack[top - 1]);
+      };
+
+      stack[top - i - 1] = tmp2;
+      top -= i;
+      sexp_check_exception();
+      ip += sizeof(sexp);
+
+      break;
+    }
+
     if (! sexp_procedurep(tmp1))
       sexp_raise("non procedure application", sexp_list1(ctx, tmp1));
     j = i - sexp_unbox_integer(sexp_procedure_num_args(tmp1));
@@ -1487,6 +1582,8 @@ sexp sexp_vm (sexp ctx, sexp proc) {
     top-=2;
     break;
   case OP_STRING_LENGTH:
+    if (!sexp_stringp(_ARG1))
+      sexp_raise("string-length: not a string", sexp_list1(ctx, _ARG1));
     _ARG1 = sexp_make_integer(sexp_string_length(_ARG1));
     break;
   case OP_MAKE_PROCEDURE:
@@ -1865,6 +1962,10 @@ sexp sexp_load (sexp ctx, sexp source, sexp env) {
     res = in;
   } else {
     while ((x=sexp_read(ctx, in)) != (sexp) SEXP_EOF) {
+      if (sexp_exceptionp(x)) {
+        res = x;
+        break;
+      }
       res = sexp_eval(ctx2, x);
       if (sexp_exceptionp(res))
         break;
@@ -2139,6 +2240,15 @@ sexp sexp_eval_string (sexp ctx, char *str) {
   sexp_gc_release(ctx, obj, s_obj);
   return res;
 }
+
+void debug_sexp(sexp ctx, sexp obj) {
+  sexp out = env_global_ref(sexp_context_env(ctx),
+                            the_cur_err_symbol,
+                            SEXP_FALSE);
+  sexp_write(obj, out);
+  sexp_printf(out, "\n");
+}
+
 
 void sexp_scheme_init () {
   sexp ctx;
