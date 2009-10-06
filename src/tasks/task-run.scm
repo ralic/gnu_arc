@@ -31,7 +31,9 @@
 ;;
 ;; :args STRING-LIST
 ;; the arguments to be passed to the command.  If not given treated as
-;; empty argument list.
+;; empty argument list.  Note that when a command requires options to be
+;; offset from the values by a space (e.g. "-d dir") two strings must be given
+;; here (i.e. '("-d" "dir").
 ;;
 ;; :indir STRING
 ;; specifies the directory which is to be used as current working directory
@@ -40,7 +42,7 @@
 ;; the current working directory is used.
 ;;
 ;; :capture? BOOLEAN
-;; indicates whether the tools output should be captured an returned as
+;; indicates whether the tools output should be captured and returned as
 ;; string.  By default the output is send to stdout/stderr as normally.
 ;;
 ;; :uptodate? STRING-LiST
@@ -60,7 +62,7 @@
                            (capture? boolean optional)
                            (uptodate? strlist optional) ))
 
-(define (arc:-run-run cmd cmd-line capture?)
+(define (arc:-run-run cmd args capture?)
   (let* ((av (arc:attrval))
          (retv 0)
          (stdout-file #f)
@@ -71,11 +73,12 @@
         (begin
           (set! stdout-file (arc:temp-file-name "capture-out"))
           (set! stderr-file (arc:temp-file-name "capture-err"))
-          (set! cmd-line (string-append cmd-line " 1> " stdout-file
-                                        " 2> " stderr-file))))
+          (set! args (arc:list-appends args
+                                       "1>" stdout-file
+                                       "2>" stderr-file))))
 
-    (arc:display cmd-line 'nl)
-    (set! retv (system cmd-line))
+    (arc:display-command cmd args)
+    (set! retv (sys:execute* cmd args))
     (arc:attrval-default! av retv)
 
     (if (not (equal? retv 0))
@@ -91,6 +94,7 @@
           (sys:remove-file stderr-file)))
     av))
   
+
 (define (arc:run props body)
   (let* ((cmd (arc:aval 'cmd props ""))
          (args (arc:aval 'args props (list)))
@@ -114,10 +118,10 @@
             (let ((cwd (path:cwd))
                   (retv (arc:attrval)))
               (sys:change-dir indir)
-              (set! retv (arc:-run-run cmd full-cmd-line capture?))
+              (set! retv (arc:-run-run cmd args capture?))
               (sys:change-dir cwd)
               retv)
-            (arc:-run-run cmd full-cmd-line capture?)) )) )
+            (arc:-run-run cmd args capture?)) )) )
 
 (define (arc:deps-run-needs-rerun? key sfiles)
   (let* ((depkey (arc:run-command->symbol key))
