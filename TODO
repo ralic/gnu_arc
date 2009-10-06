@@ -1,9 +1,3 @@
-- fix task-run.  adapt to new execute API
-
-
-
-
-
 - put an "exclude:" argument to task-fileset to manual, like this:
 
 (fileset pattern: "src/*.h"
@@ -28,8 +22,6 @@
   etc) aren't met.  throw a exceptions...!
 
 - remove the orange tasks
-
-- add the missing cvs functions to task-cvs: add, commit, remove, tag
 
 - design a 'task-build': this checksout a module from cvs into a temporary
   directory, calls a arcfile in this module with default task 'all'; if
@@ -103,6 +95,12 @@ TASKs to be written:
 
 - D compile (gdc, dmd)
 - C++ compile
+VC tasks:
+  - add the missing cvs functions to task-cvs: add, commit, remove, tag
+  - git tasks
+  - svn tasks
+  - monotone tasks
+  - hg tasks
 
 
 
@@ -120,5 +118,3 @@ TASKs to be written:
 - rethink nature of dependencies.  How to decide whether a given stmt is to
   be evaluated dependeing on the modtime/md5-difference between a source
   and a destination file?
-
-
