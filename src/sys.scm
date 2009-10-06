@@ -22,7 +22,7 @@
           (let ((aps (arc:path->string (arc:path-subpath dirnm 0
                                                          (+ pc 1)))))
             (if (not (sys:file-exists? aps))
-                (if (not (sys:mkdir aps))
+                (if (not (sys:mkdir aps 0755))
                     (begin
                       (arc:log 'error 
                                "failed to create directory '" aps "'")
