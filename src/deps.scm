@@ -147,7 +147,8 @@
                     (let loop ((fc (cadr dps)))
                       (if (null? fc)
                           #f
-                          (or (< mtime (cdar fc))
+                          (or (not (cdar fc))
+                              (< mtime (cdar fc))
                               (loop (cdr fc))) ))))) )
     (arc:log 'debug "mtime changed of " ofile " -> " retv)
     retv))
