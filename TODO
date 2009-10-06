@@ -1,3 +1,9 @@
+- fix task-run.  adapt to new execute API
+
+
+
+
+
 - put an "exclude:" argument to task-fileset to manual, like this:
 
 (fileset pattern: "src/*.h"
