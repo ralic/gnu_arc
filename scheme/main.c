@@ -4,6 +4,7 @@
 
 #include <sys/stat.h>
 #include "chibi/eval.h"
+#include "chibi/install.h"
 
 #include "dirport.h"
 #include "fsys.h"

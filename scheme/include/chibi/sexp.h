@@ -6,7 +6,6 @@
 #define SEXP_H
 
 #include "config.h"
-#include "install.h"
 
 #include <ctype.h>
 #include <stdio.h>
