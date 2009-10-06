@@ -162,8 +162,6 @@ void run_main(int argc, char **argv)
         else
           arc_define_program_args(ctx, env, 0, NULL);
 
-        sexp_load(ctx, str = find_module_file(ctx, arc_init_file, 1), env);
-
         sexp_load(ctx, str = sexp_c_string(ctx, argv[2], -1), env);
 
         goto handle_end;
