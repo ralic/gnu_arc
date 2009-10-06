@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <utime.h>
 #include <sys/wait.h>
+#include <dirent.h>
 
 #include "scheme-private.h"
 
@@ -300,66 +301,6 @@ pointer scm_getcwd(scheme* sc, pointer args)
 }
 
 
-/* (sys:opendir dirname) => port */
-pointer scm_opendir(scheme *sc, pointer args)
-{
-  pointer first_arg;
-  
-  if ((args != sc->NIL) && is_string((first_arg = pair_car(args)))) {
-    char* name = string_value(first_arg);
-    DIR* dir = opendir(name);
-
-    if (dir) {
-      port *pt = (port*)sc->malloc(sizeof(port));
-      if (!pt)
-        return sc->NIL;
-
-      pt->kind = port_dir;
-      pt->rep.dir = dir;
-      
-      return mk_port(sc, pt);
-    }
-  }
-
-  return sc->F;
-}
-
-
-#define is_dirport(p) (type(p) == T_PORT && p->_object._port->kind & port_dir)
-
-/* (sys:readdir port) => string */
-pointer scm_readdir(scheme *sc, pointer args)
-{
-  pointer pt;
-  
-  if ((args != sc->NIL) && is_dirport((pt = pair_car(args)))) {
-    struct dirent* dp = readdir(pt->_object._port->rep.dir);
-
-    if (dp) {
-      return mk_string(sc, dp->d_name);
-    }
-  }
-
-  return sc->F;
-}
-
-
-/* (sys:closedir port) => string */
-pointer scm_closedir(scheme *sc, pointer args)
-{
-  pointer pt;
-  
-  if ((args != sc->NIL) && is_dirport((pt = pair_car(args)))) {
-    if (closedir(pt->_object._port->rep.dir) == 0) {
-      pt->_object._port->kind = port_free;
-      return sc->T;
-    }
-  }
-
-  return sc->F;
-}
-
-
 /* (sys:getpid) => int */
 pointer scm_getpid(scheme* sc, pointer args)
 {
@@ -498,10 +439,12 @@ pointer scm_system(scheme* sc, pointer args)
     cmd_args_count = 1;
 
     if (args_arg != sc->NIL) {
-      veclen = ivalue(pair_car(args));
+      veclen = ivalue(args_arg);
       for (i = 0; i < veclen; i++) {
-        if (!is_string(vector_elem(args_arg, i)))
+        if (!is_string(vector_elem(args_arg, i))) {
+          fprintf(stderr, "ERROR: system: argument %d is not a string\n", i);
           return sc->F;
+        }
         
         cmd_args_count++;
       }
@@ -519,10 +462,24 @@ pointer scm_system(scheme* sc, pointer args)
     }
     cmd_args[cmdn++] = NULL;
     
-
     pid = fork();
     if (pid == 0) {
       /* This is the child process.  Execute the shell command. */
+
+/*
+      if (new_in >= 0) {
+        close(STDIN_FILENO);
+        dup2(new_in, STDIN_FILENO);
+      }
+      if (new_out >= 0) {
+        close(STDOUT_FILENO);
+        dup2(new_out, STDOUT_FILENO);
+      }
+      if (new_err >= 0) {
+        close(STDERR_FILENO);
+        dup2(new_err, STDERR_FILENO);
+      }
+*/
       execvp(cmd, cmd_args);
       _exit(EXIT_FAILURE);
     }

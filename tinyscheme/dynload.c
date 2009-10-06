@@ -21,9 +21,8 @@ static void make_init_fn(const char *name, char *init_fn);
 #else
 typedef void *HMODULE;
 typedef void (*FARPROC)();
-#ifdef SUN_DL
-#  include <dlfcn.h>
-#endif
+#define SUN_DL
+#include <dlfcn.h>
 #endif
 
 #ifdef _WIN32
@@ -140,7 +139,8 @@ static void make_init_fn(const char *name, char *init_fn) {
 }
 
 
-
-
-
-
+/*
+Local variables:
+c-file-style: "k&r"
+End:
+*/ 

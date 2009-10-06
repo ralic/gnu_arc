@@ -5,56 +5,25 @@
 
 #include "scheme.h"
 
-#include "dirent.h"
-
-
 /*------------------ Ugly internals -----------------------------------*/
 /*------------------ Of interest only to FFI users --------------------*/
 
-enum scheme_types {
-  T_STRING       = 1,
-  T_NUMBER       = 2,
-  T_SYMBOL       = 3,
-  T_PROC         = 4,
-  T_PAIR         = 5,
-  T_CLOSURE      = 6,
-  T_CONTINUATION = 7,
-  T_FOREIGN      = 8,
-  T_CHARACTER    = 9,
-  T_PORT         = 10,
-  T_VECTOR       = 11,
-  T_MACRO        = 12,
-  T_PROMISE      = 13,
-  T_ENVIRONMENT  = 14,
-
-  T_LAST_SYSTEM_TYPE=14
-};
-
-#ifndef FIRST_CELLSEGS
-# define FIRST_CELLSEGS 3
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-/* ADJ is enough slack to align cells in a TYPE_BITS-bit boundary */
-#define ADJ             32
-#define TYPE_BITS        5
-#define T_MASKTYPE      31    /* 0000000000011111 */
-#define T_SYNTAX      4096    /* 0001000000000000 */
-#define T_IMMUTABLE   8192    /* 0010000000000000 */
-#define T_ATOM       16384    /* 0100000000000000 */   /* only for gc */
-#define CLRATOM      49151    /* 1011111111111111 */   /* only for gc */
-#define MARK         32768    /* 1000000000000000 */
-#define UNMARK       32767    /* 0111111111111111 */
-
-#define typeflag(p)      ((p)->_flag)
-#define type(p)          (typeflag(p) & T_MASKTYPE)
+#if USE_EXTOBJ
+typedef struct extobject extobject;
+#endif
 
 enum scheme_port_kind { 
-  port_free   = 0, 
-  port_file   = 1, 
-  port_string = 2,
-  port_dir    = 4,
-  port_input  = 16, 
-  port_output = 32 
+  port_free=0, 
+  port_file=1, 
+  port_string=2, 
+  port_srfi6=4, 
+  port_input=16, 
+  port_output=32,
+  port_saw_EOF=64,
 };
 
 typedef struct port {
@@ -63,13 +32,16 @@ typedef struct port {
     struct {
       FILE *file;
       int closeit;
+#if SHOW_ERROR_LINE
+      int curr_line;
+      char *filename;
+#endif
     } stdio;
     struct {
       char *start;
       char *past_the_end;
       char *curr;
     } string;
-    DIR* dir;
   } rep;
 } port;
 
@@ -88,6 +60,9 @@ struct cell {
       struct cell *_car;
       struct cell *_cdr;
     } _cons;
+#if USE_EXTOBJ
+    extobject* _ext;
+#endif
   } _object;
 };
 
@@ -100,8 +75,9 @@ func_dealloc free;
 int retcode;
 int tracing;
 
+
 #define CELL_SEGSIZE    5000  /* # of cells in one segment */
-#define CELL_NSEGMENT   1000    /* # of segments for cells */
+#define CELL_NSEGMENT   10    /* # of segments for cells */
 char *alloc_seg[CELL_NSEGMENT];
 pointer cell_seg[CELL_NSEGMENT];
 int     last_cell_seg;
@@ -126,7 +102,8 @@ struct cell _EOF_OBJ;
 pointer EOF_OBJ;         /* special cell representing end-of-file object */
 pointer oblist;          /* pointer to symbol table */
 pointer global_env;      /* pointer to global environment */
-
+pointer c_nest;          /* stack for nested calls from C */
+  
 /* global pointers to special symbols */
 pointer LAMBDA;               /* pointer to syntax lambda */
 pointer QUOTE;           /* pointer to syntax quote */
@@ -138,6 +115,7 @@ pointer FEED_TO;         /* => */
 pointer COLON_HOOK;      /* *colon-hook* */
 pointer ERROR_HOOK;      /* *error-hook* */
 pointer SHARP_HOOK;  /* *sharp-hook* */
+pointer COMPILE_HOOK;  /* *compile-hook* */
 
 pointer free_cell;       /* pointer to top of free cells */
 long    fcells;          /* # of free cells */
@@ -158,7 +136,8 @@ char    no_memory;       /* Whether mem. alloc. has failed */
 
 #define LINESIZE 1024
 char    linebuff[LINESIZE];
-char    strbuff[256];
+#define STRBUFFSIZE 256
+char    strbuff[STRBUFFSIZE];
 
 FILE *tmpfp;
 int tok;
@@ -181,10 +160,30 @@ enum scheme_opcodes {
   OP_MAXDEFINED 
 }; 
 
+#if USE_EXTOBJ
+typedef void (*extobject_finalize_func)(scheme* sc, pointer p);
+typedef void (*extobject_mark_func)(scheme* sc, pointer p);
+typedef void (*extobject_display_func)(scheme* sc, char* outstr, pointer p);
+
+typedef struct extobject_class extobject_class;
+struct extobject_class
+{
+  extobject_finalize_func finalize_func;
+  extobject_mark_func     mark_func;
+  extobject_display_func  display_func;
+};
+
+struct extobject
+{
+  extobject_class* isa;
+};
+#endif
+
 
 #define cons(sc,a,b) _cons(sc,a,b,0)
 #define immutable_cons(sc,a,b) _cons(sc,a,b,1)
 
+int cell_type(pointer p);
 int is_string(pointer p);
 char *string_value(pointer p);
 int is_number(pointer p);
@@ -226,10 +225,24 @@ int is_environment(pointer p);
 int is_immutable(pointer p);
 void setimmutable(pointer p);
 
+pointer reverse_in_place(scheme *sc, pointer term, pointer list);
 pointer mk_port(scheme *sc, port *p);
 pointer mk_vector(scheme *sc, int len);
+
 pointer vector_elem(pointer vec, int ielem);
 pointer set_vector_elem(pointer vec, int ielem, pointer a);
 
+int is_extobject(pointer p);
+pointer mk_extobject(scheme* sc, extobject* o);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
+
+/*
+Local variables:
+c-file-style: "k&r"
+End:
+*/ 

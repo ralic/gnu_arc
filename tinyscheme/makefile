@@ -37,28 +37,7 @@ SYS_LIBS= -ldl
 PLATFORM_FEATURES= -DSUN_DL=1
 
 # Cygwin
-PLATFORM_FEATURES = -DUSE_STRLWR=0
-
-# Mac OS X 
-CC = gcc -fPIC 
-DEBUG=-g -Wall -Wno-char-subscripts -O 
-Osuf=o 
-SOsuf=so 
-LIBsuf=a
-EXE_EXT=
-LIBPREFIX=lib
-OUT = -o $@ 
-RM= -rm -f
-AR= ar crs
-LD = gcc 
-LDFLAGS = -shared 
-DEBUG=-g -Wno-char-subscripts -O
-SYS_LIBS= -ldl
-PLATFORM_FEATURES= -DSUN_DL=1 -DOSX -DUSE_STRLWR=1
-
-
-# Cygwin
-# PLATFORM_FEATURES = -DUSE_STRLWR=1
+#PLATFORM_FEATURES = -DUSE_STRLWR=0
 
  
 # Solaris 

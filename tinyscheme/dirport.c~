@@ -1,0 +1,72 @@
+#if USE_DIRPORT
+#include "stddef.h"
+#include "stdlib.h"
+#include "string.h"
+#include "unistd.h"
+#include "sys/stat.h"
+#include <stdio.h>
+#include <sys/types.h>
+#include <utime.h>
+#include <sys/wait.h>
+#include <dirent.h>
+
+#include "scheme-private.h"
+
+/* (open-dir-port dirname) => port */
+pointer dirport_opendir(scheme *sc, pointer args)
+{
+  pointer first_arg;
+  
+  if ((args != sc->NIL) && is_string((first_arg = pair_car(args)))) {
+    char* name = string_value(first_arg);
+    DIR* dir = opendir(name);
+
+    if (dir) {
+      port *pt = (port*)sc->malloc(sizeof(port));
+      if (!pt)
+        return sc->NIL;
+
+      pt->kind = port_dir;
+      pt->rep.dir = dir;
+      
+      return mk_port(sc, pt);
+    }
+  }
+
+  return sc->F;
+}
+
+
+/* (read-dir-port port) => string */
+pointer dirport_readdir(scheme *sc, pointer args)
+{
+  pointer pt;
+  
+  if ((args != sc->NIL) && is_dirport((pt = pair_car(args)))) {
+    struct dirent* dp = readdir(pt->_object._port->rep.dir);
+
+    if (dp) {
+      return mk_string(sc, dp->d_name);
+    }
+  }
+
+  return sc->F;
+}
+
+
+/* (close-dir-port port) => string */
+pointer dirport_closedir(scheme *sc, pointer args)
+{
+  pointer pt;
+  
+  if ((args != sc->NIL) && is_dirport((pt = pair_car(args)))) {
+    if (closedir(pt->_object._port->rep.dir) == 0) {
+      pt->_object._port->kind = port_free;
+      return sc->T;
+    }
+  }
+
+  return sc->F;
+}
+
+#endif

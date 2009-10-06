@@ -1,0 +1,9 @@
+#ifndef dirstream_h
+#define dirstream_h
+
+pointer scm_opendir(scheme *sc, pointer args);
+pointer scm_readdir(scheme *sc, pointer args);
+pointer scm_closedir(scheme *sc, pointer args);
+
+
+#endif
