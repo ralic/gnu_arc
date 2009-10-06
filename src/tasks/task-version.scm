@@ -117,7 +117,7 @@
               (append struct 
                       (list (list->string (reverse buffer))))))
 
-    (close-port *in*)
+    (close-input-port *in*)
     struct))
 
 (define (arc:-version-file-increase-counts apt step
@@ -175,7 +175,7 @@
                          (display (string boundary) *out*))))
                   (else 'ignore)))
               apt)
-    (close-port *out*)))
+    (close-output-port *out*)))
       
 
 ;;Keep this comment at the end of the file 

@@ -115,7 +115,7 @@
 
     (arc:display-command mi-cmd mi-args)
 
-    (if (not (= (sys:execute mi-cmd mi-args) 0))
+    (if (not (equal? (sys:execute mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing info '" srcnm "' failed")
           (set! retv #f))
@@ -127,14 +127,14 @@
 
 ;; find all xxx.info files in the current working directory
 (define (arc:-texi-format-info-find-info-files dirnp pattern)
-  (let ((dp (sys:opendir "."))
+  (let ((dp (open-dir-port "."))
         (retv '()))
-    (do ((fn (sys:readdir dp) (sys:readdir dp)))
-        ((not fn) 'done)
+    (do ((fn (read-dir-port dp) (read-dir-port dp)))
+        ((eof-object? fn) 'done)
       (if (arc:string-prefix? fn pattern)
           (set! retv (append retv (list (arc:path->string 
                                          (arc:path-append dirnp fn)))))))
-    (sys:closedir dp)
+    (close-dir-port dp)
     retv))
 
 
@@ -155,7 +155,7 @@
          (retv #f))
     (sys:change-dir destdir)
     (arc:display-command mi-cmd mi-args)
-    (if (not (= (sys:execute* mi-cmd mi-args) 0))
+    (if (not (equal? (sys:execute* mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing plain '" srcnm "' failed")
           (set! retv #f))
@@ -180,12 +180,15 @@
          (retv #f))
     (sys:change-dir destdir)
     (arc:display-command mi-cmd mi-args)
-    (if (not (= (sys:execute mi-cmd mi-args) 0))
-        (begin
-          (arc:log 'error "texinfo: processing pdf '" srcnm "' failed")
-          (set! retv #f))
-        (set! retv (list (arc:path->string (arc:path-append destdirp 
-                                                            destfnm)))))
+
+    (let ((result (sys:execute mi-cmd mi-args)))
+      (arc:display "pdf: " result " from " mi-cmd " " mi-args 'nl)
+      (if (not (equal? result 0))
+          (begin
+            (arc:log 'error "texinfo: processing pdf '" srcnm "' failed")
+            (set! retv #f))
+          (set! retv (list (arc:path->string (arc:path-append destdirp 
+                                                              destfnm))))))
     
     (sys:change-dir cwd)
     retv))
@@ -205,7 +208,7 @@
          (retv #f))
     (sys:change-dir destdir)
     (arc:display-command mi-cmd mi-args)
-    (if (not (= (sys:execute mi-cmd mi-args) 0))
+    (if (not (equal? (sys:execute mi-cmd mi-args) 0))
         (begin
           (arc:log 'error "texinfo: processing dvi '" srcnm "' failed")
           (set! retv #f))
@@ -246,7 +249,7 @@
     (sys:change-dir basedir)
     (arc:display-command mi-cmd mi-args)
 
-    (if (not (= (sys:execute mi-cmd mi-args) 0))
+    (if (not (equal? (sys:execute mi-cmd mi-args) 0))
         (begin
           (sys:change-dir cwd)
           (arc:throw 'error 

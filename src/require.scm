@@ -49,7 +49,7 @@
               (display (symbol->string tag))
               (display "'")
               (newline)
-              (quit))) )))
+              (quit -1))) )))
 
 (define (arc:--look-for-a-file fn)
   (let loop ((pp %arc:arc-incl-path%))

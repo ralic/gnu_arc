@@ -81,7 +81,7 @@
              (destp (arc:string->path dest))
              (ndest (arc:path->string (arc:path-append 
                                        destp (arc:path-last-comp srcp)))))
-        (arc:display "install " src " to " ndest "(" (or mode 'exec) ")" #\nl)
+        (arc:display "install " src " to " ndest "(" (or mode 'exec) ")" 'nl)
         (sys:mkdirs dest)
         (sys:copy-file src ndest)
         

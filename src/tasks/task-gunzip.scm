@@ -42,38 +42,38 @@
                               (force? boolean optional)) )
 (define (arc:gunzip props body)
   (let* ((fn (arc:aval 'file props ""))
-	 (dest (arc:aval 'dest props ""))
-	 (force? (arc:aval 'force? props #f))
-	 (really-do #t))
+         (dest (arc:aval 'dest props ""))
+         (force? (arc:aval 'force? props #f))
+         (really-do #t))
     
     (arc:log 'debug "gunzip '" fn "' to '" dest "'")
     
     (if (or (= (string-length fn) 0)
-	    (= (string-length dest) 0))
-	(arc:log 'fatal "invalid file names in gunzip"))
-
+            (= (string-length dest) 0))
+        (arc:log 'fatal "invalid file names in gunzip"))
+    
     (if (sys:file-exists? fn)
-	(begin
-	  (if (sys:file-exists? dest)
-	      (if force?
-		  (begin
-		    (sys:remove-file dest)
-		    (set! really-do #t))
-		  (let ((mt-fn (sys:mtime fn))
-			(mt-dest (sys:mtime dest)))
-		    (set! really-do (> mt-fn mt-dest))) ))
-	  
-	  (if really-do
-	      (let ((gunzipcmd (string-append "gzip -d -c "
-					      fn
-					      " > "
-					      dest)))
-		(arc:display gunzipcmd #\nl)
-		(if (not (equal? (system gunzipcmd) 0))
-		    (arc:log 'error "failed to gunzip file '" fn "'")
-		    #t))
-	      (arc:log 'info "gunzip: file '" dest "' is newer. don't touch")))
-	(arc:log 'info "gunzip: file '" fn "' does not exist")) )
+        (begin
+          (if (sys:file-exists? dest)
+              (if force?
+                  (begin
+                    (sys:remove-file dest)
+                    (set! really-do #t))
+                  (let ((mt-fn (sys:mtime fn))
+                        (mt-dest (sys:mtime dest)))
+                    (set! really-do (> mt-fn mt-dest))) ))
+          
+          (if really-do
+              (let ((gunzip-cmd "gzip")
+                    (gunzip-args (arc:libs-appends "-d" "-c"
+                                                   fn
+                                                   ">" dest)))
+                (arc:display-command gunzip-cmd gunzip-args)
+                (if (not (equal? (sys:execute* gunzip-cmd gunzip-args) 0))
+                    (arc:log 'error "failed to gunzip file '" fn "'")
+                    #t))
+              (arc:log 'info "gunzip: file '" dest "' is newer. don't touch")))
+        (arc:log 'info "gunzip: file '" fn "' does not exist")) )
   '<unspecified>)
 
 (arc:register-task 'gunzip arc:gunzip arc:gunzip-keywords)

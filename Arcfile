@@ -17,7 +17,7 @@
 ;; arcfile for building, installing, and cleaning arc
 (project arc-app
          project: "arc"
-         version: "0.4.0"
+         version: "0.4.0b"
          info: "Arc application"
          basedir: "."
          default: 'all)
@@ -92,12 +92,13 @@
                                        "src/**/*.decl"
                           
                                        "boot/*.scm"
-                                       "asc/**/*.c"
-                                       "asc/**/*.h"
-                                       "asc/**/*.h.in"
-                                       "asc/(build-.*.sh$)"
-                                       "asc/(build-.*.bat$)"
-                                       "asc/*.scm"
+
+                                       "tinyscheme/**/*.c"
+                                       "tinyscheme/**/*.h"
+                                       "tinyscheme/**/*.h.in"
+                                       "tinyscheme/(build-.*.sh$)"
+                                       "tinyscheme/(build-.*.bat$)"
+                                       "tinyscheme/*.scm"
                           
                                        "doc/*.scm"
                                        "doc/*.in"
@@ -106,11 +107,12 @@
                                        "test/*.m"
                                        "test/*.c"
                                        "test/*.h"
-				       "test/*.in"
+                                       "test/*.in"
                                        "test/*.java"
                                        "test/Arcfile"
                           
                                        "doc/texinfo.tex"
+                                       "doc/fdl.tex"
                                       
                                        "README"
                                        "NEWS"
@@ -124,8 +126,8 @@
                                        "configure"))))
 
 (stmt clean
-      (clean res: (fileset pattern: '("asc/*.o"
-                                      "asc/asc"
+      (clean res: (fileset pattern: '("tinyscheme/*.o"
+                                      "tinyscheme/asc"
                                       "test/_build"
                                       "doc/*.aux"
                                       "doc/*.cp"
@@ -163,12 +165,24 @@
 (stmt c-sources
       scope: 'local
       depends: 'configure
-      (fileset pattern: "asc/*.c"))
+      (fileset files: '("tinyscheme/scheme.c"
+                        "tinyscheme/main.c" 
+                        "tinyscheme/fsys.c"
+                        "tinyscheme/dirport.c")) )
+
+(stmt c-flags
+      os: 'darwin
+      scope: 'local
+      '("-Wno-switch-enum" "-Wno-char-subscripts" "-DSUN_DL"))
 
 (stmt compile-asc
       info: "compiles all c sources."
       (c-compile sources: (-> c-sources)
-                 includes: '("asc")
+                 includes: '("tinyscheme")
+                 flags: (append '("-DSTANDALONE=0" "-DUSE_MATH=0" "-DUSE_ASCII_NAMES=1"
+                          "-DUSE_STRLWR=1" "-DUSE_COLON_HOOK=0" "-DUSE_ERROR_HOOK=0"
+                          "-DUSE_EXTOBJ=1")
+                          (-> c-flags))
                  debug?: #f
                  shared?: #f
                  static?: #t
@@ -183,7 +197,6 @@
       os: '(linux darwin)
       (link outdir: "asc"
             files: (-> compile-asc)
-            libs: '("m")
             shared?: #f
             appnm: "asc"))
 
@@ -192,6 +205,54 @@
             force?: #t
             tofile: "app/arc"))
 
+
+;; ----------------------------------------------------------------------
+
+(stmt arc-c-sources
+      scope: 'local
+      depends: 'configure
+      (fileset files: '("scheme/sexp.c" "scheme/eval.c" "scheme/fsys.c"
+                        "scheme/dirport.c"
+                        "scheme/arc.c")) )
+
+(stmt arc-c-flags
+      os: 'darwin
+      scope: 'local
+      '("-DOSX"))
+
+(stmt compile-arc
+      info: "compiles all c sources."
+      (c-compile sources: (-> arc-c-sources)
+                 includes: '("scheme/include")
+                 flags: (append '("-DUSE_WARN_UNDEFS=0")
+                                (-> arc-c-flags))
+;                 outdir: ".arc/objs"
+                 debug?: #f
+                 shared?: #f
+                 static?: #t
+                 warn-level: 'high
+                 opt-level: 'high))
+
+(stmt link-arc
+      os: 'linux
+      frameworks
+      (link outdir: "scheme"
+            files: (-> compile-arc)
+            shared?: #f
+            appnm: "arc"))
+
+(stmt link-arc
+      os: 'darwin
+      (link outdir: "scheme"
+            files: (-> compile-arc)
+            shared?: #f
+            appnm: "arc"
+            frameworks: '("Carbon") ))
+
+(stmt arc
+      (copy file: (-> link-arc)
+            force?: #t
+            tofile: "app/arc"))
 
 ;; --------------------------------------------------------------------
 ;; installing asc/arc

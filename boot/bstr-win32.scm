@@ -20,22 +20,22 @@
   (sys:mkdirs "../app/arc")
   (let ((port (open-output-file "../app/arc.bat")))
     (arc:pdisplay port 
-                  "@echo off" #\nl
-                  "if not \"%ARC_HOME%\"==\"\" goto START_ARC" #\nl
-                  "set ARC_HOME=" %arc:path% #\nl
-                  #\nl
-                  ":START_ARC" #\nl
+                  "@echo off" 'nl
+                  "if not \"%ARC_HOME%\"==\"\" goto START_ARC" 'nl
+                  "set ARC_HOME=" %arc:path% 'nl
+                  'nl
+                  ":START_ARC" 'nl
                   (string-append "asc -s " %arc:path% "\\arc.scm "
                                  "-- $1 $2 $3 $4 $5 $6 $7 $8 $9")
-                  #\nl)
+                  'nl)
     (close-output-port port)) )
 
 (define (bootstrap-script)
   (let ((port (open-output-file "../arc.bat")))
     (arc:pdisplay port 
-                  "@echo off" #\nl
-                  "set ARC_HOME=" %arc:src-dir% #\nl
-                  "app\\arc.bat %1 %2 %3 %4 %5 %6 %7 %8 %9" #\nl)
+                  "@echo off" 'nl
+                  "set ARC_HOME=" %arc:src-dir% 'nl
+                  "app\\arc.bat %1 %2 %3 %4 %5 %6 %7 %8 %9" 'nl)
     (close-output-port port)))
   
 (define (include-path)

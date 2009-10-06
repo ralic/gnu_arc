@@ -360,34 +360,30 @@ fi
 
 #!/bin/sh
 cat > ./bootstrap.sh <<_ACEOF
-ASC_HOME="$arcdir"
-export ASC_HOME
+ARC_INSTALL_HOME="$arcdir"
+export ARC_INSTALL_HOME
 _ACEOF
 
 case "$build" in
   Linux | FreeBSD | Darwin)
-    asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF
-(cd tinyscheme; /bin/sh build-unix.sh $build $arch)
+(cd scheme; /bin/sh build-unix.sh $build $arch)
 _ACEOF
     ;;
   Cygwin* | CYGWIN* )
-    asccmd=asc.exe
     arccmd=arc.exe
     cat >> ./bootstrap.sh <<_ACEOF
 (cd asc; /bin/sh build-cygwin.sh)
 _ACEOF
     ;;
   BeOS)
-    asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF
 (cd asc; /bin/sh build-beos.sh)
 _ACEOF
     ;;
   SunOS )
-    asccmd=asc
     arccmd=arc
     cat >> ./bootstrap.sh <<_ACEOF
 (cd asc; /bin/sh build-sun.sh)
@@ -400,25 +396,24 @@ _ACEOF
 esac
 
 cat >> ./bootstrap.sh <<_ACEOF
+unset ARC_INSTALL_HOME
+
 # copy the asc initializing file for arc
 if [ ! -d "./app" ]; then
   mkdir ./app
 fi
-cp tinyscheme/asc-init.scm ./app/asc-init.scm
-cp tinyscheme/init.scm ./app/init.scm
-cp tinyscheme/$asccmd ./app/$arccmd
+cp boot/arc-init.scm ./app/arc-init.scm
+cp scheme/init.scm ./app/init.scm
+cp scheme/$arccmd ./app/$arccmd
 
 ARC_HOME="`pwd`/src"
 export ARC_HOME
-ASC_INIT_DIR=`pwd`/app
-export ASC_INIT_DIR
-(cd boot; ../app/arc -s -1 bootstrap.scm -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir")
-unset ASC_INIT_DIR
+ARC_INIT_DIR=`pwd`/app
+export ARC_INIT_DIR
+(cd boot; ../app/arc -s bootstrap.scm -P "$prefix" -s "$build" -a "$arch" -p "$arcdir" -x "$bindir")
+unset ARC_INIT_DIR
 unset ARC_HOME
 
 ./arc configure
 _ACEOF
 chmod +x ./bootstrap.sh
- 
-
-

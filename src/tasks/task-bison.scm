@@ -100,38 +100,35 @@
                                          (arc:path-last-comp x)))
                                        (arc:path->string x))))
                            y)))
-           (bisoncmd (string-append "bison "
-                                    (if verbose?
-                                        "-v "
-                                        "")
-                                    (if no-lines?
-                                        "-l "
-                                        "")
-                                    (if ch?
-                                        (string-append "--defines="
-                                                       houtfile " ")
-                                        "")
-                                    (if to-c-file
-                                        (string-append "-o "
-                                                       to-c-file
-                                                       " ")
-                                        (if coutfile
-                                            (string-append "-o "
-                                                           coutfile
-                                                           " ")
-                                            ""))
-                                    (if prefix
-                                        (string-append "-p" prefix " ")
-                                        "")
-                                    source
-                                    )) )
+           (bison-cmd "bison")
+           (bison-args (arc:list-appends (if verbose?
+                                             "-v"
+                                             '())
+                                         (if no-lines?
+                                             "-l"
+                                             '())
+                                         (if ch?
+                                             (string-append "--defines="
+                                                            houtfile)
+                                             '())
+                                         (if to-c-file
+                                             (list "-o" to-c-file)
+                                             (if coutfile
+                                                 (list "-o" coutfile)
+                                                 '()))
+                                         (if prefix
+                                             (string-append "-p" prefix)
+                                             '())
+                                         source
+                                         ) ) 
+           )
       
       
       (if (arc:deps-bison-needs-recompile? source 
                                            (or to-c-file coutfile))
           (begin
-            (arc:display bisoncmd #\nl)
-            (if (not (= (system bisoncmd) 0))
+            (arc:display-command bison-cmd bison-args)
+            (if (not (= (sys:execute bison-cmd bison-args) 0))
                 (arc:log 'error "bison: failed to translate file '" 
                          source "'")
                 (begin

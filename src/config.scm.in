@@ -25,8 +25,8 @@
 (define (arc:host-cpu) "@host-cpu@")
 (define (arc:host-maker) "@host-maker@")
 (define (arc:host-version) "@host-version@")
-(define (arc:exec-path) "@exec-path@")
-(define (arc:home) "@arc-home@")
+;(define (arc:exec-path) "@exec-path@")
+;(define (arc:home) "@arc-home@")
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:

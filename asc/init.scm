@@ -285,25 +285,25 @@
 
 (define (asc:display-help)
   (asc:display
-   "asc - an interpreter for Scheme code" #\nl
-   "usage:" #\nl
-   "  asc options" #\nl
-   #\nl
-   "Options:" #\nl
-   " -h, --help           display this help and exit" #\nl
-   " -v, --version        display version information and exit" #\nl
-   " -s, --script SCRIPT  load Scheme source code from FILE, and exit" #\nl
-   #\nl))
+   "asc - an interpreter for Scheme code" 'nl
+   "usage:" 'nl
+   "  asc options" 'nl
+   'nl
+   "Options:" 'nl
+   " -h, --help           display this help and exit" 'nl
+   " -v, --version        display version information and exit" 'nl
+   " -s, --script SCRIPT  load Scheme source code from FILE, and exit" 'nl
+   'nl))
 
 (define (asc:display-version)
   (asc:display
-   "asc 0.0.1" #\nl
-   "Copyright (c) 2002 by Gregor Klinke" #\nl
-   "Asc may be distributed under the terms of the GNU General Public Licence;" #\nl
-   "certain other uses are permitted as well.  For details, see the file" #\nl
-   "'COPYING', which is included in the Guile distribution." #\nl
-   "There is no warranty, to the extent permitted by law." #\nl
-   #\nl))
+   "asc 0.0.1" 'nl
+   "Copyright (c) 2002 by Gregor Klinke" 'nl
+   "Asc may be distributed under the terms of the GNU General Public Licence;" 'nl
+   "certain other uses are permitted as well.  For details, see the file" 'nl
+   "'COPYING', which is included in the Guile distribution." 'nl
+   "There is no warranty, to the extent permitted by law." 'nl
+   'nl))
    
 (define %asc:exit-after-eval% #f)
 (define %asc:script-name% #f)
@@ -334,10 +334,10 @@
                               (list-tail %asc:argv% *asc:optind*)))
                       (set! done #t)))
           ((#\?) (begin
-                   (warn "bad option: " *asc:optopt* #\nl)
+                   (warn "bad option: " *asc:optopt* 'nl)
                    (quit)))
           ((#\:) (begin
-                   (warn "missing arg " *asc:optopt* #\nl)
+                   (warn "missing arg " *asc:optopt* 'nl)
                    (quit))))
         (if (not done)
             (loop (asc:getopt %asc:argv% asc:opts)))) ))

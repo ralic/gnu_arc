@@ -108,10 +108,10 @@
                            '())
                        incls 
                        sfile)))
-    (arc:display orange-cmd " " (arc:string-list->string* orange-args " ") #\nl)
+    (arc:display-command orange-cmd orange-args)
     (if (not (equal? (sys:execute orange-cmd orange-args) 0))
         (if (not %arc:keep-going-on-errors%)
-            (quit)))
+            (quit -1)))
     ))
 
 

@@ -70,7 +70,7 @@
                        "statement '" stmt-id "' unknown "
                        "(at least on this platform). Aborted")
               ;;(arc:context-display)
-              (quit))
+              (quit -1))
             (if (arc:stmt-callable-from-scope? stmt 
                                                (if (not (null? at-level))
                                                    (car at-level)

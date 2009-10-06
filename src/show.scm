@@ -33,11 +33,11 @@
           (if (arc:context? (car mq))
               (begin
                 (arc:display "CONTEXT NAME: " 
-                             (vector-ref (car mq) %ARC:ID-SLOT%) #\nl)
+                             (vector-ref (car mq) %ARC:ID-SLOT%) 'nl)
                 (arc:show-context-stmts
                  (vector-ref (car mq) %ARC:STMT-SLOT%)) 
                 )
-              (arc:display "??" #\nl))
+              (arc:display "??" 'nl))
           (loop (cdr mq))))))
 
 (define (arc:show-context-stmts stmt-alist)
@@ -68,7 +68,7 @@
                   (if info
                       (arc:show-info-wrapped info (+ 2 stmt-id-length 3)))
                                              
-                  (arc:display #\nl)))
+                  (arc:display 'nl)))
             (loop (cdr ta)))))) )
 (define (arc:stmt-id-spacer sym-len max-len)
   (if (> sym-len max-len)
@@ -105,6 +105,6 @@
                        dist
                        (- txtl ofs))))
           (if first 
-              (arc:display #\nl (make-string col #\space)))
+              (arc:display 'nl (make-string col #\space)))
           (arc:display (substring txt ofs (+ ofs len)))
           (loop #t (+ ofs len)))))) )

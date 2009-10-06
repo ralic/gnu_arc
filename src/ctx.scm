@@ -70,7 +70,7 @@
         (set! %arc:contexts% (cdr  %arc:contexts%)))
       (begin 
         (arc:log 'error "no context to drop. bad stacking")
-        (quit))))
+        (quit -1))))
 
 (define (arc:context-current)
   (if (null? %arc:contexts%)
@@ -113,7 +113,7 @@
           (if (not (sys:change-dir tps))
               (begin
                 (arc:msg "failed to change to directory '" tps "'.  Aborted")
-                (quit)))))))
+                (quit -1)))))))
 
 ;; returns the basedir property of the specified context or #f if not given
 (define (arc:context-basedir ctx)
@@ -194,7 +194,7 @@
       (let ((val-assoc (assoc name (vector-ref ctx %ARC:STMT-SLOT%))))
         (if (arc:context-stmt-redefined? val-assoc 
                                          (or (member 'os props) 'all))
-            (arc:display "Statement '" name "' redefined.  Ignored" #\nl)
+            (arc:display "Statement '" name "' redefined.  Ignored" 'nl)
             (vector-set! ctx %ARC:STMT-SLOT%
                          (append (vector-ref ctx %ARC:STMT-SLOT%)
                                  (list (let ((s (arc:make-stmt name)))
@@ -365,6 +365,45 @@
 
 
 ;; ----------------------------------------------------------------------
+;; properties
+;; ----------------------------------------------------------------------
+
+(define (arc:property key)
+  (or (arc:current-context-property key)
+      (arc:env-get key)))
+
+(define (arc:property! key value)
+  (arc:env-set! key value))
+
+(define (arc:property-unset! key)
+  (arc:env-unset! key))
+
+(define (arc:arc-tmp-directory)
+  (let* ((p (or (arc:property "tmpdir")
+                (arc:path-append 
+                 (arc:string->path 
+                  (if (arc:context-script-home (arc:context-current))
+                      (arc:context-script-home (arc:context-current))
+                      '()))
+                 ".arc"))))
+    (if (sys:file-exists? (arc:path->string p))
+        p
+        (begin
+          (sys:mkdirs (arc:path->string p))
+          p))))
+
+(define (arc:builddir subpath)
+  (let ((p (if subpath
+               (arc:path-append (arc:arc-tmp-directory) subpath)
+               (arc:arc-tmp-directory))))
+    (if (sys:file-exists? (arc:path->string p))
+        p
+        (begin
+          (sys:mkdirs (arc:path->string p))
+          p))))
+    
+
+;; ----------------------------------------------------------------------
 ;; tests
 ;; ----------------------------------------------------------------------
 ;; displays the complete stack of contexts
@@ -376,14 +415,14 @@
           (if (arc:context? (car mq))
               (begin
                 (arc:display "Name:  " 
-                             (vector-ref (car mq) %ARC:ID-SLOT%) #\nl)
-                (arc:display "-- Statements -----------: " #\nl)
+                             (vector-ref (car mq) %ARC:ID-SLOT%) 'nl)
+                (arc:display "-- Statements -----------: " 'nl)
                 (arc:context-display-stmts
                  (vector-ref (car mq) %ARC:STMT-SLOT%)) 
-                (arc:display "-- Flags -------------: " #\nl
-                             (vector-ref (car mq) %ARC:META-SLOT%) #\nl)
+                (arc:display "-- Flags -------------: " 'nl
+                             (vector-ref (car mq) %ARC:META-SLOT%) 'nl)
                 )
-              (arc:display "??" #\nl))
+              (arc:display "??" 'nl))
           (loop (cdr mq))))))
 
 (define (arc:context-display-stmts stmt-alist)
@@ -391,7 +430,7 @@
     (if (null? ta)
         #t
         (begin
-          (arc:display (caar ta) (arc:stmt-info (car ta)) #\nl)
+          (arc:display (caar ta) (arc:stmt-info (car ta)) 'nl)
           (loop (cdr ta))))))
 
 

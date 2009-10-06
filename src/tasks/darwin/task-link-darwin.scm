@@ -38,6 +38,13 @@
      ;; the default application extension (on windows: .exe)
      (app-ext ,(lambda (self) ""))
 
+     (format-framework-options
+      ,(lambda (self frameworks)
+         (arc:reduce (lambda (x lst)
+                       (cons "-framework" (cons x lst)))
+                     '()
+                     frameworks)))
+
      (rpath-option ,(lambda (self rpath)
                       (cond
                        ((string? rpath)

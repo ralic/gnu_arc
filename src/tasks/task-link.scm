@@ -87,7 +87,8 @@
                             (nostdlib? boolean optional)
                             (rpath string optional)
                             (local-exec-outdir string optional)
-                            (libdirs strlist optional)) )
+                            (libdirs strlist optional)
+                            (frameworks strlist optional)) )
 (define (arc:link props body)
   (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-link) 'alloc))
          (shared (arc:aval 'shared? props #t))
@@ -104,6 +105,7 @@
                           (arc:attrval-ref files* 'dep-lib-dirs)
                           #f))
          (libs (arc:aval 'libs props '())) 
+         (frameworks (arc:aval 'frameworks props '()))
          (appext (arc:aval 'appext props (<backend> 'app-ext)))
          (appnm (arc:aval 'appnm props ""))
          (outdir (arc:aval 'outdir props #f))
@@ -130,13 +132,13 @@
           #f)
         (let* ((fullnm (<backend> 'link-app outdir appnm appext
                                   libdirs autolibdirs shared nostdlib
-                                  files autolibs libs rpath))
+                                  files autolibs libs rpath frameworks))
                (locexec (if (and shared
                                  local-exec-outdir)
                             (<backend> 'link-app local-exec-outdir appnm appext
                                        libdirs autolibdirs shared nostdlib
                                        files autolibs libs 
-                                       local-exec-rpath))))
+                                       local-exec-rpath frameworks))))
           fullnm) )))
 
 

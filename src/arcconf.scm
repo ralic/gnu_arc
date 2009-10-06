@@ -25,7 +25,7 @@
   (arc:log 'debug "load config " script)
   (let* ((*in* (open-input-file script))
          (conf (read *in*)))
-    (close-port *in*)
+    (close-input-port *in*)
     (if conf
         (set! %arc:env% (cons conf %arc:env%))
         #f)))
@@ -62,6 +62,7 @@
           (set-cdr! aslot #f)
           (set-car! aslot #f)))
     #f))
+
 
 ;;Keep this comment at the end of the file 
 ;;Local variables:

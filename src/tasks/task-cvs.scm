@@ -122,28 +122,28 @@
       (arc:log 'fatal "cvs: 'checkout' needs module"))
   (let* ((tfn (arc:path->string (arc:path-append (arc:arc-tmp-directory)
                                                  "cvs-out")))
-         (cvscmd (string-append "cvs "
-                                compress-opt " "
-                                (if cvsroot
-                                    (string-append "-d" cvsroot " ")
-                                    "") 
-                                "checkout "
-                                (if rev
-                                    (string-append "-r" rev " ")
-                                    (if date
-                                        (string-append "-D\"" date "\" ")
-                                        ""))
-                                (if prune-dir?
-                                    "-P "
-                                    "")
-                                (if dir
-                                    (string-append "-d" dir " ")
-                                    "")
-                                module 
-                                " > " tfn)))
-    (arc:display cvscmd #\nl)
+         (cvs-cmd "cvs")
+         (cvs-args (arc:list-appends compress-opt 
+                                     (if cvsroot
+                                         (string-append "-d" cvsroot)
+                                         '()) 
+                                     "checkout"
+                                     (if rev
+                                         (string-append "-r" rev)
+                                         (if date
+                                             (string-append "-D\"" date "\"")
+                                             '()))
+                                     (if prune-dir?
+                                         "-P"
+                                         '())
+                                     (if dir
+                                         (string-append "-d" dir)
+                                         '())
+                                     module 
+                                     ">" tfn)) )
+    (arc:display-command cvs-cmd cvs-args)
     
-    (if (not (equal? (system cvscmd) 0))
+    (if (not (equal? (sys:execute* cvs-cmd cvs-args) 0))
         (begin
           (arc:log 'error "cvs: 'checkout' failed for module '" module "'")
           #f)
@@ -158,25 +158,25 @@
       (arc:log 'fatal "cvs: 'export' requires either a revision or date"))
   (let* ((tfn (arc:path->string (arc:path-append (arc:arc-tmp-directory)
                                                  "cvs-out")))
-         (cvscmd (string-append "cvs "
-                                compress-opt " "
-                                (if cvsroot
-                                    (string-append "-d" cvsroot " ")
-                                    "") 
-                                "export "
-                                (if rev
-                                    (string-append "-r" rev " ")
-                                    (if date
-                                        (string-append "-D\"" date "\" ")
-                                        ""))
-                                (if dir
-                                    (string-append "-d" dir " ")
-                                    "")
-                                module
-                                " > " tfn)))
-    (arc:display cvscmd #\nl)
+         (cvs-cmd "cvs")
+         (cvs-args (arc:list-appends compress-opt
+                                     (if cvsroot
+                                         (string-append "-d" cvsroot)
+                                         '()) 
+                                     "export"
+                                     (if rev
+                                         (string-append "-r" rev)
+                                         (if date
+                                             (string-append "-D\"" date "\"")
+                                             '()))
+                                     (if dir
+                                         (string-append "-d" dir)
+                                         '())
+                                     module
+                                     ">" tfn)))
+    (arc:display-command cvs-cmd cvs-args)
     
-    (if (not (equal? (system cvscmd) 0))
+    (if (not (equal? (sys:execute* cvs-cmd cvs-args) 0))
         (begin
           (arc:log 'error "cvs: 'export' failed for module '" module "'")
           #f)
@@ -194,32 +194,30 @@
     
     (let* ((tfn (arc:path->string (arc:path-append (arc:arc-tmp-directory)
                                                    "cvs-out")))
-           (cvscmd (string-append "cvs "
-                                  compress-opt " "
-                                  "update "
-                                  (if local?
-                                      "-l "
-                                      "")
-                                  (if create-dir?
-                                      "-d "
-                                      "")
-                                  (if prune-dir?
-                                      "-P "
-                                      "")
-                                  (if rev
-                                      (string-append "-r" rev " ")
-                                      (if date
-                                          (string-append "-D\"" date "\" ")
-                                          ""))
-                                  (if files
-                                      (arc:reduce string-append "" files)
-                                      "")
-                                  " > " tfn))
+           (cvs-cmd "cvs")
+           (cvs-args (arc:list-appends compress-opt 
+                                       "update"
+                                       (if local?
+                                           "-l"
+                                           '())
+                                       (if create-dir?
+                                           "-d"
+                                           '())
+                                       (if prune-dir?
+                                           "-P"
+                                           '())
+                                       (if rev
+                                           (string-append "-r" rev)
+                                           (if date
+                                               (string-append "-D\"" date "\"")
+                                               '()))
+                                       (if files files '())
+                                       ">" tfn))
            (retv #t))
       
-      (arc:display cvscmd #\nl)
+      (arc:display-command cvs-cmd cvs-args)
       
-      (if (not (equal? (system cvscmd) 0))
+      (if (not (equal? (sys:execute* cvs-cmd cvs-args) 0))
           (begin
             (arc:log 'error "cvs: 'update' failed for module '" module "'")
             (set! retv #f)))

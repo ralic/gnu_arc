@@ -20,28 +20,28 @@
   (sys:mkdirs "../app")
   (let ((port (open-output-file "../app/arc")))
     (arc:pdisplay port 
-                  "#!/bin/sh" #\nl
-                  #\nl
-                  "if [ -z \"$ARC_HOME\" ]; then" #\nl
-                  "  ARC_HOME=" %arc:path% #\nl
-                  "  export ARC_HOME" #\nl
-                  "fi" #\nl
-                  #\nl
-                  "asc -s $ARC_HOME/arc.scm -- $*"
-                  #\nl)
+                  "#!/bin/sh" 'nl
+                  'nl
+                  "if [ -z \"$ARC_HOME\" ]; then" 'nl
+                  "  ARC_HOME=" %arc:path% 'nl
+                  "  export ARC_HOME" 'nl
+                  "fi" 'nl
+                  'nl
+                  "arc -s $ARC_HOME/arc.scm -- $*"
+                  'nl)
     (close-output-port port)
     (sys:chmod "../app/arc" 'exec)) )
 
 (define (bootstrap-script)
   (let ((port (open-output-file "../arc")))
     (arc:pdisplay port 
-                  "#!/bin/sh" #\nl
-                  #\nl
-                  "ARC_HOME=" %arc:src-dir% #\nl
-                  "export ARC_HOME" #\nl
-                  "ASC_INIT_DIR=" %arc:app-dir% #\nl
-                  "export ASC_INIT_DIR" #\nl
-                  "exec `dirname $0`/app/arc $*" #\nl)
+                  "#!/bin/sh" 'nl
+                  'nl
+                  "ARC_HOME=" %arc:src-dir% 'nl
+                  "export ARC_HOME" 'nl
+                  "ARC_INIT_DIR=" %arc:app-dir% 'nl
+                  "export ARC_INIT_DIR" 'nl
+                  "exec `dirname $0`/app/arc $*" 'nl)
     (close-output-port port)
     (sys:chmod "../arc" 'exec)) )
 

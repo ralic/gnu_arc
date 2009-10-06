@@ -155,7 +155,7 @@
   (if (sys:file-directory? tofile)
       (arc:log 'info "copy: destination is a directory, not a file")
       (if (not (sys:file-exists? file))
-          (arc:log 'info "copy: source file not found (" file")")
+          (arc:log 'info "copy: source file not found (" file ")")
           (if (sys:file-exists? tofile)
               (if (not force)
                   (arc:log 'info "copy: destination file found. don't touch")

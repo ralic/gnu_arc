@@ -17,7 +17,7 @@
 (define arc:top-exception-handler 
   (lambda (type arg)
     (arc:display (arc:to-str "unhandled ("
-                             type ") " arg) #\nl)))
+                             type ") " arg) 'nl)))
 
 (define (arc:throw type arg) 
   (arc:top-exception-handler type arg))

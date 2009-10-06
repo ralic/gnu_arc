@@ -75,20 +75,21 @@
     (if really-work
         (begin
           (arc:log 'debug "create tar '" tfn "'")
-          (let ((tarcmd (string-append "tar cl"
-                                       (if absp "P" "")
-                                       (if deref "h" "")
-                                       (case (arc:aval 'zip-mode props #f)
-                                         ((gzip) "z")
-                                         ((compress) "Z")
-                                         ((bzip2) "I")
-                                         (else ""))
-                                       "f "
-                                       tfn " "
-                                       (arc:string-list->string* files
-                                                                 " "))))
-            (arc:display tarcmd #\nl)
-            (if (not (equal? (system tarcmd) 0))
+          (let ((tar-cmd "tar")
+                (tar-args (arc:list-appends (string-append "cl"
+                                                           (if absp "P" "")
+                                                           (if deref "h" "")
+                                                           (case (arc:aval 'zip-mode props #f)
+                                                             ((gzip) "z")
+                                                             ((compress) "Z")
+                                                             ((bzip2) "I")
+                                                             (else ""))
+                                                           "f")
+                                            tfn
+                                            (if files files '()))) )
+
+            (arc:display-command tar-cmd tar-args)
+            (if (not (equal? (sys:execute tar-cmd tar-args) 0))
                 (begin
                   (arc:log 'error "failed to create tar file '" tfn "'")
                  #f)

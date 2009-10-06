@@ -37,17 +37,16 @@
         (ranlib-cmd (self 'ranlib-cmd))
         (ranlib-args (list libnm)) )
     
-    (arc:display ar-cmd " " (arc:string-list->string* ar-args " ") #\nl)
+    (arc:display-command ar-cmd ar-args)
     
     (if (not (equal? (sys:execute ar-cmd ar-args) 0))
-        (arc:msg "failed to create library " libnm #\nl)
+        (arc:msg "failed to create library " libnm 'nl)
 
         (if (self 'ranlib-needed?)
             (begin
-              (arc:display ranlib-cmd " " 
-                           (arc:string-list->string* ranlib-args " ") #\nl)
+              (arc:display-command ranlib-cmd ranlib-args)
               (if (not (equal? (sys:execute ranlib-cmd ranlib-args) 0))
-                  (arc:msg "failed to run ranlib on " libnm #\nl)))))
+                  (arc:msg "failed to run ranlib on " libnm 'nl)))))
     libnm))
 
 
@@ -95,22 +94,20 @@
                           "--dllname" dllname
                           "--output-lib" import-libname))
          )
-    (arc:display dll1-cmd " " (arc:string-list->string* dll1-args " ") #\nl)
+    (arc:display-command dll1-cmd dll1-args)
     
     (if (not (equal? (sys:execute dll1-cmd dll1-args) 0))
         (arc:throw 'exec 
                    (string-append "failed to create library " libnm
                                   " (dlltool)"))
         (begin
-          (arc:display dll2-cmd " "
-                       (arc:string-list->string* dll2-args " ") #\nl)
+          (arc:display-command dll2-cmd dll2-args)
           (if (not (equal? (sys:execute dll2-cmd dll2-args) 0))
               (arc:throw 'exec 
                          (string-append "failed to create library " libnm
                                         " (dllwrap)"))
               (begin
-                (arc:display dll3 " " 
-                             (arc:string-list->string* dll3-args " ") #\nl)
+                (arc:display-command dll3-cmd dll3-args)
                 (if (not (equal? (sys:execute dll3-cmd dll3-args) 0))
                     (arc:throw 'exec 
                                (string-append "failed to create library " libnm

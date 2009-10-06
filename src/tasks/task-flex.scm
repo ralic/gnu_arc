@@ -70,30 +70,29 @@
                                         (arc:path-last-comp x)))
                                       (arc:path->string x))))
                           y)))
-           (flexcmd (string-append "flex "
-                                   (if ci?
-                                       "-I "
-                                       "")
-                                   (if prefix
-                                       (string-append "-P" prefix " ")
-                                       "")
-                                   (if (or tofile outfile)
-                                       "-t "
-                                       "")
-                                   source
-                                   (if tofile
-                                       (string-append " > " tofile)
-                                       (if outfile
-                                           (string-append " > " outfile)
-                                           ""))
-                                   )))
-      
+           (flex-cmd "flex")
+           (flex-args (arc:list-appends (if ci?
+                                            "-I"
+                                            '())
+                                        (if prefix
+                                            (string-append "-P" prefix)
+                                            '())
+                                        (if (or tofile outfile)
+                                            "-t"
+                                            '())
+                                        source
+                                        (if tofile
+                                            (string-append ">" tofile)
+                                            (if outfile
+                                                (string-append ">" outfile)
+                                                '()))
+                                        )))
       
       (if (arc:deps-flex-needs-recompile? source 
                                           (or tofile outfile))
           (begin
-            (arc:display flexcmd #\nl)
-            (if (not (= (system flexcmd) 0))
+            (arc:display-command flex-cmd flex-args)
+            (if (not (= (sys:execute* flex-cmd flex-args) 0))
                 (arc:log 'error "flex: failed to translate file '" 
                          source "'")
                 (arc:attrval-set! av 'c-source (or tofile outfile)))))

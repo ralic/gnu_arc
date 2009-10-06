@@ -19,11 +19,8 @@
 ;; input installation-path of scripts, %arc:exec%
 ;; input scheme-implementation, %arc:impl%
 
-(define %arc:argv% *args*)
-(define %arc:scheme-impl% 'asc)
+(define %arc:argv% (vector->list *args*))
 
-(display %arc:argv%) (newline)
-(display %arc:scheme-impl%) (newline)
 (define %arc:debug% (let ((ff (sys:getenv "ARC_DEBUG")))
                       (if (and ff (equal? ff "yes")) #t #f)))
 
@@ -62,17 +59,17 @@
           ((exec) (set! %arc:exec% *arc:optarg*))
           ((#\?) (begin 
                    (arc:msg "unknown option: " *arc:optopt*) 
-                   (quit)))
+                   (quit -1)))
           ((#\:) (begin
                    (arc:msg "missing arg " *arc:optopt*) 
-                   (quit)))
+                   (quit -1)))
           (else (begin
                   (arc:msg "unknown option: " opt))))
         (loop (arc:getopt %arc:argv% arc:opts)))))
 
 (define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f %arc:arch% #f ))
 
-(define %arc:home% "../src")
+;(define %arc:home% "../src")
 (load "../src/oop.scm")
 (load "../src/sys.scm")
 
@@ -92,6 +89,7 @@
         (begin
           (case (car v)
             ((#\newline) (newline port))
+            ((nl) (newline port))
             (else (display (car v) port)))
           (loop (cdr v))))))
 
@@ -103,7 +101,7 @@
   (else (begin
           (display "unknown system. can't install arc automatically")
           (newline)
-          (quit))))
+          (quit -1))))
 
 
 (bootstrap-script)
@@ -127,7 +125,7 @@
                    ("host-maker"   ,(caddr %arc:sysnm%))
                    ("host-version" ,(cadddr %arc:sysnm%))) )
 
-(quit)
+(quit 0)
 
 
 ;;Keep this comment at the end of the file 

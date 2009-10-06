@@ -35,39 +35,15 @@
 ;; ----------------------------------------------------------------------
 
 ;; the directory where to put dependency files
-(define %arc:deps-directory% ".arc/deps")
+;(define %arc:deps-directory% ".arc/deps")
 
-(arc:register-built-resource ".arc" 'recursive)
-
+;(arc:register-built-resource ".arc" 'recursive)
 
 (define %arc:deps-mode% 'database)
 
-(define (arc:arc-tmp-directory)
-  (let ((p (arc:path-append 
-            (arc:string->path 
-             (if (arc:context-script-home (arc:context-current))
-                 (arc:context-script-home (arc:context-current))
-                 '()))
-            ".arc")))
-    (if (sys:file-exists? (arc:path->string p))
-        p
-        (begin
-          (sys:mkdirs (arc:path->string p))
-          p))))
-
 ;; returns the dependency directory as a path object
 (define (arc:deps-directory)
-  (let ((p (arc:path-append 
-            (arc:string->path 
-             (if (arc:context-script-home (arc:context-current))
-                 (arc:context-script-home (arc:context-current))
-                 '()))
-            (arc:string->path %arc:deps-directory%))))
-    (if (sys:file-exists? (arc:path->string p))
-        p
-        (begin
-          (sys:mkdirs (arc:path->string p))
-          p))))
+  (arc:builddir "deps"))
 
 (define (arc:deps? deps)
   (and deps
@@ -133,7 +109,7 @@
 
 (define (arc:save-deps-file fn deps)
   (if (sys:file-exists? fn)
-      (delete-file fn))
+      (sys:remove-file fn))
   (let ((port (open-output-file fn)))
     ;; produce some informational stuff
     (display ";; don't edit this file" port) (newline port)
@@ -166,11 +142,13 @@
 (define (arc:mtime-file-changed? deps ofile)
   (let ((retv (let ((mtime (sys:mtime ofile))
                     (dps (arc:deps-determine-mtime deps)))
-                (let loop ((fc (cadr dps)))
-                  (if (null? fc)
-                      #f
-                      (or (< mtime (cdar fc))
-                          (loop (cdr fc))) )))))
+                (if (not mtime)
+                    #t
+                    (let loop ((fc (cadr dps)))
+                      (if (null? fc)
+                          #f
+                          (or (< mtime (cdar fc))
+                              (loop (cdr fc))) ))))) )
     (arc:log 'debug "mtime changed of " ofile " -> " retv)
     retv))
       
@@ -210,6 +188,7 @@
               (arc:save-deps-file fn deps))
           deps)
         df)))
+
 
 ;; ----------------------------------------------------------------------
 ;; store the dependencies in one single database file
@@ -296,7 +275,7 @@
         ((eof-object? c) #t)
       (case state
         ((pre-ws) (case c
-                    ((#\space #\nl #\tab #\cr) 'ignore)
+                    ((#\space #\newline #\tab #\return) 'ignore)
                     (else (begin
                             (set! state 'targ)
                             (set! buf (cons c buf))))))
@@ -308,19 +287,21 @@
                            (set! buf '())))
                   (else (set! buf (cons c buf)))))
         ((targ-ws) (case c
-                     ((#\space #\nl #\tab #\cr) 'ignore)
+                     ((#\space #\newline #\tab #\return) 'ignore)
                      (else (begin 
                              (set! state 'dep)
                              (set! buf (cons c buf))))))
         ((dep) (case c
-                 ((#\space #\nl #\tab #\cr) 
+                 ((#\space #\newline #\tab #\return) 
                   (begin
                     (set! state 'ws)
                     (arc:deps-set-deps! deps (list->string (reverse buf)))
                     (set! buf '())))
                  (else (set! buf (cons c buf)))))
         ((ws) (case c
-                ((#\space #\nl #\tab #\cr) 'ignore)
+                ((#\space #\newline #\tab #\return) 
+                 (begin
+                   'ignore))
                 ((#\\) 'ignore)
                 (else (begin
                         (set! state 'dep)
@@ -329,6 +310,7 @@
     (close-input-port port)
     
     deps))
+
 
 
 ;;Keep this comment at the end of the file 

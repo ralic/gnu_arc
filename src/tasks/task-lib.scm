@@ -173,11 +173,13 @@
   (if (not (sys:file-exists? libnm))
       #t
       (let ((libmt (sys:mtime libnm)))
-        (let loop ((obj objs))
-          (if (null? obj)
-              #f
-              (or (< libmt (sys:mtime (car obj)))
-                  (loop (cdr obj))))))))
+        (if (not libmt)
+            #t
+            (let loop ((obj objs))
+              (if (null? obj)
+                  #f
+                  (or (< libmt (sys:mtime (car obj)))
+                      (loop (cdr obj)))))))) )
 
 
 (arc:register-task 'lib arc:lib arc:lib-keywords)

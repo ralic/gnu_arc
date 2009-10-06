@@ -96,6 +96,7 @@
         (begin
           (case (car v)
             ((#\newline) (newline))
+            ((nl) (newline))
             (else (display (car v))))
           (loop (cdr v))))))
 
@@ -119,7 +120,7 @@
     ((error) (apply arc:msg (cons "ERROR: " values)))
     ((fatal) (begin
                (apply arc:msg (cons "ERROR: " values))
-               (quit)))))
+               (quit -1)))))
 
 ;; looks up a entry from an alist, and returns it's value.  if no such
 ;; entry is found, returns default
@@ -155,7 +156,7 @@
         (begin
           (do ((c cc (read-char port)))
               ((or (eof-object? c)
-                   (equal? c #\nl)) #t)
+                   (equal? c #\newline)) #t)
             (set! res (cons c res)) )
           (list->string (reverse res))))))
 
@@ -210,7 +211,7 @@
 
 
 (define (arc:display-command cmd args)
-  (arc:display cmd " " (arc:string-list->string* args " ") #\nl))
+  (arc:display cmd " " (arc:string-list->string* args " ") 'nl))
 
 
 ;;Keep this comment at the end of the file 

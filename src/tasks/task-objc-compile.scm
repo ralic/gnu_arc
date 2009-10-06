@@ -15,9 +15,9 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (arc:provide 'task-objc-compile)
+
 (arc:require 'task-c-compile)
 (arc:require 'task-c-deps)
-
 
 (arc:log 'debug "loading 'objc-compile' task")
 
@@ -89,8 +89,23 @@
 ;; the return value is a list of all object files controlled by this task
 
 (define arc:objc-compile-keywords 
-  (append arc:c-compile-keywords
-          '((warn-protocol? boolean optional))))
+;  (append arc:c-compile-keywords
+  
+  '((sources (list attrval) required)
+    (debug? boolean optional)
+    (ansi? boolean optional)
+    (signed-char? boolean optional)
+    (warn-level symbol optional)
+    (opt-level symbol optional)
+    (flags strlist optional)
+    (includes strlist optional)
+    (outdir string optional)
+    (objext string optional)
+    (sobjext string optional)
+    (shared? boolean optional)
+    (static? boolean optional)
+    (depends dependencies optional)
+    (warn-protocol? boolean optional)))
 
 (define (arc:objc-compile props body)
   (let* ((warn-protocol (arc:aval 'warn-protocol? props #f))

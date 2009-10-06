@@ -24,12 +24,10 @@
 (define (arc:filter-file in-file out-file table)
   (arc:filter-file* in-file out-file table #\@))
 
-(define (arc:filter-file* in-file out-file table sepc)
-  (let* ((port (open-input-file in-file))
-         (out (open-output-file out-file))
-         (state 'copy-pass) 
+(define (arc:-filter-file in-port out-port table sepc)
+  (let ( (state 'copy-pass) 
          (key '()))
-    (let loop ((c (read-char port)))
+    (let loop ((c (read-char in-port)))
       (if (eof-object? c)
           'done
           (begin
@@ -38,18 +36,23 @@
                                (begin
                                  (set! state 'parse-key)
                                  (set! key '()))
-                               (write-char c out)))
+                               (write-char c out-port)))
               ((parse-key) (if (eqv? c sepc)
                                (let* ((k (list->string (reverse key)))
                                       (a (assoc k table)))
                                  (if (= (string-length k) 0)
-                                     (write-char sepc out)
+                                     (write-char sepc out-port)
                                      (if a
-                                         (display (cadr a) out)
+                                         (display (cadr a) out-port)
                                          (arc:msg "key '" k "' not known")))
                                  (set! state 'copy-pass))
                                (set! key (cons c key)))))
-            (loop (read-char port)) )))
+            (loop (read-char in-port)) )))) )
+
+(define (arc:filter-file* in-file out-file table sepc)
+  (let* ((port (open-input-file in-file))
+         (out (open-output-file out-file)) )
+    (arc:-filter-file port out table sepc)
     (close-input-port port)
     (close-output-port out)))
 

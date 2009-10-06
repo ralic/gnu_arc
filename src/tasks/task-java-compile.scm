@@ -107,7 +107,6 @@
 (define (arc:-compile-java-file sfile classpath jflags)
   (let ((cmd-cmd %arc:java-compiler%)
         (cmd-args (list-appends %arc:java-defs%
-                                
                                 (if (> (string-length classpath) 0)
                                     (list %arc:java-cp-flag% classpath)
                                     '())
@@ -115,10 +114,10 @@
                                 jflags                    ; custom cflags
                                 sfile                     ; the source file
                                 )))
-    (arc:display cmd-str " " (arc:string-list->string* cmd-args " ") #\nl)
-    (if (not (equal? (sys:execute cmd-str cmd-args) 0))
+    (arc:display-command cmd-cmd cmd-args)
+    (if (not (equal? (sys:execute cmd-cmd cmd-args) 0))
         (if (not %arc:keep-going-on-errors%)
-            (quit)))))
+            (quit -1)))))
 
 
 (define (arc:-build-java-classpath strlist)

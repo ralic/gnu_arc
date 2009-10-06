@@ -39,17 +39,16 @@
         (ranlib-cmd (self 'ranlib-cmd))
         (ranlib-args (list libnm)) )
     
-    (arc:display ar-cmd " " (arc:string-list->string* ar-args " ") #\nl)
+    (arc:display-command ar-cmd ar-args)
     
     (if (not (equal? (sys:execute ar-cmd ar-args) 0))
-        (arc:msg "failed to create library " libnm #\nl)
+        (arc:msg "failed to create library " libnm 'nl)
 
         (if (self 'ranlib-needed?)
             (begin
-              (arc:display ranlib-cmd " " 
-                           (arc:string-list->string* ranlib-args " ") #\nl)
+              (arc:display-command ranlib-cmd ranlib-args)
               (if (not (equal? (sys:execute ranlib-cmd ranlib-args) 0))
-                  (arc:msg "failed to run ranlib on " libnm #\nl)))))
+                  (arc:msg "failed to run ranlib on " libnm 'nl)))))
     libnm))
 
 
@@ -86,11 +85,11 @@
                   (self 'ld-outfile-flag)
                   libnm)) )
 
-    (arc:display ld-cmd " " (arc:string-list->string* ld-args " ") #\nl)
+    (arc:display-command ld-cmd ld-args)
     
     (if (not (equal? (sys:execute ld-cmd ld-args) 0))
         (begin
-          (arc:msg "failed to create library " libnm #\nl)
+          (arc:msg "failed to create library " libnm 'nl)
           #f)
         libnm) ))
 

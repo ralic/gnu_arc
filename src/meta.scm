@@ -30,7 +30,7 @@
         ((eof-object? expr) #t)
       (arc:eval-arc-defines expr))
 
-    ;;(arc:display %arc:contexts% #\nl)
+    ;;(arc:display %arc:contexts% 'nl)
     (close-input-port *in*)
     #t))
          
@@ -426,10 +426,9 @@
       
       ;; access to properties and statements
       ((->) (arc:eval-stmt (cadr expr) 'local))
-      ((prop) (or (arc:current-context-property (cadr expr))
-                  (arc:env-get (cadr expr))))
-      ((prop!) (arc:env-set! (cadr expr) (arc:eval-arc (caddr expr))))
-      ((prop-unset!) (arc:env-unset! (cadr expr)))
+      ((prop) (arc:property (cadr expr)))
+      ((prop!) (arc:property! (cadr expr) (arc:eval-arc (caddr expr))))
+      ((prop-unset!) (arc:property-unset! (cadr expr)))
 
       ;; else: (i) see if the called function is a declared function (from
       ;; named let for instance), than (ii) look if it is a generic tasks
@@ -544,7 +543,7 @@
                                               task-name)
                         (begin
                           (arc:msg "missing properties")
-                          (quit)))
+                          (quit -1)))
                     #f)))
     (if task
         (arc:try (lambda (type arg)
@@ -559,7 +558,7 @@
          (props (or (arc:compile-key-list (caddr task) param-alist task-name)
                     (begin
                       (arc:msg "missing properties")
-                      (quit)))) )
+                      (quit -1)))) )
     (if task
         (arc:try (lambda (type arg)
                    (arc:log 'error (arc:to-str "(" type ") "

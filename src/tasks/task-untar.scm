@@ -20,7 +20,7 @@
 (arc:log 'debug "loading 'untar' task")
 
 
-(define %arc:untar-tmp-list% ".arc/tar-list")
+;(define %arc:untar-tmp-list% ".arc/tar-list")
 
 
 ;; extract a (file) tar archive (using the gnu tar tool).  Returns a list
@@ -84,27 +84,30 @@
           (arc:log 'debug "extract tar '" tfn "'")
           (if (not (sys:file-exists? tfn))
               (arc:log 'info "tar file '" tfn "' does not exist")
-              (let ((tarcmd (string-append "tar xv"
-                                           (if absp "P" "")
-                                           (if perm "p" "")
-                                           (case (arc:aval ':zip-mode props #f)
-                                             ((gzip) "z")
-                                             ((compress) "Z")
-                                             ((bzip2) "I")
-                                             (else ""))
-                                           (if (not force) "k" "")
-                                           "f "
-                                           tfn 
-                                           " > " %arc:untar-tmp-list%)) )
+              (let* ((tar-list (arc:path->string (arc:builddir "tar-list")))
+                     (tar-cmd "tar")
+                     (tar-args (arc:list-appends 
+                                (string-append "xv"
+                                               (if absp "P" "")
+                                               (if perm "p" "")
+                                               (case (arc:aval ':zip-mode props #f)
+                                                 ((gzip) "z")
+                                                 ((compress) "Z")
+                                                 ((bzip2) "I")
+                                                 (else ""))
+                                               (if (not force) "k" "")
+                                               "f")
+                                tfn 
+                                ">" tar-list)) )
                 (if outdir
                     (sys:change-dir outdir))
 
                 ;; create the base directory for the tmp directory
-                (sys:mkdirs (arc:path->string (arc:path-without-last-comp 
-                                               (arc:string->path %arc:untar-tmp-list%))))
+                ;(sys:mkdirs (arc:path->string (arc:path-without-last-comp 
+                ;                              (arc:string->path tar-list))))
                 
-                (arc:display tarcmd #\nl)
-                (if (not (= (system tarcmd) 0))
+                (arc:display-command tar-cmd tar-args)
+                (if (not (= (sys:execute* tar-cmd tar-args) 0))
                     (if (not force)
                         (arc:log 'info 
                                  "some or all files could not "
@@ -112,9 +115,9 @@
                         (arc:log 'info 
                                  "failed to extract tar file '" 
                                  tfn "'")))
-                (if (sys:file-exists? %arc:untar-tmp-list%)
-                    (let ((lf (arc:-tar-read-list-of-extracted-files %arc:untar-tmp-list%)))
-                      (sys:remove-file %arc:untar-tmp-list%)
+                (if (sys:file-exists? tar-list)
+                    (let ((lf (arc:-tar-read-list-of-extracted-files tar-list)))
+                      (sys:remove-file tar-list)
                       (set! retv lf)))
                 (if outdir
                     (sys:change-dir olddir)) ))))

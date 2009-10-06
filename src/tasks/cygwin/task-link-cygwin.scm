@@ -60,7 +60,7 @@
      (link-app
       ,(lambda (self outdir appnm appext 
                      libdirs autolibdirs shared nostdlib files autolibs libs
-                     rpath)
+                     rpath frameworks)
          (let* ((fullnm (self 'make-app-name outdir appnm appext))
                 (link-cmd "gcc")
                 (link-args (hea:list-appends 
@@ -92,10 +92,9 @@
                             )) )
            (arc:log 'debug "linking " fullnm " ...")
            
-           (arc:display link-cmd " "
-                        (arc:string-list->string* link-args " ") #\nl)
+           (arc:display-command link-cmd link-args)
            
-           (if (not (= (sys:execute link-cmd link-args) 0))
+           (if (not (equal? (sys:execute link-cmd link-args) 0))
                (arc:log 'info "linking '" fullnm "' failed"))
            
            fullnm)) )

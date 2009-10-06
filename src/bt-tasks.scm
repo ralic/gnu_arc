@@ -19,17 +19,17 @@
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "meta-inf"))
           (dir (if (sys:file-exists? (arc:path->string pth))
-                   (sys:opendir (arc:path->string pth))
+                   (open-dir-port (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (sys:readdir dir) (sys:readdir dir)))
-               ((not fn) #t)
+           (do ((fn (read-dir-port dir) (read-dir-port dir)))
+               ((eof-object? fn) #t)
              (if (arc:string-suffix? fn ".decl")
                  (begin
                    (arc:log 'verbose "load '" (arc:path-append pth fn) "'")
                    (arc:load (arc:path->string (arc:path-append pth fn))))))
-           (sys:closedir dir)))))
+           (close-dir-port dir)))))
  %arc:arc-incl-path%)
 
 ;; load all tasks in the subdirectory "tasks"
@@ -37,12 +37,12 @@
  (lambda (pn)
    (let* ((pth (arc:path-append (arc:string->path pn) "tasks"))
           (dir (if (sys:file-exists? (arc:path->string pth))
-                   (sys:opendir (arc:path->string pth))
+                   (open-dir-port (arc:path->string pth))
                    #f)))
      (if dir
          (begin
-           (do ((fn (sys:readdir dir) (sys:readdir dir)))
-               ((not fn) #t)
+           (do ((fn (read-dir-port dir) (read-dir-port dir)))
+               ((eof-object? fn) #t)
              (if (and (arc:string-prefix? fn "task-")
                       (arc:string-suffix? fn ".scm"))
                  (arc:require (string->symbol 
@@ -50,7 +50,7 @@
                                 (arc:path-without-last-ext 
                                  (arc:string->path fn))))
                               (arc:path->string (arc:path-append pth fn)))))
-           (sys:closedir dir)))))
+           (close-dir-port dir)))))
  %arc:arc-incl-path%)
 
 

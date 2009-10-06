@@ -17,9 +17,9 @@
 ;; this walks a tree and applies 'proc' to each file it finds
 (define (arc:walk-tree cpath proc)
   (if (sys:file-directory? (arc:path->string cpath))
-      (let ((dir (sys:opendir (arc:path->string cpath))))
-        (do ((fn (sys:readdir dir) (sys:readdir dir)))
-            ((not fn) 'done)
+      (let ((dir (open-dir-port (arc:path->string cpath))))
+        (do ((fn (read-dir-port dir) (read-dir-port dir)))
+            ((eof-object? fn) 'done)
           (if (not (or (string=? fn ".") (string=? fn "..")))
               (if (sys:file-directory? (arc:path->string 
                                              (arc:path-append cpath fn)))
@@ -27,7 +27,7 @@
                     (arc:walk-tree (arc:path-append cpath fn) proc)
                     (apply proc (list ':dir (arc:path-append cpath fn))))
                   (apply proc (list ':file (arc:path-append cpath fn))) )))
-        (sys:closedir dir))
+        (close-dir-port dir))
       'could-not-open-dir))
 
 

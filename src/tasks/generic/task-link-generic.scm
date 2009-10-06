@@ -71,11 +71,16 @@
                         (arc:path-without-last-ext (arc:string->path appnm)))) )
            (arc:path->string (arc:path-append od ap)))))
      
+     (format-framework-options
+      ,(lambda (self frameworks)
+         (arc:log 'warn "Framework settings are ignored on platforms other than Darwin/OS X")
+         '()))
+
      ;; link a set of object files
      (link-app
       ,(lambda (self outdir appnm appext 
                      libdirs autolibdirs shared nostdlib files autolibs libs
-                     rpath)
+                     rpath frameworks)
          (let* ((fullnm (self 'make-app-name outdir appnm appext))
                 (link-cmd (self 'link-cmd))
                 (link-args (arc:list-appends
@@ -104,12 +109,16 @@
                                 '())
                             (if libs
                                 (arc:annotate-list libs "-l")
-                                '()) )))
+                                '())
+                            (if frameworks
+                                (self 'format-framework-options frameworks)
+                                '()) 
+                            )))
            (arc:log 'debug "linking " fullnm " ...")
 
-           (arc:display link-cmd " " (arc:string-list->string* link-args " ") #\nl)
+           (arc:display-command link-cmd link-args)
 
-           (if (not (= (sys:execute link-cmd link-args) 0))
+           (if (not (equal? (sys:execute link-cmd link-args) 0))
                (arc:log 'info "linking '" fullnm "' failed"))
       
            fullnm)) )

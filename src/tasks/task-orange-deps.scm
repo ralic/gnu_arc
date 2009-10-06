@@ -62,7 +62,7 @@
                                       "-O" cfile
                                       sfile)))
 
-    (arc:display deps-cmd " " (arc:string-list->string* deps-args " ") #\nl)
+    (arc:display-command deps-cmd deps-args)
 
     (if (equal? (sys:execute deps-cmd deps-args) 0)
         (let ((deps (arc:load-deps-file tdf)))

@@ -114,11 +114,10 @@
                           ofile                          ; obj file
                           sfile                          ; the source file
                           )))
-           (arc:display cmd-str " "
-                        (arc:string-list->string* cmd-args " ") #\nl)
-           (if (not (equal? (sys:execute cmd-str cmd-args) 0))
+           (arc:display-command cmd-cmd cmd-args)
+           (if (not (equal? (sys:execute* cmd-cmd cmd-args) 0))
                (if (not %arc:keep-going-on-errors%)
-                   (quit))))))
+                   (quit -1))))))
      
      
      (makedeps 
@@ -134,9 +133,9 @@
                           cincs
                           sfile
                           ">" tdf)) )
-           (arc:display dcmd " "
-                        (arc:string-list->string* md-args " ") #\nl)
-           (if (equal? (sys:execute md-cmd md-args) 0)
+           (arc:display-command md-cmd md-args)
+
+           (if (equal? (sys:execute* md-cmd md-args) 0)
                (let* ((deps (arc:parse-make-deps-file tdf)))
                  ;; set the correct object target
                  (arc:deps-set-target! deps ofile)

@@ -33,6 +33,9 @@
                 (loop (+ pc 1))))))))
 
 
+(define (sys:remove-file path)
+  (sys:unlink path))
+
 (define (sys:remove-dir path)
   (arc:traverse-dir path (lambda (kind fn)
                            (case kind
@@ -83,7 +86,8 @@
   (let ((a (if (list? args) 
                (cons cmd args)
                (cons cmd (vector->list args)) )))
-    (sys:system "/bin/sh" (list->vector a))))
+    (sys:system "/bin/sh" (vector "-c"
+                                  (arc:string-list->string* a " ")))))
 
 (define (sys:execute cmd args)
   (let ((a (if (list? args) 

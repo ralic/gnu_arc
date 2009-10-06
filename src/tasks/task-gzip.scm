@@ -42,36 +42,37 @@
                             (compress-level integer optional)) )
 (define (arc:gzip props body)
   (let* ((fn (arc:aval 'file props ""))
-	 (zfn (arc:aval 'zipfile props ""))
-	 (cl (case (arc:aval 'compress-level props 6)
-	       ((1) "-1 ")
-	       ((2) "-2 ")
-	       ((3) "-3 ")
-	       ((4) "-4 ")
-	       ((5) "-5 ")
-	       ((6) "-6 ")
-	       ((7) "-7 ")
-	       ((8) "-8 ")
-	       ((9) "-9 ")
-	       (else (begin
-		       (arc:log 'error "bad compression level '" 
-				(arc:aval ':compress-level props 6) "'")
-		       "")))) )
-
+         (zfn (arc:aval 'zipfile props ""))
+         (cl (case (arc:aval 'compress-level props 6)
+               ((1) "-1")
+               ((2) "-2")
+               ((3) "-3")
+               ((4) "-4")
+               ((5) "-5")
+               ((6) "-6")
+               ((7) "-7")
+               ((8) "-8")
+               ((9) "-9")
+               (else (begin
+                       (arc:log 'error "bad compression level '" 
+                                (arc:aval ':compress-level props 6) "'")
+                       "")))) )
+    
     (arc:log 'debug "gzip '" fn "' to '" zfn "'")
     
     (if (or (= (string-length fn) 0)
-	    (= (string-length zfn) 0))
-	(arc:log 'fatal "invalid file names in gzip"))
-
+            (= (string-length zfn) 0))
+        (arc:log 'fatal "invalid file names in gzip"))
+    
     (if (sys:file-exists? fn)
         (begin
           (if (sys:file-exists? zfn)
               (sys:remove-file zfn))
           
-          (let ((gzipcmd (string-append "gzip -c " cl fn " > " zfn)))
-            (arc:display gzipcmd #\nl)
-            (if (not (equal? (system gzipcmd) 0))
+          (let ((gzip-cmd "gzip")
+                (gzip-args (list "-c" cl fn ">" zfn)))
+            (arc:display-command gzip-cmd gzip-args)
+            (if (not (equal? (sys:execute* gzip-cmd gzip-args) 0))
                 (arc:log 'error "failed to gzip file '" fn "'")
                 #t)))
         (arc:log 'info "gzip: file '" fn "' does not exist")) )
