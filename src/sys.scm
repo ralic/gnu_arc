@@ -82,12 +82,25 @@
         #t)
       #f))
 
+(define (arc:escape-path-name path)
+  (list->string (arc:reduce (lambda (x lst)
+                              (case x
+                                ((#\space) (cons #\\ (cons #\space lst)))
+                                (else (cons x lst)))
+                              )
+                            '()
+                            (string->list path))) )
+
 (define (sys:execute* cmd args)
-  (let ((a (if (list? args) 
+  (let* ((a (if (list? args) 
                (cons cmd args)
-               (cons cmd (vector->list args)) )))
+               (cons cmd (vector->list args)) ))
+         (a2 (arc:reduce (lambda (x lst)
+                           (cons (arc:escape-path-name x) lst))
+                         '()
+                         a)) )
     (sys:system "/bin/sh" (vector "-c"
-                                  (arc:string-list->string* a " ")))))
+                                  (arc:string-list->string* a2 " ")))))
 
 (define (sys:execute cmd args)
   (let ((a (if (list? args) 
