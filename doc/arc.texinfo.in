@@ -10,11 +10,12 @@
 @c (amp) and not by @ (at) as normally, since Texinfo uses @ as markup maker!
 @set VERSION &arc-version&
 @set PROGNAME @command{arc}
+@set COPYRIGHT 2002, 2003, 2009 Gregor Klinke
 
 @ifinfo
 This file documents the @command{arc} command which is a build tool
 
-Copyright (C)  2002, 2003  Gregor Klinke.
+Copyright (C)  @value{COPYRIGHT}.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -49,7 +50,7 @@ by the Foundation.
 
 @page
 @vskip 0pt plus 1filll
-Copyright (C)  2002, 2003  Gregor Klinke.
+Copyright (C)  @value{COPYRIGHT}.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -322,7 +323,7 @@ is optional, and if not given, no explicit dependencies are recorded
 (but note that the statement can depend implicitly on other
 statements).
 
-@item os: @var{symbol}
+@item os: (@var{symbol-list} | @var{symbol})
 Gives the operating system or a list of operating systems, for which
 this statement is to be evaluated only.  Operating systems are
 identified by symbolic names (@ref{Conditionals}).  This setting is
@@ -1082,6 +1083,11 @@ A list of libraries to link with the executable.  The entries has to
 give the "base library name" only, so for e.g. for "libAbcX.so" give
 "AbcX".  This task looks in the places given by ":libdirs" for
 libraries and shared objects
+
+@item frameworks @var{string-list}
+A list of framework names to link with the executable.  This property
+is applicable on Mac OS X/Darwin only and requires an Apple gcc
+compiler.
 
 @item shared?: @var{boolean}
 If @code{#t}, use shared libraries for the executable.  If @code{#f},
