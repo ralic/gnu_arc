@@ -1,7 +1,8 @@
 *~
 /app/
-/asc/asc
-/asc/*.o
+/scheme/arc
+/scheme/*.o
+/scheme/scmenv.h
 /asc/scmenv.h
 /boot/*~
 /bootstrap.sh
