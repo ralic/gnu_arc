@@ -16,6 +16,7 @@
 
 (arc:provide 'task-link)
 
+(arc:require 'sys-link)
 
 (arc:log 'debug "loading 'link' task")
 
@@ -90,7 +91,7 @@
                             (libdirs strlist optional)
                             (frameworks strlist optional)) )
 (define (arc:link props body)
-  (let* ((<backend> ((arc:handler-factory %arc:sysnm% 'task-link) 'alloc))
+  (let* ((backend (arc:link-backend %arc:sysnm%))
          (shared (arc:aval 'shared? props #t))
          (files* (arc:aval 'files props '()))
          (files (if (arc:attrval? files*)
@@ -106,7 +107,7 @@
                           #f))
          (libs (arc:aval 'libs props '())) 
          (frameworks (arc:aval 'frameworks props '()))
-         (appext (arc:aval 'appext props (<backend> 'app-ext)))
+         (appext (arc:aval 'appext props (arc:link:app-ext backend)))
          (appnm (arc:aval 'appnm props ""))
          (outdir (arc:aval 'outdir props #f))
          (nostdlib (arc:aval 'nostdlib? props #f))
@@ -122,7 +123,6 @@
                                    #f)))
          )
     (if (= (string-length appnm) 0)
-        ;; (arc:log 'fatal "bad or empty application name"))
         (arc:throw 'bad-parameters "bad or empty application name"))
     
     (if (and (= (length files) 0)
@@ -130,15 +130,15 @@
         (begin
           (arc:log 'info "no object files/libs for executable!")
           #f)
-        (let* ((fullnm (<backend> 'link-app outdir appnm appext
-                                  libdirs autolibdirs shared nostdlib
-                                  files autolibs libs rpath frameworks))
+        (let* ((fullnm (arc:link:link-app backend outdir appnm appext
+                                          libdirs autolibdirs shared nostdlib
+                                          files autolibs libs rpath frameworks))
                (locexec (if (and shared
                                  local-exec-outdir)
-                            (<backend> 'link-app local-exec-outdir appnm appext
-                                       libdirs autolibdirs shared nostdlib
-                                       files autolibs libs 
-                                       local-exec-rpath frameworks))))
+                            (arc:link:link-app backend local-exec-outdir appnm appext
+                                               libdirs autolibdirs shared nostdlib
+                                               files autolibs libs 
+                                               local-exec-rpath frameworks))))
           fullnm) )))
 
 

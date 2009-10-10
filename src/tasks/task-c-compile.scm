@@ -17,7 +17,13 @@
 (arc:provide 'task-c-compile)
 (arc:require 'task-c-deps)
 
+(arc:require 'sys-c-compile)
+
 (arc:log 'debug "loading 'c-compile' task")
+
+
+;;--------------------------------------------------------------------------------
+;;--------------------------------------------------------------------------------
 
 ;; compiles a set of C files into object files.
 ;;
@@ -72,39 +78,39 @@
 ;; to those for static libraries this may result in double compilation.
 ;;
 ;; the return value is a list of all object files controlled by this task
-(define arc:c-compile-keywords '((sources (list attrval) required)
-                                 (debug? boolean optional)
-                                 (ansi? boolean optional)
-                                 (signed-char? boolean optional)
-                                 (warn-level symbol optional)
-                                 (opt-level symbol optional)
-                                 (flags strlist optional)
-                                 (includes strlist optional)
-                                 (outdir string optional)
-                                 (objext string optional)
-                                 (sobjext string optional)
-                                 (shared? boolean optional)
-                                 (static? boolean optional)
-                                 (depends dependencies optional)))
+(define arc:c-compile-keywords '((sources      (list attrval) required)
+                                 (debug?       boolean        optional)
+                                 (ansi?        boolean        optional)
+                                 (signed-char? boolean        optional)
+                                 (warn-level   symbol         optional)
+                                 (opt-level    symbol         optional)
+                                 (flags        strlist        optional)
+                                 (includes     strlist        optional)
+                                 (outdir       string         optional)
+                                 (objext       string         optional)
+                                 (sobjext      string         optional)
+                                 (shared?      boolean        optional)
+                                 (static?      boolean        optional)
+                                 (depends      dependencies   optional)))
 
 (define (arc:c-compile props body)
   (let* ((outdir (arc:aval 'outdir props #f))
-         (<backend> ((arc:handler-factory %arc:sysnm% 'task-c-compile) 'alloc))
-         (cflags (string-append 
-                  "" (arc:string-list->string*
-                      (arc:aval 'flags props '())
-                                               " ")
-                  " "
-                  (if (arc:aval 'debug? props #f) 
-                      (string-append (<backend> 'debug-flag) " ") "")
-                  (if (arc:aval 'ansi? props #f) 
-                      (string-append (<backend> 'ansi-flag) " ") "") 
-                  (if (arc:aval 'signed-char? props #f)
-                      (string-append (<backend> 'signed-char-flag) " ") "")
-                  (<backend> 'opt-level-flag (arc:aval 'opt-level props #f))
-                  " "                  
-                  (<backend> 'warn-level-flag 
-                             (arc:aval 'warn-level props #f))))
+         (backend (arc:c-compile-backend %arc:sysnm%))
+         (cflags (arc:list-appends (arc:aval 'flags props '())
+                                   (if (arc:aval 'debug? props #f) 
+                                       (arc:cc:debug-flag backend)
+                                       '())
+                                   (if (arc:aval 'ansi? props #f) 
+                                       (arc:cc:ansi-flag backend)
+                                       '())
+                                   (if (arc:aval 'signed-char? props #f)
+                                       (arc:cc:signed-char-flag backend)
+                                       '())
+                                   (arc:cc:opt-level-flag backend
+                                                          (arc:aval 'opt-level props #f))
+
+                                   (arc:cc:warn-level-flag backend 
+                                                           (arc:aval 'warn-level props #f))))
          (sources (arc:-prepare-c-source-list
                    (arc:aval 'sources props '())))
          (depends (arc:aval 'depends props #f)) 
@@ -116,11 +122,7 @@
      (lambda (fn)
        (let* ((compile-file 
                (lambda (av-slot av-slot2 objext cfl)
-                 (let* ((on (<backend> 'make-objfile-name fn outdir objext))
-                        (cincls (arc:string-list->string* 
-                                 (arc:aval 'includes props '())
-                                 " -I")))
-                   
+                 (let* ((on (arc:cc:make-objfile-name backend fn outdir objext)))
                    (let ((vv (arc:attrval-ref av av-slot) ))
                      (if vv
                          (arc:attrval-set! av av-slot (append vv (list on)))
@@ -140,28 +142,28 @@
                                                     outdir)
                        (begin
                          (arc:log 'verbose "compile '" fn "' into '" on "'")
-                         (<backend> 'compile-file
-                                  fn     ; source file
-                                  on     ; object file
-                                  cincls ; c includes
-                                  cfl    ; flags
-                                  ))))) )
+                         (arc:cc:compile-file backend
+                                              fn     ; source file
+                                              on     ; object file
+                                              (arc:aval 'includes props '()) ; c includes
+                                              cfl    ; flags
+                                              ))))) )
               )
 
          (if (and (arc:aval 'shared? props #f) 
-                  (<backend> 'need-shared-build))
+                  (arc:cc:need-shared-build backend))
              (compile-file 'shared-objs #f
                            (arc:aval 'sobjext props 
-                                     (<backend> 'shared-objfile-ext))
+                                     (arc:cc:shared-objfile-ext backend))
                            (string-append cflags " " 
-                                          (<backend> 'shared-obj-flag))))
+                                          (arc:cc:shared-obj-flag backend))))
          (if (or (arc:aval 'static? props #t)
-                 (not (<backend> 'need-shared-build)))
-             (compile-file 'objs (if (<backend> 'need-shared-build)
+                 (not (arc:cc:need-shared-build backend)))
+             (compile-file 'objs (if (arc:cc:need-shared-build backend)
                                      #f
                                      'shared-objs)
                            (arc:aval 'objext props 
-                                     (<backend> 'objfile-ext))
+                                     (arc:cc:objfile-ext backend))
                            cflags)) ))
      sources)
     av))

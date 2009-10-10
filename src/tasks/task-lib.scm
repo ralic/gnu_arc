@@ -16,7 +16,7 @@
 
 (arc:provide 'task-lib)
 
-(arc:require 'oop)
+(arc:require 'sys-lib)
 
 (arc:log 'debug "loading 'lib' task")
 
@@ -86,14 +86,14 @@
          (libnm (arc:aval 'libnm props ""))
          (outdir (arc:aval 'outdir props #f))
          (av (arc:attrval)) 
-         
-         (<backend> ((arc:handler-factory %arc:sysnm% 'task-lib) 'alloc)))
+    
+         (backend (arc:lib-backend %arc:sysnm%)))
     
     (if (= (string-length libnm) 0)
         (arc:log 'fatal "bad or empty library name"))
     
     (if (arc:aval 'static? props #t)
-        (let ((la (<backend> 'make-static-name outdir libnm))
+        (let ((la (arc:ld:make-static-name backend outdir libnm))
               (files (if (arc:attrval? files*)
                          (arc:attrval-ref files* 'objs)
                          files*)))
@@ -104,7 +104,7 @@
           (if (arc:deps-lib-needs-rebuild? la files)
               (begin
                 (arc:log 'debug "make static " la " ...")
-                (<backend> 'make-static-lib la files)))
+                (arc:ld:make-static-lib backend la files)))
 
           ;; set the return value
           (arc:attrval-set! av 'static la)
@@ -119,12 +119,8 @@
               (arc:log 'info "no object files for library!"))
           
           (let* ((vi (arc:aval 'version-info props '(0 0 0)))
-                 (names (<backend> 'make-shared-names outdir libnm
-                                   (car vi) (cadr vi) (caddr vi)))
-;                 (fullnm (<backend> 'make-shared-name outdir libnm
-;                                    (car vi) (cadr vi) (caddr vi)))
-;                 (linkernm (<backend> 'make-shared-name-no-version 
-;                                      outdir libnm)))
+                 (names (arc:ld:make-shared-names backend outdir libnm
+                                                  (car vi) (cadr vi) (caddr vi)))
                  (realnm (car names))
                  (soname (cadr names))
                  (linknm (caddr names))
@@ -135,11 +131,11 @@
                 (begin
                   (arc:log 'debug "make dll " realnm " ...")
                 
-                  (<backend> 'make-shared-lib 
-                             realnm int-soname files
-                             (arc:aval 'libdirs props '())
-                             (arc:aval 'addlibs props '())
-                             (arc:aval 'rpath props #f))
+                  (arc:ld:make-shared-lib backend
+                                          realnm int-soname files
+                                          (arc:aval 'libdirs props '())
+                                          (arc:aval 'addlibs props '())
+                                          (arc:aval 'rpath props #f))
 
                   ;; create additional links for this library (i.e. the
                   ;; short name without the version info added.  This is to
