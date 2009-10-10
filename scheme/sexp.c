@@ -712,6 +712,7 @@ void sexp_write (sexp obj, sexp out) {
     case SEXP_PROCEDURE:
       sexp_write_string("#<procedure: ", out);
       sexp_write(sexp_bytecode_name(sexp_procedure_code(obj)), out);
+      sexp_printf(out, " (%d)", sexp_procedure_num_args(obj));
       sexp_write_string(">", out);
       break;
     case SEXP_IPORT:
