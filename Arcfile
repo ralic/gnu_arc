@@ -224,7 +224,7 @@
       info: "compiles all c sources."
       (c-compile sources: (-> arc-c-sources)
                  includes: '("scheme/include")
-                 flags: (append '("-DUSE_WARN_UNDEFS=0")
+                 flags: (append '("-DUSE_WARN_UNDEFS=0") ; "-DDEBUG_VM=1")
                                 (-> arc-c-flags))
 ;                 outdir: ".arc/objs"
                  debug?: #f
