@@ -49,12 +49,6 @@
           (loop (cdr v))))))
 
 
-(define asc:error error)
-(define asc:warn warn)
-(define slib:exit quit)
-(define exit quit)
-
-
 ;; --------------------------------------------------------------------
 ;; arc specific settings and code
 ;; --------------------------------------------------------------------

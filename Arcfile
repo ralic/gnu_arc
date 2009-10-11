@@ -15,7 +15,7 @@
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;; arcfile for building, installing, and cleaning arc
-(project arc-app
+(project arc
          project: "arc"
          version: "0.4.0b"
          info: "Arc application"
@@ -24,7 +24,8 @@
 
 ;; properties
 (stmt prefix 
-      scope: 'local (prop home))
+      scope: 'local
+      (prop home))
 (stmt bindir 
       scope: 'local 
       (prop exec-path))
@@ -37,12 +38,12 @@
 (stmt arc-tasks-dir
       scope: 'local
       (path-append (prop home) "tasks"))
-(stmt arc-meta-inf-dir
-      scope: 'local
-      (path-append (prop home) "meta-inf"))
 
+;;----------------------------------------------------------------------
+;; configure
+;;----------------------------------------------------------------------
 (stmt configure
-      info: "configures the application"
+      info: "Configures the application"
       (let ((values (make-alist "arc-version" (prop version))))
         (filter src: "src/version.scm.in"
                 values: values)
@@ -52,6 +53,9 @@
         (filter src: "doc/arc.1.in"
                 values: values)))
 
+;;----------------------------------------------------------------------
+;; documentation
+;;----------------------------------------------------------------------
 (stmt doc-pdf
       depends: 'configure
       (texinfo src: "doc/arc.texinfo"
@@ -80,11 +84,18 @@
       depends: '(doc-pdf doc-dvi doc-info doc-plain)
       #t)
 
+
+;;----------------------------------------------------------------------
+;; main target
+;;----------------------------------------------------------------------
 (stmt all
       depends: 'configure
       'done)
 
 
+;;----------------------------------------------------------------------
+;; packaging
+;;----------------------------------------------------------------------
 (stmt dist
       depends: 'all
       (dist files: (fileset pattern: '("src/**/*.scm"
@@ -127,6 +138,9 @@
                                        "scheme/scmenv.h"
                                        "test/version.h") )))
 
+;;----------------------------------------------------------------------
+;; cleanup
+;;----------------------------------------------------------------------
 (stmt clean
       (clean res: (fileset pattern: '("scheme/*.o"
                                       "scheme/arc"
@@ -160,54 +174,9 @@
                                       "doc/(.*\\.info(-[0-9]+)?$)"))))
 
 
-;; --------------------------------------------------------------------
-;; building asc from the arcfile
-;; --------------------------------------------------------------------
-(stmt c-sources
-      scope: 'local
-      depends: 'configure
-      (fileset files: '("tinyscheme/scheme.c"
-                        "tinyscheme/main.c" 
-                        "tinyscheme/fsys.c"
-                        "tinyscheme/dirport.c")) )
-
-(stmt c-flags
-      os: 'darwin
-      scope: 'local
-      '("-Wno-switch-enum" "-Wno-char-subscripts" "-DSUN_DL"))
-
-(stmt compile-asc
-      info: "compiles all c sources."
-      (c-compile sources: (-> c-sources)
-                 includes: '("tinyscheme")
-                 flags: (append '("-DSTANDALONE=0" "-DUSE_MATH=0" "-DUSE_ASCII_NAMES=1"
-                          "-DUSE_STRLWR=1" "-DUSE_COLON_HOOK=0" "-DUSE_ERROR_HOOK=0"
-                          "-DUSE_EXTOBJ=1")
-                          (-> c-flags))
-                 debug?: #f
-                 shared?: #f
-                 static?: #t
-                 warn-level: 'high
-                 opt-level: 'high))
-
-(stmt link-asc
-      os: 'windows
-      (echo "Windows platforms not supported yet"))
-
-(stmt link-asc
-      os: '(linux darwin)
-      (link outdir: "asc"
-            files: (-> compile-asc)
-            shared?: #f
-            appnm: "asc"))
-
-(stmt asc
-      (copy file: (-> link-asc)
-            force?: #t
-            tofile: "app/arc"))
-
-
-;; ----------------------------------------------------------------------
+;;----------------------------------------------------------------------
+;; building the contained chibi scheme interpreter
+;;----------------------------------------------------------------------
 
 (stmt arc-c-sources
       scope: 'local
@@ -222,12 +191,14 @@
       '("-DOSX"))
 
 (stmt compile-arc
-      info: "compiles all c sources."
+      info: "Compiles all c sources."
       (c-compile sources: (-> arc-c-sources)
                  includes: '("scheme/include")
-                 flags: (append '("-DUSE_WARN_UNDEFS=0") ; "-DDEBUG_VM=1")
+                 flags: (append '("-DUSE_WARN_UNDEFS=0"
+                                  ;; "-DDEBUG_VM=1"
+                                  )
                                 (-> arc-c-flags))
-;                 outdir: ".arc/objs"
+;;;                 outdir: ".arc/objs"
                  debug?: #f
                  shared?: #f
                  static?: #t
@@ -251,13 +222,15 @@
             frameworks: '("Carbon") ))
 
 (stmt arc
+      info: "Compile and build the main executable"
       (copy file: (-> link-arc)
             force?: #t
             tofile: "app/arc"))
 
 ;; --------------------------------------------------------------------
-;; installing asc/arc
+;; installing arc
 ;; --------------------------------------------------------------------
+
 (stmt install-exe
       os: 'cygwin
       (install src: "app/arc.exe"
@@ -295,8 +268,6 @@
       (install src: (fileset pattern: "src/tasks/darwin/*.scm")
                dest: (path-append (-> arc-tasks-dir) "darwin"))
 
-      (install src: (fileset pattern: "src/meta-inf/*.decl")
-               dest: (-> arc-meta-inf-dir))
       (install src: (fileset pattern: '("doc/(.*\\.info(-[0-9]+)?$)"))
                dest: (-> infodir)))
 

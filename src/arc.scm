@@ -14,9 +14,6 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;; setup the program arguments
-(define %arc:argv% (vector->list *args*))
-
 ;; setup the require/provide system
 (define %arc:debug% (let ((ff (sys:getenv "ARC_DEBUG")))
                       (if (and ff (equal? ff "yes")) #t #f)))
@@ -112,7 +109,7 @@
 ;; display a help text
 (define (arc:display-help)
   (arc:display
-   "arc - a scheme based makefile and config system" 'nl
+   "arc - a scheme based make and config system" 'nl
    "usage:" 'nl
    "  arc [options] [statement]" 'nl
    'nl
@@ -162,7 +159,6 @@
   (if (not opt)
       #f
       (let ((done #f))
-        (display opt)(newline)
         (case opt
           ((verbose) (set! %arc:verbose% #t))
           ((conf) (set! arc:config-name *arc:optarg*))
