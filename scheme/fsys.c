@@ -26,8 +26,7 @@ static sexp arc_fsref_to_path(sexp ctx, FSRef* ref)
     
     if (str) {
       char path[PATH_MAX];
-      int len = CFStringGetLength(str);
-      if (CFStringGetCString(str, path, len, kCFStringEncodingUTF8))
+      if (CFStringGetCString(str, path, PATH_MAX, kCFStringEncodingUTF8))
         result = sexp_c_string(ctx, path, -1);
       
       CFRelease(str);
