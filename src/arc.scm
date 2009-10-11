@@ -107,7 +107,6 @@
 (load (string-append (arc:home) "/filter.scm"))
 (load (string-append (arc:home) "/pregexp.scm"))
 (load (string-append (arc:home) "/fnmatch.scm"))
-(load (string-append (arc:home) "/handler-factory.scm"))
 (load (string-append (arc:home) "/bt-tasks.scm"))
   
 

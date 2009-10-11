@@ -14,24 +14,6 @@
 ;;  You should have received a copy of the GNU General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;; read the handler declarations
-(for-each 
- (lambda (pn)
-   (let* ((pth (arc:path-append (arc:string->path pn) "meta-inf"))
-          (dir (if (sys:file-exists? (arc:path->string pth))
-                   (open-dir-port (arc:path->string pth))
-                   #f)))
-     (if dir
-         (begin
-           (do ((fn (read-dir-port dir) (read-dir-port dir)))
-               ((eof-object? fn) #t)
-             (if (arc:string-suffix? fn ".decl")
-                 (begin
-                   (arc:log 'verbose "load '" (arc:path-append pth fn) "'")
-                   (arc:load (arc:path->string (arc:path-append pth fn))))))
-           (close-dir-port dir)))))
- %arc:arc-incl-path%)
-
 ;; load all tasks in the subdirectory "tasks"
 (for-each 
  (lambda (pn)
