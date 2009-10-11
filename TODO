@@ -1,10 +1,24 @@
-- put an "exclude:" argument to task-fileset to manual, like this:
+General
+-------
 
-(fileset pattern: "src/*.h"
-         exclude: "src/version.h")
+- support for separating of source and build directory.  review "outdir"
+  properties.  review the ".arc" folder as temporary.  Make sure that all
+  tasks use the builddir for temporary files and output (e.g. tar)
 
-  i.e. include all .h-files in src except for "version.h"
+- Use arc:try/arc:throw instead of simple logging in tasks.  Make sure that
+  tasks don't continue, when prerequisites (missing params, etc) aren't
+  met.
 
+- implement the cond, case, begin expressions in meta.scm.
+
+- let tasks register automatically created files (like bison, flex, etc.),
+  like arc:register-built-resource does, but save this information across
+  arc runs into a database on .arc (or alike).  Declare this generated
+  files to be deleted on istclean or clean.
+
+
+Tasks
+-----
 
 - c-compile: extend.  Add more compiler-flag abstractions.  Add support for
   more c compilers (llvm)
@@ -15,13 +29,27 @@
 - implement dependency control for the java compiler.
 
 - implement a ":depends" keyword on the "arc:deps" task.  This will make
-  .dep files depend on the source files!
-
-- scan the tasks and apply the new arc:try/arc:throw mechanism to them.
-  Make sure that tasks don't continue, when prerequisites (missing params,
-  etc) aren't met.  throw a exceptions...!
+  .dep files depend on the source files
 
 - remove the orange tasks
+
+- installation & install-tasks: strip symbols from installed binaries
+
+
+Documentation
+-------------
+
+- put an "exclude:" argument to task-fileset to manual, like this:
+
+(fileset pattern: "src/*.h"
+         exclude: "src/version.h")
+
+  i.e. include all .h-files in src except for "version.h"
+
+
+
+New stuff
+---------
 
 - design a 'task-build': this checksout a module from cvs into a temporary
   directory, calls a arcfile in this module with default task 'all'; if
@@ -37,12 +65,6 @@
   parse in the -DHAVE_CONFIG_H key; all the settings would then be
   generated in the config.h file.  this would allow to combine arc with
   autoconf.
-
-- strip symbols from installed binaries
-
-
-
-- implement the cond, case, begin expressions in meta.scm.
 
 
 - think about an companion system 'arcconfig'.  this takes an Arcreq file
@@ -83,13 +105,15 @@ to be scanned over and over again.
   conditioned by the operating system [if we know, we're having a given
   situation on win32, we don't need to check for everything.]
 
-- the are are given checks, like check-lib, check-header, check-behaviour,
-  check-command.  They set a property in the local property-map.  This
-  property map is exported after a successful run as "arc.config"
+- there are are predefined checks (like tasks), like check-lib,
+  check-header, check-behaviour, check-command.  They set a property in the
+  local property-map.  This property map is exported after a successful run
+  as "arc.config"
 
 
      
-
+Ideas for more Tasks
+--------------------
 
 TASKs to be written:
 
@@ -101,20 +125,17 @@ VC tasks:
   - svn tasks
   - monotone tasks
   - hg tasks
+- m4 (replacement/extension to task-filter).  Would be cool to have it in
+  scheme
 
 
-
-
-
-- let task register automatically created files (like bison, flex, etc.),
-  like arc:register-built-resource does, but save this information across
-  arc runs into a database on .arc (or alike).  Declare this generated
-  files to be deleted on istclean or clean.
-
-
-- rethink the attrval return types.  They bind tasks very strictly
-  together.  Needs a better loose coupling.
+Later
+-----
 
 - rethink nature of dependencies.  How to decide whether a given stmt is to
   be evaluated dependeing on the modtime/md5-difference between a source
   and a destination file?
+
+- rethink the attrval return types.  They bind tasks very strictly
+  together.  Needs a better loose coupling.
+
