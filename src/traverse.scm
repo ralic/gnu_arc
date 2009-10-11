@@ -18,23 +18,27 @@
 (define (arc:walk-tree cpath proc)
   (if (sys:file-directory? (arc:path->string cpath))
       (let ((dir (open-dir-port (arc:path->string cpath))))
-        (do ((fn (read-dir-port dir) (read-dir-port dir)))
-            ((eof-object? fn) 'done)
-          (if (not (or (string=? fn ".") (string=? fn "..")))
-              (if (sys:file-directory? (arc:path->string 
-                                             (arc:path-append cpath fn)))
-                  (begin
-                    (arc:walk-tree (arc:path-append cpath fn) proc)
-                    (apply proc (list ':dir (arc:path-append cpath fn))))
-                  (apply proc (list ':file (arc:path-append cpath fn))) )))
-        (close-dir-port dir))
+        (if dir
+            (begin
+              (do ((filenm (read-dir-port dir) (read-dir-port dir)))
+                  ((eof-object? filenm) 'done)
+                (if (not (or (string=? filenm ".") 
+                             (string=? filenm "..")))
+                    (if (sys:file-directory? (arc:path->string 
+                                              (arc:path-append cpath filenm)))
+                        (if (not (eq? (arc:walk-tree (arc:path-append cpath filenm) proc)
+                                      'could-not-open-dir))
+                            (apply proc (list ':dir (arc:path-append cpath filenm))))
+                        (apply proc (list ':file (arc:path-append cpath filenm))) )))
+              (close-dir-port dir))
+            'could-not-open-dir))
       'could-not-open-dir))
 
 
-;; the procedure takes two parameters, the first is one of the symbols:
-;; :dir or :file, indicating wether the entry is a directory or a file.
-;; The second gives the file path (as returned by arc:string->path).
-;; Directories are stated *after* their content
+;; proc: the function takes two parameters, the first is either :dir or
+;;       :file, indicating whether the entry is a directory or a file.  The
+;;       second gives the file path (as returned by arc:string->path).
+;;       Directories are reported *after* their content
 (define (arc:traverse-dir path proc)
   (arc:walk-tree (arc:string->path path) proc))
 
