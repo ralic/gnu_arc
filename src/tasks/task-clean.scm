@@ -43,7 +43,6 @@
          (dir (arc:aval 'dir props 
                         (arc:context-basedir (arc:context-current)))) )
     
-
     (arc:log 'debug "clean ... (root: " dir ")")
     
     (arc:clean-implicit dir)
