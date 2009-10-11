@@ -89,31 +89,29 @@
       depends: 'all
       (dist files: (fileset pattern: '("src/**/*.scm"
                                        "src/**/*.in"
-                                       "src/**/*.decl"
                           
                                        "boot/*.scm"
 
-                                       "tinyscheme/**/*.c"
-                                       "tinyscheme/**/*.h"
-                                       "tinyscheme/**/*.h.in"
-                                       "tinyscheme/(build-.*.sh$)"
-                                       "tinyscheme/(build-.*.bat$)"
-                                       "tinyscheme/*.scm"
+                                       "scheme/**/*.c"
+                                       "scheme/**/*.h"
+                                       "scheme/**/*.h.in"
+                                       "scheme/(build-.*.sh$)"
+                                       "scheme/(build-.*.bat$)"
+                                       "scheme/*.scm"
                           
                                        "doc/*.scm"
                                        "doc/*.in"
                                        "doc/fdl.texinfo"
+                                       "doc/texinfo.tex"
                           
                                        "test/*.m"
                                        "test/*.c"
                                        "test/*.h"
                                        "test/*.in"
                                        "test/*.java"
+                                       "test/date-time.sh"
                                        "test/Arcfile"
                           
-                                       "doc/texinfo.tex"
-                                       "doc/fdl.tex"
-                                      
                                        "README"
                                        "NEWS"
                                        "TODO"
@@ -123,11 +121,15 @@
                                        "Arcfile"
                                        "arc.config.in"
                                        "AUTHORS"
-                                       "configure"))))
+                                       "configure")
+                            exclude: '("src/config.scm" 
+                                       "src/version.scm"
+                                       "scheme/scmenv.h"
+                                       "test/version.h") )))
 
 (stmt clean
-      (clean res: (fileset pattern: '("tinyscheme/*.o"
-                                      "tinyscheme/asc"
+      (clean res: (fileset pattern: '("scheme/*.o"
+                                      "scheme/arc"
                                       "test/_build"
                                       "doc/*.aux"
                                       "doc/*.cp"
@@ -146,17 +148,16 @@
 (stmt distclean
       depends: 'clean
       (clean res: (fileset pattern: '("bootstrap.sh"
-                                    "src/config.scm"
-                                    "src/version.scm"
-                                    "asc-init.scm"
-                                    "arc"
-                                    "arc.config"
-                                    "doc/arc.1"
-                                    "doc/arc.texinfo"
-                                    "app"
-                                    "doc/*.pdf"
-                                    "doc/*.dvi"
-                                    "doc/(.*\\.info(-[0-9]+)?$)"))))
+                                      "src/config.scm"
+                                      "src/version.scm"
+                                      "arc"
+                                      "arc.config"
+                                      "doc/arc.1"
+                                      "doc/arc.texinfo"
+                                      "app"
+                                      "doc/*.pdf"
+                                      "doc/*.dvi"
+                                      "doc/(.*\\.info(-[0-9]+)?$)"))))
 
 
 ;; --------------------------------------------------------------------
