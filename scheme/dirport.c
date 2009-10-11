@@ -73,7 +73,7 @@ static sexp arc_open_dir_port(sexp ctx, sexp path)
   struct dirport_obj* obj;
 
   if (!sexp_stringp(path))
-    return sexp_type_exception(ctx, "not a string", path);
+    return sexp_type_exception(ctx, "open-dir-port: not a string", path);
 
   if ((obj = dirport_obj_alloc(sexp_string_data(path))))
     return sexp_make_extobj(ctx, &dirport_obj_class, obj);
@@ -87,7 +87,7 @@ static sexp arc_read_dir_port(sexp ctx, sexp port)
   struct dirport_obj* obj;
 
   if (arc_dirport_p(ctx, port) == SEXP_FALSE)
-    return sexp_type_exception(ctx, "not a dirt-port", port);
+    return sexp_type_exception(ctx, "read-dir-port: not a dir-port", port);
 
   obj = (struct dirport_obj*)sexp_extobj_obj(port);
   if (obj && obj->dir) {
@@ -106,7 +106,7 @@ static sexp arc_close_dir_port(sexp ctx, sexp port)
   struct dirport_obj* obj;
 
   if (arc_dirport_p(ctx, port) == SEXP_FALSE)
-    return sexp_type_exception(ctx, "not a dirt-port", port);
+    return sexp_type_exception(ctx, "close-dir-port: not a dir-port", port);
 
   obj = (struct dirport_obj*)sexp_extobj_obj(port);
   if (obj && obj->dir) {
