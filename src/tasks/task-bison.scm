@@ -138,17 +138,7 @@
     av))
 
 (define (arc:deps-bison-needs-recompile? sfile ofile)
-  (let ((deps (arc:deps-get-deps sfile ofile 
-                                 (lambda (src dest)
-                                   (arc:deps-set-deps! (arc:make-deps dest)
-                                                       src)))))
-    (if (not (list? deps))
-        ;; for some reason we didn't got a dependecy list. assume recompile
-        #t
-        ;; otherwise check if the object file needs recompilation.  this is
-        ;; done generic.  probably once replace the modification time
-        ;; method by a md5sum based method?
-        (arc:mtime-file-changed? deps ofile))))
+  (arc:is-due? ofile sfile 'single))
 
 
 (arc:register-task 'bison arc:bison arc:bison-keywords)

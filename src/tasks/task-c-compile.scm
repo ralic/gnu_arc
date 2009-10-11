@@ -170,26 +170,22 @@
 
 (define (arc:deps-c-needs-recompile? depends sfile ofile 
                                      incl flags objext outdir)
-  (let ((deps (if depends
-                  (let ((va (assoc ofile depends)))
-                    (if va (list va) #f))
-                  (arc:call-task 'c-deps
-                                 (list 'sources (list sfile)
-                                       'objext objext
-                                       'outdir (if outdir 
-                                                   outdir
-                                                   '())
-                                       'includes incl
-                                       'flags flags)
-                                 #f) )))
-    (if (not (list? deps))
-        ;; for some reason we didn't got a dependecy list. assume recompile
-        #t
-        ;; otherwise check if the object file needs recompilation.  this is
-        ;; done generic.  probably once replace the modification time
-        ;; method by a md5sum based method?
-        (arc:mtime-file-changed? (car deps) ofile))))
-
+  (arc:is-due? ofile sfile 
+               (lambda (src out)
+                 (if depends
+                     (assoc out depends)
+                     (let ((va (arc:call-task 'c-deps
+                                              (list 'sources (list src)
+                                                    'objext objext
+                                                    'outdir (if outdir 
+                                                                outdir
+                                                                '())
+                                                    'includes incl
+                                                    'flags flags)
+                                              #f) ))
+                       (if va 
+                           (car va)
+                           #f)) ))) )
 
 (define (arc:-prepare-c-source-list lst)
   (cond

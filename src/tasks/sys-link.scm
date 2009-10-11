@@ -39,6 +39,9 @@
                                    libdirs autolibdirs shared nostdlib files
                                    autolibs libs rpath frameworks))
 
+(define-generic (arc:link:needs-relink? fullnm files))
+
+
 ;;--------------------------------------------------------------------------------
 
 (define-class <arc:link-generic> (<class>) ())
@@ -117,7 +120,11 @@
   (arc:log 'warn "Framework settings are ignored on platforms other than Darwin/OS X")
   '())
 
-     ;; link a set of object files
+
+(define-method (arc:link:needs-relink? <arc:link-generic> fullnm files)
+  (arc:is-due? fullnm files 'list))
+
+;; link a set of object files
 (define-method (arc:link:link-app <arc:link-generic> outdir appnm appext 
                                   libdirs autolibdirs shared nostdlib files autolibs libs
                                   rpath frameworks)
@@ -155,12 +162,15 @@
                          (arc:link:format-framework-options self frameworks)
                          '()) 
                      )))
-    (arc:log 'debug "linking " fullnm " ...")
+
+    (if (arc:link:needs-relink? self fullnm files)
+        (begin
+          (arc:log 'debug "linking " fullnm " ...")
     
-    (arc:display-command link-cmd link-args)
+          (arc:display-command link-cmd link-args)
     
-    (if (not (equal? (sys:execute* link-cmd link-args) 0))
-        (arc:log 'info "linking '" fullnm "' failed"))
+          (if (not (equal? (sys:execute* link-cmd link-args) 0))
+              (arc:log 'info "linking '" fullnm "' failed")) ))
     
     fullnm))
 

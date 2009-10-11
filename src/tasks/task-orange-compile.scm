@@ -79,23 +79,18 @@
 
 (define (arc:deps-orange-needs-recompile? depends sfile cfile
                                           catalog objext outdir)
-  (let ((deps (if depends
-                  (let ((va (assoc cfile depends)))
-                    (if va (list va) #f))
-                  (arc:call-task 'orange-deps
-                                 (list 'sources (list sfile)
-                                       'outdir (if outdir 
-                                                   outdir
-                                                   '())
-                                       'catalog catalog )
-                                 #f) )))
-    (if (not (list? deps))
-        ;; for some reason we didn't got a dependecy list. assume recompile
-        #t
-        ;; otherwise check if the object file needs recompilation.  this is
-        ;; done generic.  probably once replace the modification time
-        ;; method by a md5sum based method?
-        (arc:mtime-file-changed? (car deps) cfile))))
+  (arc:is-due? cfile sfile 
+               (lambda (src out)
+                 (if depends
+                     (assoc out depends)
+                     (let ((va (arc:call-task 'orange-deps
+                                              (list 'sources (list src)
+                                                    'outdir (if outdir 
+                                                                outdir
+                                                                '())
+                                                    'catalog catalog )
+                                              #f) ))
+                       (if va (car va) #f)))) ))
 
 
 (define (arc:orange-compile-file sfile cfile incls

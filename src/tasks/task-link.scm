@@ -90,6 +90,7 @@
                             (local-exec-outdir string optional)
                             (libdirs strlist optional)
                             (frameworks strlist optional)) )
+
 (define (arc:link props body)
   (let* ((backend (arc:link-backend %arc:sysnm%))
          (shared (arc:aval 'shared? props #t))
@@ -130,6 +131,7 @@
         (begin
           (arc:log 'info "no object files/libs for executable!")
           #f)
+
         (let* ((fullnm (arc:link:link-app backend outdir appnm appext
                                           libdirs autolibdirs shared nostdlib
                                           files autolibs libs rpath frameworks))
