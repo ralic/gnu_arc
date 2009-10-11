@@ -53,7 +53,6 @@
                                          (arc:host-cpu)
                                          (arc:host-version)))
 
-(load (string-append (arc:home) "/oop.scm"))
 (load (string-append (arc:home) "/oop2.scm"))
 (load (string-append (arc:home) "/sys.scm"))
 

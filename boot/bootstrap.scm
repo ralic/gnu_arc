@@ -70,7 +70,7 @@
 (define %arc:sysnm% (arc:canonical-sysnm %arc:system% #f %arc:arch% #f ))
 
 ;(define %arc:home% "../src")
-(load "../src/oop.scm")
+(load "../src/oop2.scm")
 (load "../src/sys.scm")
 
 (define %arc:src-dir% (arc:path->string
